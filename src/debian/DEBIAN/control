@@ -1,0 +1,10 @@
+Package: sbt
+Version: 0.11-2
+Section: base
+Priority: optional
+Architecture: all
+Depends: bash (>= 2.05a-11), textutils (>= 2.0-12), awk, procps (>= 1:2.0.7-8), sed (>= 3.02-8), grep (>= 2.4.2-3), coreutils (>= 5.0-5), curl (>= 7.21.6)
+Maintainer: Josh Suereth <joshua.suereth@typesafe.com>
+Description: Simple Build Tool
+ This script provides a native way to run the Simple Build Tool,
+ a build tool for Scala software, also called SBT.
