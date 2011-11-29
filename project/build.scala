@@ -10,6 +10,7 @@ object DebianPkg {
   val makeDebianExplodedPackage = TaskKey[File]("make-debian-exploded-package")
   val makeZippedPackageSource = TaskKey[Unit]("make-zipped-package-source")
   val genControlFile = TaskKey[File]("generate-control-file")
+  val lintian = TaskKey[Unit]("lintian")
 
   val settings: Seq[Setting[_]] = Seq(
     resourceDirectory in Debian <<= baseDirectory(_ / "src" / "debian"),
@@ -59,9 +60,13 @@ object DebianPkg {
         }
         dir      
     },
-    packageBin in Debian <<= (makeDebianExplodedPackage, makeZippedPackageSource, target in Debian) map { (pkgdir, _, tdir) =>
+    packageBin in Debian <<= (makeDebianExplodedPackage, makeZippedPackageSource, target in Debian, name in Debian, version in Debian) map { (pkgdir, _, tdir, n, v) =>
        Process(Seq("dpkg-deb", "--build", pkgdir.getAbsolutePath), Some(tdir)).!
-      tdir / "debian.deb"
+      tdir.getParentFile / (n + "-" + v + ".deb")
+    },
+    lintian <<= (packageBin in Debian) map { file =>
+       println("lintian -c " + file.getName + " on " + file.getParentFile.getAbsolutePath)
+       Process(Seq("lintian", "-c", file.getName), Some(file.getParentFile)).!
     }
   )
 
@@ -69,7 +74,7 @@ object DebianPkg {
   final val ControlFileContent = """Section: base
 Priority: optional
 Architecture: all
-Depends:   libcomerr2, libgnutls26, libldap-2.4-2, libcurl3, libsasl2-2, openjdk-6-jre-headless, libtinfo5, libtasn1-3, libgpg-error0, coreutils, libncurses5, libc6, bash (>= 2.05a-11)
+Depends:   curl, openjdk-6-jre-headless, bash (>= 2.05a-11)
 Maintainer: Josh Suereth <joshua.suereth@typesafe.com>
 Description: Simple Build Tool
  This script provides a native way to run the Simple Build Tool,
