@@ -10,7 +10,8 @@ object DebianPkg {
   val makeDebianExplodedPackage = TaskKey[File]("make-debian-exploded-package")
   val makeZippedPackageSource = TaskKey[Unit]("make-zipped-package-source")
   val genControlFile = TaskKey[File]("generate-control-file")
-  val lintian = TaskKey[Unit]("lintian")
+  val lintian = TaskKey[Unit]("lintian", "Displays lintian error messages associated with the package")
+  val showMan = TaskKey[Unit]("show-man", "shows the sbt program man page")
 
   val settings: Seq[Setting[_]] = Seq(
     resourceDirectory in Debian <<= baseDirectory(_ / "src" / "debian"),
@@ -39,11 +40,7 @@ object DebianPkg {
        for((file, target) <- files) {
           val tfile = dir / target
           if(file.isDirectory) IO.createDirectory(tfile)
-          else {
-            IO.copyFile(file,tfile)
-            if(file.canExecute) tfile.setExecutable(true, false)
-            if(file.canRead) tfile.setReadable(true, false)
-          }
+          else IO.copyFile(file,tfile)
         }
         dir      
     },
@@ -61,20 +58,38 @@ object DebianPkg {
         dir      
     },
     packageBin in Debian <<= (makeDebianExplodedPackage, makeZippedPackageSource, target in Debian, name in Debian, version in Debian) map { (pkgdir, _, tdir, n, v) =>
-       Process(Seq("dpkg-deb", "--build", pkgdir.getAbsolutePath), Some(tdir)).!
+       // Assign appropriate permissions
+       val isDirectory = (_: File).isDirectory
+       val dirs = (tdir.***).get filter isDirectory
+       val bins = (tdir / "usr" / "bin" ***).get filterNot isDirectory
+       val data = (tdir / "usr" / "share" ***).get filterNot isDirectory       
+       val perms = Map("0755" -> (dirs ++ bins), 
+                       "0644" -> data)
+       val commands = for {
+         (perm, files) <- perms
+         file <- files
+         p = Process("chmod " + perm + " " + file.getAbsolutePath)
+       } p.!
+
+       // Make the package.  We put this in fakeroot, so we can build the package with root owning files.
+       Process(Seq("fakeroot", "--", "dpkg-deb", "--build", pkgdir.getAbsolutePath), Some(tdir)).!
       tdir.getParentFile / (n + "-" + v + ".deb")
     },
     lintian <<= (packageBin in Debian) map { file =>
        println("lintian -c " + file.getName + " on " + file.getParentFile.getAbsolutePath)
-       Process(Seq("lintian", "-c", file.getName), Some(file.getParentFile)).!
+       Process(Seq("lintian", "-c", "-v", file.getName), Some(file.getParentFile)).!
+    },
+    showMan <<= (resourceDirectory in Debian in makeZippedPackageSource) map { dir =>
+      Process("groff -man -Tascii " + (dir / "usr" / "share" / "man" / "man1" / "sbt.1").getAbsolutePath).!
     }
   )
 
-
-  final val ControlFileContent = """Section: base
+  // TODO - Use default-jre-headless?
+  final val ControlFileContent = """Section: java
 Priority: optional
 Architecture: all
-Depends:   curl, openjdk-6-jre-headless, bash (>= 2.05a-11)
+Depends:   curl, java2-runtime, bash (>= 2.05a-11)
+Recommends: git
 Maintainer: Josh Suereth <joshua.suereth@typesafe.com>
 Description: Simple Build Tool
  This script provides a native way to run the Simple Build Tool,
