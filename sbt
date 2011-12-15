@@ -41,11 +41,12 @@ unset sbt_rc_version
 declare -r sbt_snapshot_version=0.11.3-SNAPSHOT
 declare -r sbt_snapshot_baseurl="http://typesafe.artifactoryonline.com/typesafe/ivy-snapshots/org.scala-tools.sbt/sbt-launch/"
 
-declare -r default_java_opts="-Dfile.encoding=UTF8"
+declare -r default_jvm_opts="-Dfile.encoding=UTF8"
 declare -r default_sbt_opts="-XX:+CMSClassUnloadingEnabled"
 declare -r default_sbt_mem=1536
 declare -r noshare_opts="-Dsbt.global.base=project/.sbtboot -Dsbt.boot.directory=project/.boot -Dsbt.ivy.home=project/.ivy"
 declare -r sbt_opts_file=".sbtopts"
+declare -r jvm_opts_file=".jvmopts"
 declare -r latest_28="2.8.2"
 declare -r latest_29="2.9.1"
 declare -r latest_210="2.10.0-SNAPSHOT"
@@ -56,7 +57,6 @@ declare -r script_name="$(basename $script_path)"
 
 declare java_cmd=java
 declare sbt_mem=$default_sbt_mem
-declare java_opts="${JAVA_OPTS:-$default_java_opts}"
 
 unset sbt_jar sbt_create sbt_version sbt_snapshot
 unset scala_version
@@ -240,11 +240,12 @@ Usage: $script_name [options]
   -java-home <path>         alternate JAVA_HOME
 
   # jvm options and output control
-  JAVA_OPTS     environment variable, if unset uses "$java_opts"
-  SBT_OPTS      environment variable, if unset uses "$default_sbt_opts"
-  .sbtopts      if this file exists in the sbt root, it is prepended to the runner args
-  -Dkey=val     pass -Dkey=val directly to the java runtime
-  -J-X          pass option -X directly to the java runtime (-J is stripped)
+  JAVA_OPTS     environment variable holding jvm args, if unset uses "$default_jvm_opts"
+  SBT_OPTS      environment variable holding jvm args, if unset uses "$default_sbt_opts"
+  .jvmopts      if file is in sbt root, it is prepended to the args given to the jvm
+  .sbtopts      if file is in sbt root, it is prepended to the args given to **sbt**
+  -Dkey=val     pass -Dkey=val directly to the jvm
+  -J-X          pass option -X directly to the jvm (-J is stripped)
   -S-X          add -X to sbt's scalacOptions (-J is stripped)
 
 In the case of duplicated or conflicting options, the order above
@@ -277,6 +278,12 @@ addSnapshotRepo () {
 }
 addDebugger () {
   addJava "-Xdebug -Xrunjdwp:transport=dt_socket,server=y,suspend=n,address=$1"
+}
+get_jvm_opts () {
+  # echo "${JAVA_OPTS:-$default_jvm_opts}"
+  # echo "${SBT_OPTS:-$default_sbt_opts}"
+
+  [[ -f "$jvm_opts_file" ]] && cat "$jvm_opts_file"
 }
 
 process_args ()
@@ -337,7 +344,14 @@ process_args ()
 }
 
 # if .sbtopts exists, prepend its contents to $@ so it can be processed by this runner
-[[ -f "$sbt_opts_file" ]] && set -- $(cat "$sbt_opts_file") "$@"
+[[ -f "$sbt_opts_file" ]] && {
+  sbtargs=()
+  while IFS= read -r arg; do
+    sbtargs=( "${sbtargs[@]}" "$arg" )
+  done <"$sbt_opts_file"
+
+  set -- "${sbtargs[@]}" "$@"
+}
 
 # process the combined args, then reset "$@" to the residuals
 process_args "$@"
@@ -382,9 +396,8 @@ EOM
 
 # run sbt
 execRunner "$java_cmd" \
-  ${SBT_OPTS:-$default_sbt_opts} \
   $(get_mem_opts $sbt_mem) \
-  ${java_opts} \
+  $(get_jvm_opts) \
   ${java_args[@]} \
   -jar "$sbt_jar" \
   "${sbt_commands[@]}" \

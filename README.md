@@ -71,11 +71,13 @@ Current -help output:
       -java-home <path>         alternate JAVA_HOME
 
       # jvm options and output control
-      JAVA_OPTS     environment variable, if unset uses "-Dfile.encoding=UTF8"
-      SBT_OPTS      environment variable, if unset uses "-XX:+CMSClassUnloadingEnabled"
-      .sbtopts      if this file exists in the sbt root, it is prepended to the runner args
-      -Dkey=val     pass -Dkey=val directly to the java runtime
-      -J-X          pass option -X directly to the java runtime (-J is stripped)
+      JAVA_OPTS     environment variable with jvm args, if unset uses "-Dfile.encoding=UTF8"
+      SBT_OPTS      environment variable with jvm args, if unset uses "-XX:+CMSClassUnloadingEnabled"
+      .jvmopts      if file is in sbt root, it is prepended to the args given the jvm
+      .sbtopts      if file is in sbt root, it is prepended to the args given **sbt**
+      -Dkey=val     pass -Dkey=val directly to the jvm
+      -J-X          pass option -X directly to the jvm (-J is stripped)
+      -S-X          add -X to sbt's scalacOptions (-J is stripped)
 
     In the case of duplicated or conflicting options, the order above
     shows precedence: JAVA_OPTS lowest, command line options highest.
