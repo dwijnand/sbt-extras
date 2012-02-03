@@ -43,16 +43,18 @@ Current -help output:
 
       -h | -help         print this message
       -v | -verbose      this runner is chattier
-      -d | -debug        set sbt log level to debug
+      -d | -debug        set sbt log level to Debug
+      -q | -quiet        set sbt log level to Error
       -no-colors         disable ANSI color codes
       -sbt-create        start sbt even if current directory contains no sbt project
-      -sbt-dir   <path>  path to global settings/plugins directory (default: ~/.sbt)
+      -sbt-dir   <path>  path to global settings/plugins directory (default: ~/.sbt/<version>)
       -sbt-boot  <path>  path to shared boot directory (default: ~/.sbt/boot in 0.11 series)
       -ivy       <path>  path to local Ivy repository (default: ~/.ivy2)
       -mem    <integer>  set memory options (default: 1536, which is -Xms1536m -Xmx1536m -XX:MaxPermSize=384m -XX:ReservedCodeCacheSize=192m)
       -no-share          use all local caches; no sharing
       -offline           put sbt in offline mode
       -jvm-debug <port>  Turn on JVM debugging, open at the given port.
+      -batch             Disable interactive mode
 
       # sbt version (default: from project/build.properties if present, else latest release)
       -sbt-version  <version>   use the specified version of sbt
@@ -71,10 +73,10 @@ Current -help output:
       -java-home <path>         alternate JAVA_HOME
 
       # jvm options and output control
-      JAVA_OPTS     environment variable with jvm args, if unset uses "-Dfile.encoding=UTF8"
-      SBT_OPTS      environment variable with jvm args, if unset uses "-XX:+CMSClassUnloadingEnabled"
-      .jvmopts      if file is in sbt root, it is prepended to the args given the jvm
-      .sbtopts      if file is in sbt root, it is prepended to the args given **sbt**
+      JAVA_OPTS     environment variable holding jvm args, if unset uses "-Dfile.encoding=UTF8"
+      SBT_OPTS      environment variable holding jvm args, if unset uses "-XX:+CMSClassUnloadingEnabled"
+      .jvmopts      if file is in sbt root, it is prepended to the args given to the jvm
+      .sbtopts      if file is in sbt root, it is prepended to the args given to **sbt**
       -Dkey=val     pass -Dkey=val directly to the jvm
       -J-X          pass option -X directly to the jvm (-J is stripped)
       -S-X          add -X to sbt's scalacOptions (-J is stripped)

@@ -61,7 +61,7 @@ declare sbt_mem=$default_sbt_mem
 unset sbt_jar sbt_dir sbt_create sbt_version sbt_snapshot
 unset scala_version
 unset java_home
-unset verbose debug
+unset verbose debug quiet
 
 # pull -J and -D options to give to java.
 declare -a residual_args
@@ -211,7 +211,8 @@ Usage: $script_name [options]
 
   -h | -help         print this message
   -v | -verbose      this runner is chattier
-  -d | -debug        set sbt log level to debug
+  -d | -debug        set sbt log level to Debug
+  -q | -quiet        set sbt log level to Error
   -no-colors         disable ANSI color codes
   -sbt-create        start sbt even if current directory contains no sbt project
   -sbt-dir   <path>  path to global settings/plugins directory (default: ~/.sbt/<version>)
@@ -302,6 +303,7 @@ process_args ()
        -h|-help) usage; exit 1 ;;
     -v|-verbose) verbose=1 && shift ;;
       -d|-debug) debug=1 && shift ;;
+      -q|-quiet) quiet=1 && shift ;;
     # -u|-upgrade) addSbt 'set sbt.version 0.7.7' ; addSbt reload  && shift ;;
 
            -ivy) require_arg path "$1" "$2" && addJava "-Dsbt.ivy.home=$2" && shift 2 ;;
@@ -339,6 +341,12 @@ process_args ()
     case "$sbt_version" in
       0.7*) addSbt "debug" ;; 
          *) addSbt "set logLevel in Global := Level.Debug" ;;
+    esac
+  }
+  [[ $quiet ]] && {
+    case "$sbt_version" in
+      0.7*) ;; 
+         *) addSbt "set logLevel in Global := Level.Error" ;;
     esac
   }
 }
