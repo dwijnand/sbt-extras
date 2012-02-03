@@ -58,7 +58,7 @@ declare -r script_name="$(basename $script_path)"
 declare java_cmd=java
 declare sbt_mem=$default_sbt_mem
 
-unset sbt_jar sbt_create sbt_version sbt_snapshot
+unset sbt_jar sbt_dir sbt_create sbt_version sbt_snapshot
 unset scala_version
 unset java_home
 unset verbose debug
@@ -214,7 +214,7 @@ Usage: $script_name [options]
   -d | -debug        set sbt log level to debug
   -no-colors         disable ANSI color codes
   -sbt-create        start sbt even if current directory contains no sbt project
-  -sbt-dir   <path>  path to global settings/plugins directory (default: ~/.sbt)
+  -sbt-dir   <path>  path to global settings/plugins directory (default: ~/.sbt/<version>)
   -sbt-boot  <path>  path to shared boot directory (default: ~/.sbt/boot in 0.11 series)
   -ivy       <path>  path to local Ivy repository (default: ~/.ivy2)
   -mem    <integer>  set memory options (default: $sbt_mem, which is $(get_mem_opts $sbt_mem))
@@ -309,7 +309,7 @@ process_args ()
      -no-colors) addJava "-Dsbt.log.noformat=true" && shift ;;
       -no-share) addJava "$noshare_opts" && shift ;;
       -sbt-boot) require_arg path "$1" "$2" && addJava "-Dsbt.boot.directory=$2" && shift 2 ;;
-       -sbt-dir) require_arg path "$1" "$2" && addJava "-Dsbt.global.base=$2" && shift 2 ;;
+       -sbt-dir) require_arg path "$1" "$2" && sbt_dir="$2" && shift 2 ;;
      -debug-inc) addJava "-Dxsbt.inc.debug=true" && shift ;;
        -offline) addSbt "set offline := true" && shift ;;
      -jvm-debug) require_arg port "$1" "$2" && addDebugger $2 && shift 2 ;;
@@ -365,6 +365,7 @@ argumentCount=$#
 [[ "$sbt_version" ]] || sbt_version=$(build_props_sbt)
 [[ "$sbt_version" = *-SNAPSHOT* || "$sbt_version" = *-RC* ]] && sbt_snapshot=1
 [[ -n "$sbt_version" ]] && echo "Detected sbt version $sbt_version"
+
 [[ -n "$scala_version" ]] && echo "Detected scala version $scala_version"
 
 # no args - alert them there's stuff in here
@@ -389,6 +390,12 @@ EOM
   # still no jar? uh-oh.
   echo "Download failed. Obtain the jar manually and place it at $sbt_jar"
   exit 1
+}
+
+[[ -n "$sbt_dir" ]] || {
+  sbt_dir=~/.sbt/$sbt_version
+  addJava "-Dsbt.global.base=$sbt_dir"
+  echo "Using $sbt_dir as sbt dir, -sbt-dir to override."
 }
 
 # since sbt 0.7 doesn't understand iflast
