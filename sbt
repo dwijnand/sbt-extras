@@ -58,6 +58,8 @@ declare -r script_name="$(basename $script_path)"
 declare java_cmd=java
 declare sbt_mem=$default_sbt_mem
 
+[ -e "$JAVA_HOME/bin/java" ] && java_cmd="$JAVA_HOME/bin/java"
+
 unset sbt_jar sbt_dir sbt_create sbt_version sbt_snapshot
 unset scala_version
 unset java_home
