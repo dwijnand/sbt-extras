@@ -36,10 +36,15 @@ die() {
 
 # todo - make this dynamic
 declare -r sbt_release_version=0.11.2
-unset sbt_rc_version
-# declare -r sbt_rc_version=
 declare -r sbt_snapshot_version=0.11.3-SNAPSHOT
-declare -r sbt_snapshot_baseurl="http://typesafe.artifactoryonline.com/typesafe/ivy-snapshots/org.scala-tools.sbt/sbt-launch/"
+
+make_url () {
+  groupid="$1"
+  category="$2"
+  version="$3"
+  
+  echo "http://typesafe.artifactoryonline.com/typesafe/ivy-$category/$groupid/sbt-launch/$version/sbt-launch.jar"
+}
 
 declare -r default_jvm_opts="-Dfile.encoding=UTF8"
 declare -r default_sbt_opts="-XX:+CMSClassUnloadingEnabled"
@@ -84,13 +89,6 @@ build_props_scala () {
   fi
 }
 
-isSnapshot () {
-  [[ "$sbt_version" = *-SNAPSHOT* ]]
-}
-isRC () {
-  [[ "$sbt_version" = *-RC* ]]
-}
-
 execRunner () {
   # print the arguments one to a line, quoting any containing spaces
   [[ $verbose || $debug ]] && echo "# Executing command line:" && {
@@ -117,33 +115,21 @@ dlog () {
   [[ $debug ]] && echoerr "$@"
 }
 
-sbtjar_07_url () {
-  echo "http://simple-build-tool.googlecode.com/files/sbt-launch-${1}.jar"
+sbt_groupid () {
+  case ${1:-$sbt_version} in
+        0.7.*) echo org.scala-tools.sbt ;;
+    0.1[01].*) echo org.scala-tools.sbt ;;
+            *) echo org.scala-sbt ;;
+  esac
 }
-sbtjar_release_url () {
-  echo "http://typesafe.artifactoryonline.com/typesafe/ivy-releases/org.scala-tools.sbt/sbt-launch/$sbt_version/sbt-launch.jar"
-}
-sbtjar_snapshot_url () {
-  local ver="$sbt_version"
-  if [[ "$sbt_version" = *-SNAPSHOT ]]; then
-    ver=$(sbt_snapshot_actual_version -SNAPSHOT)
-    echoerr "sbt snapshot is $ver"
-  elif [[ "$sbt_version" = *-SNAPSHOT ]]; then
-    ver=$(sbt_snapshot_actual_version -RC)
-    echoerr "sbt rc is $ver"
-  fi
 
-  echo "${sbt_snapshot_baseurl}${ver}/sbt-launch.jar"
-}
 jar_url () {
   case $sbt_version in
-      0.7.4*) sbtjar_07_url 0.7.4 ;;
-      0.7.5*) sbtjar_07_url 0.7.5 ;;
-      0.7.7*) sbtjar_07_url 0.7.7 ;;
-       0.7.*) sbtjar_07_url 0.7.7 ;;
- *-SNAPSHOT*) sbtjar_snapshot_url ;;
-       *-RC*) sbtjar_snapshot_url ;;
-           *) sbtjar_release_url ;;
+             0.7.*) echo "http://simple-build-tool.googlecode.com/files/sbt-launch-0.7.7.jar" ;;
+ 0.1[01].*SNAPSHOT) make_url org.scala-tools.sbt snapshots $sbt_version ;;
+         0.1[01].*) make_url org.scala-tools.sbt releases $sbt_version ;;
+       *.*SNAPSHOT) make_url org.scala-sbt snapshots $sbt_version ;;
+                 *) make_url org.scala-sbt releases $sbt_version ;;
   esac
 }
 
@@ -152,24 +138,24 @@ jar_file () {
 }
 
 sbt_artifactory_list () {
-  local type="$1" # -RC or -SNAPSHOT
   local version=${sbt_version%-SNAPSHOT}
+  local url="http://typesafe.artifactoryonline.com/typesafe/ivy-snapshots/org.scala-sbt/sbt-launch/"
   
-  curl -s --list-only "$sbt_snapshot_baseurl" | \
+  curl -s --list-only "$url" | \
     grep -F $version | \
     perl -e 'print reverse <>' | \
     perl -pe 's#^<a href="([^"/]+).*#$1#;'
 }
 
-# argument is e.g. 0.11.0-SNAPSHOT
+# argument is e.g. 0.12.0-SNAPSHOT
 # finds the actual version (with the build id) at artifactory
-sbt_snapshot_actual_version () {
-  for ver in $(sbt_artifactory_list "$1"); do
-    local url="$sbt_snapshot_baseurl$ver/sbt-launch.jar"
+sbt_snapshot_actual_url () {
+  for ver in $(sbt_artifactory_list); do
+    local url=$(make_url org.scala-sbt snapshots $ver)
     dlog "Testing $url"
     curl -s --head "$url" >/dev/null
     dlog "curl returned: $?"
-    echo "$ver"
+    echo "$url"
     return
   done
 }
@@ -192,18 +178,11 @@ download_url () {
 }
 
 acquire_sbt_jar () {
-  if [[ $sbt_snapshot ]]; then
-    sbt_version=$sbt_snapshot_version
-  elif [[ ! $sbt_version ]]; then
-    sbt_version=$sbt_release_version
-  fi
-  
   sbt_url="$(jar_url)"
   sbt_jar="$(jar_file $sbt_version)"
 
   [[ -f "$sbt_jar" ]] || download_url "$sbt_url" "$sbt_jar"
 }
-
 
 usage () {
   cat <<EOM
@@ -227,7 +206,6 @@ Usage: $script_name [options]
   # sbt version (default: from project/build.properties if present, else latest release)
   -sbt-version  <version>   use the specified version of sbt
   -sbt-jar      <path>      use the specified jar as the sbt launcher
-  -sbt-rc                   use an RC version of sbt
   -sbt-snapshot             use a snapshot version of sbt
 
   # scala version (default: latest release)
@@ -273,10 +251,6 @@ addResidual () {
 addResolver () {
   addSbt "set resolvers in ThisBuild += $1"
 }
-unset addedSnapshotRepo
-addSnapshotRepo () {
-  [[ -n "$addedSnapshotRepo" ]] || addResolver "ScalaToolsSnapshots" && addedSnapshotRepo=true
-}
 addDebugger () {
   addJava "-Xdebug -Xrunjdwp:transport=dt_socket,server=y,suspend=n,address=$1"
 }
@@ -304,7 +278,6 @@ process_args ()
     -v|-verbose) verbose=1 && shift ;;
       -d|-debug) debug=1 && shift ;;
       -q|-quiet) quiet=1 && shift ;;
-    # -u|-upgrade) addSbt 'set sbt.version 0.7.7' ; addSbt reload  && shift ;;
 
            -ivy) require_arg path "$1" "$2" && addJava "-Dsbt.ivy.home=$2" && shift 2 ;;
            -mem) require_arg integer "$1" "$2" && sbt_mem="$2" && shift 2 ;;
@@ -318,8 +291,7 @@ process_args ()
          -batch) exec </dev/null && shift ;;
 
     -sbt-create) sbt_create=true && shift ;;
-        -sbt-rc) [[ -n "$sbt_rc_version" ]] || die "no sbt RC candidate defined."; sbt_version=$sbt_rc_version && shift ;;
-  -sbt-snapshot) addSnapshotRepo ; sbt_version=$sbt_snapshot_version && shift ;;
+  -sbt-snapshot) sbt_version=$sbt_snapshot_version && shift ;;
        -sbt-jar) require_arg path "$1" "$2" && sbt_jar="$2" && shift 2 ;;
    -sbt-version) require_arg version "$1" "$2" && sbt_version="$2" && shift 2 ;;
  -scala-version) require_arg version "$1" "$2" && addSbt "++ $2" && shift 2 ;;
@@ -331,7 +303,7 @@ process_args ()
             -S*) addScalac "${1:2}" && shift ;;
             -28) addSbt "++ $latest_28" && shift ;;
             -29) addSbt "++ $latest_29" && shift ;;
-           -210) addSnapshotRepo ; addSbt "++ $latest_210" && shift ;;
+           -210) addSbt "++ $latest_210" && shift ;;
 
               *) addResidual "$1" && shift ;;
     esac
@@ -339,13 +311,13 @@ process_args ()
   
   [[ $debug ]] && {
     case "$sbt_version" in
-      0.7*) addSbt "debug" ;; 
+     0.7.*) addSbt "debug" ;; 
          *) addSbt "set logLevel in Global := Level.Debug" ;;
     esac
   }
   [[ $quiet ]] && {
     case "$sbt_version" in
-      0.7*) ;; 
+     0.7.*) ;; 
          *) addSbt "set logLevel in Global := Level.Error" ;;
     esac
   }
@@ -370,10 +342,9 @@ argumentCount=$#
 [[ ${#scalac_args[@]} -eq 0 ]] || addSbt "set scalacOptions in ThisBuild += \"${scalac_args[@]}\""
 
 # figure out the version
-[[ "$sbt_version" ]] || sbt_version=$(build_props_sbt)
-[[ "$sbt_version" = *-SNAPSHOT* || "$sbt_version" = *-RC* ]] && sbt_snapshot=1
+[[ -n "$sbt_version" ]] || sbt_version=$(build_props_sbt)
+[[ "$sbt_version" = *-SNAPSHOT* ]] && sbt_snapshot=1
 [[ -n "$sbt_version" ]] && echo "Detected sbt version $sbt_version"
-
 [[ -n "$scala_version" ]] && echo "Detected scala version $scala_version"
 
 # no args - alert them there's stuff in here
