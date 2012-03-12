@@ -69,7 +69,7 @@ get_script_path () {
   if [[ "${target:0:1}" == "/" ]]; then
     echo "$target"
   else
-    echo "$(basename $path)/$target"
+    echo "$(dirname $path)/$target"
   fi
 }
 
