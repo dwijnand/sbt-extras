@@ -1,0 +1,136 @@
+#!/bin/sh
+#
+# ivy-classpath   by paul phillips   part of sbt-extras
+# https://github.com/paulp/sbt-extras
+#
+# Todo - make it possible to leave out lots more
+#
+
+prog="$(basename $0)"
+unset verbose
+
+while getopts :v opt; do
+  case $opt in
+    v) verbose=true
+    # :) echo "Option -$OPTARG requires an argument." >&2 ;;      # this case is called for a missing option argument
+    # *) echo "Unrecognized argument $OPTARG" ;;                  # this is the catch-all implying an unknown option
+  esac
+done
+
+# This removes all the options from $@, as getopts doesn't touch it.
+# After this, "$@" contains the non-option arguments.
+shift $((OPTIND-1))
+
+
+if [[ $# -eq 0 ]]; then
+  cat <<EOM
+Usage: $prog [-v] [dependency dependency ...]
+
+Resolves all dependencies through the ivy cache, downloading any required jars.
+When complete, echoes a classpath containing all dependencies, including
+transitively required ones.  The format to express dependencies is
+
+  org%name%version
+
+Example Usage:
+
+  $prog com.typesafe.akka%akka%2.0 play%play_2.9.1%2.0
+  $prog org.ow2.asm%asm%latest.release net.databinder%dispatch-http_2.9.1%latest.snapshot
+
+EOM
+  exit 0
+fi
+
+resolverNames="shared public"
+dir="$(mktemp -dt ivyfetch)"
+cd $dir
+
+[[ $verbose ]] || echo >&2 "[Working... tail $dir/log for progress.]"
+
+genIvySettings () {
+  cat <<EOM
+<ivysettings>
+  <settings defaultResolver="default"/>
+  <include url="\${ivy.default.settings.dir}/ivysettings-public.xml"/>
+  <include url="\${ivy.default.settings.dir}/ivysettings-shared.xml"/>
+  <include url="\${ivy.default.settings.dir}/ivysettings-local.xml"/>
+  <!-- <include url="\${ivy.default.settings.dir}/ivysettings-main-chain.xml"/> -->
+  $("$@")
+  <include url="\${ivy.default.settings.dir}/ivysettings-default-chain.xml"/>
+</ivysettings>
+EOM
+}
+
+ibiblio() {
+  resolverNames="$resolverNames $1"
+
+  cat <<EOM
+  <ibiblio name="${1}" m2compatible="true" root="${2}"/>
+EOM
+}
+
+ibiblioLines () {
+  local name="$1"
+  local url="$2"
+  ibiblio "${name}-releases" "${url}releases/"
+  ibiblio "${name}-snapshots" "${url}snapshots/"
+}
+
+chainLines () {
+  echo '  <chain name="main" dual="true" returnFirst="true" checkmodified="true">'
+  for id in $@; do
+    echo "    <resolver ref=\"$id\" />"
+  done
+  echo '  </chain>'
+}
+
+ivyChain () {
+  echo '<include url="${ivy.default.settings.dir}/ivysettings-shared.xml"/>'
+  echo '<resolvers>'
+
+  ibiblioLines oss        https://oss.sonatype.org/content/repositories/
+  ibiblioLines typesafe   http://repo.typesafe.com/typesafe/maven-
+  ibiblioLines akka       http://repo.akka.io/
+  ibiblio      codahale   http://repo.codahale.com/
+
+  chainLines $resolverNames
+
+  echo '</resolvers>'
+}
+
+resolveLine () {
+  ( IFS="%" && set -- "$1" && printf '  <dependency org="%s" name="%s" rev="%s" force="true" changing="true" />' $* && echo "" )
+}
+
+genIvyResolve () {
+  cat <<EOM
+<ivy-module version="2.0">
+<info organisation="org.improving" module="ivy-classpath" />
+<dependencies>
+$( for dep in "$@"; do resolveLine "$dep" ; done )
+</dependencies>
+</ivy-module>
+EOM
+}
+
+runner () {
+  # echo >&2 "$@"
+  "$@"
+}
+
+run () {
+  [[ $verbose ]] || exec &>log
+  genIvySettings ivyChain >ivysettings.xml
+  genIvyResolve "$@" >ivy.xml
+  [[ $verbose ]] && cat ivy.xml
+
+  ivy \
+    -cachepath $dir/classpath \
+    -settings $dir/ivysettings.xml \
+    -ivy $dir/ivy.xml
+}
+
+( run "$@" )
+
+# and finally, the object of our desire
+cat $dir/classpath
