@@ -12,15 +12,12 @@ unset verbose
 while getopts :v opt; do
   case $opt in
     v) verbose=true
-    # :) echo "Option -$OPTARG requires an argument." >&2 ;;      # this case is called for a missing option argument
-    # *) echo "Unrecognized argument $OPTARG" ;;                  # this is the catch-all implying an unknown option
   esac
 done
 
 # This removes all the options from $@, as getopts doesn't touch it.
 # After this, "$@" contains the non-option arguments.
 shift $((OPTIND-1))
-
 
 if [[ $# -eq 0 ]]; then
   cat <<EOM
@@ -32,12 +29,14 @@ transitively required ones.  The format to express dependencies is
 
   org%name%version
 
-Example Usage:
+Example uses:
 
   $prog com.typesafe.akka%akka%2.0 play%play_2.9.1%2.0
   $prog org.ow2.asm%asm%latest.release net.databinder%dispatch-http_2.9.1%latest.snapshot
+  scala -Ylog-classpath -cp \$($prog com.typesafe.akka%akka-actor%2.0 com.google.guava%guava%11.0.2)
 
 EOM
+
   exit 0
 fi
 
