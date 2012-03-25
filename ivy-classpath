@@ -6,6 +6,22 @@
 # Todo - make it possible to leave out lots more
 #
 
+if ! which ivy >/dev/null; then
+  cat <<"EOM"
+Error: no `ivy` command line program found.
+
+On OSX with homebrew, you can 'brew install ivy', otherwise
+save the following as executable 'ivy' and place it on your path.
+
+#!/bin/sh
+#
+
+cd /path/to/ivy/distribution && java $JAVA_OPTS -jar ivy-2.2.0.jar "$@"
+
+EOM
+  exit 1
+fi
+
 prog="$(basename $0)"
 unset verbose
 
