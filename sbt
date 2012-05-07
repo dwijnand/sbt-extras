@@ -4,7 +4,7 @@
 # Author: Paul Phillips <paulp@typesafe.com>
 
 # todo - make this dynamic
-declare -r sbt_release_version=0.11.2
+declare -r sbt_release_version=0.11.3
 declare -r sbt_snapshot_version=0.12.0-SNAPSHOT
 
 unset sbt_jar sbt_dir sbt_create sbt_snapshot
@@ -148,6 +148,7 @@ execRunner () {
 sbt_groupid () {
   case $(sbt_version) in
         0.7.*) echo org.scala-tools.sbt ;;
+       0.11.3) echo org.scala-sbt ;;
     0.1[01].*) echo org.scala-tools.sbt ;;
             *) echo org.scala-sbt ;;
   esac
