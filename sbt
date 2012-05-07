@@ -4,8 +4,8 @@
 # Author: Paul Phillips <paulp@typesafe.com>
 
 # todo - make this dynamic
-declare -r sbt_release_version=0.11.2
-declare -r sbt_snapshot_version=0.12.0-SNAPSHOT
+declare -r sbt_release_version=0.11.3
+declare -r sbt_snapshot_version=0.13.0-SNAPSHOT
 
 unset sbt_jar sbt_dir sbt_create sbt_snapshot
 unset scala_version java_home sbt_explicit_version
@@ -170,7 +170,7 @@ make_release_url () {
   make_url $(sbt_groupid) releases $(sbt_version)
 }
 
-# argument is e.g. 0.12.0-SNAPSHOT
+# argument is e.g. 0.13.0-SNAPSHOT
 # finds the actual version (with the build id) at artifactory
 make_snapshot_url () {
   for ver in $(sbt_artifactory_list); do
