@@ -148,7 +148,8 @@ execRunner () {
 sbt_groupid () {
   case $(sbt_version) in
         0.7.*) echo org.scala-tools.sbt ;;
-    0.1[01].*) echo org.scala-tools.sbt ;;
+       0.10.*) echo org.scala-tools.sbt ;;
+    0.11.[12]) echo org.scala-tools.sbt ;;
             *) echo org.scala-sbt ;;
   esac
 }
@@ -204,7 +205,7 @@ download_url () {
 
   mkdir -p $(dirname "$jar") && {
     if which curl >/dev/null; then
-      curl --silent "$url" --output "$jar"
+      curl --fail --silent "$url" --output "$jar"
     elif which wget >/dev/null; then
       wget --quiet -O "$jar" "$url"
     fi
