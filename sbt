@@ -7,7 +7,7 @@
 declare -r sbt_release_version=0.11.3
 declare -r sbt_snapshot_version=0.13.0-SNAPSHOT
 
-unset sbt_jar sbt_dir sbt_create sbt_snapshot
+unset sbt_jar sbt_dir sbt_create sbt_snapshot launcher_dir
 unset scala_version java_home sbt_explicit_version
 unset verbose debug quiet
 
@@ -112,8 +112,11 @@ declare -r script_path=$(get_script_path "$BASH_SOURCE")
 declare -r script_dir="$(dirname $script_path)"
 declare -r script_name="$(basename $script_path)"
 
+declare -r default_launcher_dir="$script_dir/.lib"
+
 declare java_cmd=java
 declare sbt_mem=$default_sbt_mem
+declare launcher_dir=$default_launcher_dir
 
 # pull -J and -D options to give to java.
 declare -a residual_args
@@ -192,7 +195,7 @@ jar_url () {
 }
 
 jar_file () {
-  echo "$script_dir/.lib/$1/sbt-launch.jar"
+  echo "$launcher_dir/$1/sbt-launch.jar"
 }
 
 download_url () {
@@ -244,6 +247,7 @@ Usage: $script_name [options]
   -sbt-version  <version>   use the specified version of sbt 
   -sbt-jar      <path>      use the specified jar as the sbt launcher
   -sbt-snapshot             use a snapshot version of sbt
+  -launcher-dir <path>      local path to which sbt launchers are downloaded
 
   # scala version (default: as chosen by sbt)
   -28                       use $latest_28
@@ -331,6 +335,7 @@ process_args ()
   -sbt-snapshot) sbt_explicit_version=$sbt_snapshot_version && shift ;;
        -sbt-jar) require_arg path "$1" "$2" && sbt_jar="$2" && shift 2 ;;
    -sbt-version) require_arg version "$1" "$2" && sbt_explicit_version="$2" && shift 2 ;;
+  -launcher-dir) require_arg path "$1" "$2" && launcher_dir="$2" && shift 2 ;;
  -scala-version) require_arg version "$1" "$2" && addSbt "set scalaVersion := \"$2\"" && shift 2 ;;
     -scala-home) require_arg path "$1" "$2" && addSbt "set scalaHome in ThisBuild := Some(file(\"$2\"))" && shift 2 ;;
      -java-home) require_arg path "$1" "$2" && java_cmd="$2/bin/java" && shift 2 ;;
