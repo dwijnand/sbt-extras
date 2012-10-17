@@ -132,6 +132,9 @@ declare -a java_args
 declare -a scalac_args
 declare -a sbt_commands
 
+# if set, use JAVA_HOME over java found in path
+[[ -e "$JAVA_HOME/bin/java" ]] && java_cmd="$JAVA_HOME/bin/java"
+
 build_props_scala () {
   if [[ -f project/build.properties ]]; then
     versionLine=$(grep ^build.scala.versions project/build.properties)
