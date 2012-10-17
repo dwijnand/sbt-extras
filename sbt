@@ -427,9 +427,9 @@ EOM
 
 [[ -n "$sbt_dir" ]] || {
   sbt_dir=~/.sbt/$(sbt_version)
-  addJava "-Dsbt.global.base=$sbt_dir"
   echoerr "Using $sbt_dir as sbt dir, -sbt-dir to override."
 }
+addJava "-Dsbt.global.base=$sbt_dir"
 
 # since sbt 0.7 doesn't understand iflast
 (( ${#residual_args[@]} == 0 )) && residual_args=( "shell" )
