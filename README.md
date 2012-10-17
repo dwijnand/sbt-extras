@@ -6,6 +6,15 @@ It works with sbt 0.7.x projects as well as 0.10+. If you're in an sbt
 project directory, the runner will figure out the versions of sbt and
 scala required by the project and download them if necessary.
 
+## Installation
+To install, the "sbt" bash script at the root of the project needs to be placed on your path.
+
+    curl https://raw.github.com/paulp/sbt-extras/master/sbt > ~/bin/sbt
+
+It is a good idea to uninstall any pre-existing sbt installations you may have.
+
+## Sample usage
+
 Sample usage: create a new project using a snapshot version of sbt as
 well as a snapshot version of scala, then run the sbt "about" command.
 
