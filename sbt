@@ -9,7 +9,7 @@ declare -r sbt_snapshot_version=0.13.0-SNAPSHOT
 
 unset sbt_jar sbt_dir sbt_create sbt_snapshot sbt_launch_dir
 unset scala_version java_home sbt_explicit_version
-unset verbose debug quiet
+unset verbose debug quiet noshare
 
 for arg in "$@"; do
   case $arg in
@@ -335,7 +335,7 @@ process_args ()
            -ivy) require_arg path "$1" "$2" && addJava "-Dsbt.ivy.home=$2" && shift 2 ;;
            -mem) require_arg integer "$1" "$2" && sbt_mem="$2" && shift 2 ;;
      -no-colors) addJava "-Dsbt.log.noformat=true" && shift ;;
-      -no-share) addJava "$noshare_opts" && shift ;;
+      -no-share) noshare=1 && shift ;;
       -sbt-boot) require_arg path "$1" "$2" && addJava "-Dsbt.boot.directory=$2" && shift 2 ;;
        -sbt-dir) require_arg path "$1" "$2" && sbt_dir="$2" && shift 2 ;;
      -debug-inc) addJava "-Dxsbt.inc.debug=true" && shift ;;
@@ -425,11 +425,15 @@ EOM
   exit 1
 }
 
-[[ -n "$sbt_dir" ]] || {
-  sbt_dir=~/.sbt/$(sbt_version)
+if [[ "$noshare" -eq 1 ]]; then
+  addJava "$noshare_opts"
+else
+  [[ -n "$sbt_dir" ]] || {
+    sbt_dir=~/.sbt/$(sbt_version)
+    echoerr "Using $sbt_dir as sbt dir, -sbt-dir to override."
+  }
   addJava "-Dsbt.global.base=$sbt_dir"
-  echoerr "Using $sbt_dir as sbt dir, -sbt-dir to override."
-}
+fi
 
 # since sbt 0.7 doesn't understand iflast
 (( ${#residual_args[@]} == 0 )) && residual_args=( "shell" )
