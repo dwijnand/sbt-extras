@@ -20,7 +20,7 @@ done
 
 build_props_sbt () {
   if [[ -f project/build.properties ]]; then
-    versionLine=$(grep ^sbt.version project/build.properties)
+    versionLine=$(grep ^sbt.version project/build.properties | sed -re 's/ //g')
     versionString=${versionLine##sbt.version=}
     echo "$versionString"
   fi
@@ -33,8 +33,8 @@ update_build_props_sbt () {
   if [[ $ver == $old ]]; then
     return
   elif [[ -f project/build.properties ]]; then
-    perl -pi -e "s/^sbt\.version=.*\$/sbt.version=${ver}/" project/build.properties
-    grep -q '^sbt.version=' project/build.properties || echo "sbt.version=${ver}" >> project/build.properties
+    perl -pi -e "s/^sbt\.version *=.*\$/sbt.version=${ver}/" project/build.properties
+    grep -q '^sbt.version *=' project/build.properties || echo "sbt.version=${ver}" >> project/build.properties
 
     echo !!!
     echo !!! Updated file project/build.properties setting sbt.version to: $ver
@@ -137,7 +137,7 @@ declare -a sbt_commands
 
 build_props_scala () {
   if [[ -f project/build.properties ]]; then
-    versionLine=$(grep ^build.scala.versions project/build.properties)
+    versionLine=$(grep ^build.scala.versions project/build.properties | sed -re 's/ //g')
     versionString=${versionLine##build.scala.versions=}
     echo ${versionString%% .*}
   fi
@@ -395,7 +395,7 @@ argumentCount=$#
 # set scalacOptions if we were given any -S opts
 [[ ${#scalac_args[@]} -eq 0 ]] || addSbt "set scalacOptions in ThisBuild += \"${scalac_args[@]}\""
 
-# Update build.properties no disk to set explicit version - sbt gives us no choice
+# Update build.properties on disk to set explicit version - sbt gives us no choice
 [[ -n "$sbt_explicit_version" ]] && update_build_props_sbt "$sbt_explicit_version"
 echoerr "Detected sbt version $(sbt_version)"
 
