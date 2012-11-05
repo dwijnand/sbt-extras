@@ -9,7 +9,7 @@ declare -r sbt_snapshot_version=0.13.0-SNAPSHOT
 
 unset sbt_jar sbt_dir sbt_create sbt_snapshot sbt_launch_dir
 unset scala_version java_home sbt_explicit_version
-unset verbose debug quiet noshare
+unset verbose debug quiet noshare trace_level log_level
 
 for arg in "$@"; do
   case $arg in
@@ -108,12 +108,13 @@ make_url () {
 declare -r default_jvm_opts="-Dfile.encoding=UTF8"
 declare -r default_sbt_opts="-XX:+CMSClassUnloadingEnabled"
 declare -r default_sbt_mem=1536
+declare -r default_trace_level=15
 declare -r noshare_opts="-Dsbt.global.base=project/.sbtboot -Dsbt.boot.directory=project/.boot -Dsbt.ivy.home=project/.ivy"
 declare -r sbt_opts_file=".sbtopts"
 declare -r jvm_opts_file=".jvmopts"
 declare -r latest_28="2.8.2"
 declare -r latest_29="2.9.2"
-declare -r latest_210="2.10.0-SNAPSHOT"
+declare -r latest_210="2.10.0-RC2"
 
 declare -r script_path=$(get_script_path "$BASH_SOURCE")
 declare -r script_dir="$(dirname $script_path)"
@@ -125,6 +126,8 @@ declare sbt_launch_dir="$script_dir/.lib"
 declare sbt_universal_launcher="$script_dir/lib/sbt-launch.jar"
 declare sbt_mem=$default_sbt_mem
 declare sbt_jar=$sbt_universal_launcher
+declare trace_level=$default_trace_level
+declare log_level=Info
 
 # pull -J and -D options to give to java.
 declare -a residual_args
@@ -241,6 +244,7 @@ Usage: $script_name [options]
   -v | -verbose      this runner is chattier
   -d | -debug        set sbt log level to Debug
   -q | -quiet        set sbt log level to Error
+  -trace <level>     display stack traces with a max of <level> frames (default: $default_trace_level)
   -no-colors         disable ANSI color codes
   -sbt-create        start sbt even if current directory contains no sbt project
   -sbt-dir   <path>  path to global settings/plugins directory (default: ~/.sbt/<version>)
@@ -252,6 +256,7 @@ Usage: $script_name [options]
   -offline           put sbt in offline mode
   -jvm-debug <port>  Turn on JVM debugging, open at the given port.
   -batch             Disable interactive mode
+  -prompt <expr>     Set the sbt prompt; in expr, 's' is the State and 'e' is Extracted
 
   # sbt version (default: from project/build.properties if present, else latest release)
   !!! The only way to accomplish this pre-0.12.0 if there is a build.properties file which
@@ -302,7 +307,7 @@ addResidual () {
   residual_args=( "${residual_args[@]}" "$1" )
 }
 addResolver () {
-  addSbt "set resolvers in ThisBuild += $1"
+  addSbt "set every resolvers += $1"
 }
 addDebugger () {
   addJava "-Xdebug -Xrunjdwp:transport=dt_socket,server=y,suspend=n,address=$1"
@@ -329,9 +334,10 @@ process_args ()
     case "$1" in
        -h|-help) usage; exit 1 ;;
     -v|-verbose) verbose=1 && shift ;;
-      -d|-debug) debug=1 && shift ;;
-      -q|-quiet) quiet=1 && shift ;;
+      -d|-debug) debug=1 && log_level=Debug && shift ;;
+      -q|-quiet) quiet=1 && log_level=Error && shift ;;
 
+         -trace) require_arg integer "$1" "$2" && trace_level=$2 && shift 2 ;;
            -ivy) require_arg path "$1" "$2" && addJava "-Dsbt.ivy.home=$2" && shift 2 ;;
            -mem) require_arg integer "$1" "$2" && sbt_mem="$2" && shift 2 ;;
      -no-colors) addJava "-Dsbt.log.noformat=true" && shift ;;
@@ -342,14 +348,15 @@ process_args ()
        -offline) addSbt "set offline := true" && shift ;;
      -jvm-debug) require_arg port "$1" "$2" && addDebugger $2 && shift 2 ;;
          -batch) exec </dev/null && shift ;;
+        -prompt) require_arg "expr" "$1" "$2" && addSbt "set shellPrompt in ThisBuild := (s => { val e = Project.extract(s) ; $2 })" && shift 2 ;;
 
     -sbt-create) sbt_create=true && shift ;;
   -sbt-snapshot) sbt_explicit_version=$sbt_snapshot_version && shift ;;
        -sbt-jar) require_arg path "$1" "$2" && sbt_jar="$2" && shift 2 ;;
    -sbt-version) require_arg version "$1" "$2" && sbt_explicit_version="$2" && shift 2 ;;
 -sbt-launch-dir) require_arg path "$1" "$2" && sbt_launch_dir="$2" && shift 2 ;;
- -scala-version) require_arg version "$1" "$2" && addSbt "set scalaVersion := \"$2\"" && shift 2 ;;
-    -scala-home) require_arg path "$1" "$2" && addSbt "set scalaHome in ThisBuild := Some(file(\"$2\"))" && shift 2 ;;
+ -scala-version) require_arg version "$1" "$2" && addSbt "set every scalaVersion := \"$2\"" && addSbt "set every scalaBinaryVersion := \"$2\"" && shift 2 ;;
+    -scala-home) require_arg path "$1" "$2" && addSbt "set every scalaHome := Some(file(\"$2\"))" && shift 2 ;;
      -java-home) require_arg path "$1" "$2" && java_cmd="$2/bin/java" && shift 2 ;;
 
             -D*) addJava "$1" && shift ;;
@@ -362,19 +369,6 @@ process_args ()
               *) addResidual "$1" && shift ;;
     esac
   done
-
-  [[ $debug ]] && {
-    case $(sbt_version) in
-     0.7.*) addSbt "debug" ;;
-         *) addSbt "set logLevel in Global := Level.Debug" ;;
-    esac
-  }
-  [[ $quiet ]] && {
-    case $(sbt_version) in
-     0.7.*) ;;
-         *) addSbt "set logLevel in Global := Level.Error" ;;
-    esac
-  }
 }
 
 # if .sbtopts exists, prepend its contents to $@ so it can be processed by this runner
@@ -393,7 +387,7 @@ set -- "${residual_args[@]}"
 argumentCount=$#
 
 # set scalacOptions if we were given any -S opts
-[[ ${#scalac_args[@]} -eq 0 ]] || addSbt "set scalacOptions in ThisBuild += \"${scalac_args[@]}\""
+[[ ${#scalac_args[@]} -eq 0 ]] || addSbt "set every scalacOptions += \"${scalac_args[@]}\""
 
 # Update build.properties no disk to set explicit version - sbt gives us no choice
 [[ -n "$sbt_explicit_version" ]] && update_build_props_sbt "$sbt_explicit_version"
@@ -444,5 +438,8 @@ execRunner "$java_cmd" \
   $(get_jvm_opts) \
   ${java_args[@]} \
   -jar "$sbt_jar" \
+  -shell \
+  "set logLevel in Global := Level.$log_level" \
+  "set every traceLevel := $trace_level" \
   "${sbt_commands[@]}" \
   "${residual_args[@]}"
