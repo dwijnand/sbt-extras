@@ -386,6 +386,14 @@ process_args "$@"
 set -- "${residual_args[@]}"
 argumentCount=$#
 
+# set sbt version specific options
+case $(sbt_version) in
+   0.7.*) ;;
+  0.10.*) ;;
+  0.11.*) ;;
+       *) addSbt "set every traceLevel := $trace_level" ;;
+esac
+
 # set scalacOptions if we were given any -S opts
 [[ ${#scalac_args[@]} -eq 0 ]] || addSbt "set every scalacOptions += \"${scalac_args[@]}\""
 
@@ -440,6 +448,5 @@ execRunner "$java_cmd" \
   -jar "$sbt_jar" \
   -shell \
   "set logLevel in Global := Level.$log_level" \
-  "set every traceLevel := $trace_level" \
   "${sbt_commands[@]}" \
   "${residual_args[@]}"
