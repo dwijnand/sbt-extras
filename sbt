@@ -432,13 +432,14 @@ fi
 # since sbt 0.7 doesn't understand iflast
 (( ${#residual_args[@]} == 0 )) && residual_args=( "shell" )
 
+# -shell \
+
 # run sbt
 execRunner "$java_cmd" \
   $(get_mem_opts $sbt_mem) \
   $(get_jvm_opts) \
   ${java_args[@]} \
   -jar "$sbt_jar" \
-  -shell \
   "set logLevel in Global := Level.$log_level" \
   "set every traceLevel := $trace_level" \
   "${sbt_commands[@]}" \
