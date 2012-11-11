@@ -433,6 +433,7 @@ fi
 (( ${#residual_args[@]} == 0 )) && residual_args=( "shell" )
 
 # -shell \
+# "set every traceLevel := $trace_level" \
 
 # run sbt
 execRunner "$java_cmd" \
@@ -441,6 +442,5 @@ execRunner "$java_cmd" \
   ${java_args[@]} \
   -jar "$sbt_jar" \
   "set logLevel in Global := Level.$log_level" \
-  "set every traceLevel := $trace_level" \
   "${sbt_commands[@]}" \
   "${residual_args[@]}"
