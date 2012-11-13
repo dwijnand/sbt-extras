@@ -386,6 +386,14 @@ process_args "$@"
 set -- "${residual_args[@]}"
 argumentCount=$#
 
+# set sbt version specific options
+case $(sbt_version) in
+   0.7.*) ;;
+  0.10.*) ;;
+  0.11.*) ;;
+       *) addSbt "set every traceLevel := $trace_level" ;;
+esac
+
 # set scalacOptions if we were given any -S opts
 [[ ${#scalac_args[@]} -eq 0 ]] || addSbt "set every scalacOptions += \"${scalac_args[@]}\""
 
