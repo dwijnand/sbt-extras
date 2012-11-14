@@ -138,6 +138,9 @@ declare -a sbt_commands
 # if set, use JAVA_HOME over java found in path
 [[ -e "$JAVA_HOME/bin/java" ]] && java_cmd="$JAVA_HOME/bin/java"
 
+# use ~/.sbt/launch to store sbt jars if script_dir is not writable
+[[ -w "$sbt_launch_dir" ]] || sbt_launch_dir="$HOME/.sbt/launch"
+
 build_props_scala () {
   if [[ -f project/build.properties ]]; then
     versionLine=$(grep ^build.scala.versions project/build.properties)
