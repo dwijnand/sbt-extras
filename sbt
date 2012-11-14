@@ -355,7 +355,7 @@ process_args ()
        -sbt-jar) require_arg path "$1" "$2" && sbt_jar="$2" && shift 2 ;;
    -sbt-version) require_arg version "$1" "$2" && sbt_explicit_version="$2" && shift 2 ;;
 -sbt-launch-dir) require_arg path "$1" "$2" && sbt_launch_dir="$2" && shift 2 ;;
- -scala-version) require_arg version "$1" "$2" && addSbt "set every scalaVersion := \"$2\"" && addSbt "set every scalaBinaryVersion := \"$2\"" && shift 2 ;;
+ -scala-version) require_arg version "$1" "$2" && addSbt "set scalaVersion := \"$2\"" && addSbt "set every scalaBinaryVersion := \"$2\"" && shift 2 ;;
     -scala-home) require_arg path "$1" "$2" && addSbt "set every scalaHome := Some(file(\"$2\"))" && shift 2 ;;
      -java-home) require_arg path "$1" "$2" && java_cmd="$2/bin/java" && shift 2 ;;
 
@@ -395,7 +395,7 @@ case $(sbt_version) in
 esac
 
 # set scalacOptions if we were given any -S opts
-[[ ${#scalac_args[@]} -eq 0 ]] || addSbt "set every scalacOptions += \"${scalac_args[@]}\""
+[[ ${#scalac_args[@]} -eq 0 ]] || addSbt "set scalacOptions += \"${scalac_args[@]}\""
 
 # Update build.properties no disk to set explicit version - sbt gives us no choice
 [[ -n "$sbt_explicit_version" ]] && update_build_props_sbt "$sbt_explicit_version"
