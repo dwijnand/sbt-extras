@@ -2,6 +2,7 @@
 #
 # A more capable sbt runner, coincidentally also called sbt.
 # Author: Paul Phillips <paulp@typesafe.com>
+# Author: Josh Suereth  <joshua.suereth@typesafe.com>
 
 # todo - make this dynamic
 declare -r sbt_release_version=0.12.1
@@ -112,6 +113,9 @@ declare -r default_trace_level=15
 declare -r noshare_opts="-Dsbt.global.base=project/.sbtboot -Dsbt.boot.directory=project/.boot -Dsbt.ivy.home=project/.ivy"
 declare -r sbt_opts_file=".sbtopts"
 declare -r jvm_opts_file=".jvmopts"
+declare -r default_config_home="/etc/sbt"
+declare -r etc_sbt_opts_file="${default_config_home}/sbtopts"
+declare -r etc_jvm_opts_file="${default_config_home}/jvmopts"
 declare -r latest_28="2.8.2"
 declare -r latest_29="2.9.2"
 declare -r latest_210="2.10.0-RC2"
@@ -277,16 +281,24 @@ Usage: $script_name [options]
   -java-home <path>         alternate JAVA_HOME
 
   # jvm options and output control
-  JAVA_OPTS     environment variable holding jvm args, if unset uses "$default_jvm_opts"
-  SBT_OPTS      environment variable holding jvm args, if unset uses "$default_sbt_opts"
-  .jvmopts      if file is in sbt root, it is prepended to the args given to the jvm
-  .sbtopts      if file is in sbt root, it is prepended to the args given to **sbt**
-  -Dkey=val     pass -Dkey=val directly to the jvm
-  -J-X          pass option -X directly to the jvm (-J is stripped)
-  -S-X          add -X to sbt's scalacOptions (-S is stripped)
+  JAVA_OPTS         environment variable holding jvm args, if unset uses "$default_jvm_opts"
+  SBT_OPTS          environment variable holding jvm args, if unset uses "$default_sbt_opts"
+  .jvmopts          if this file exists in the current directory, it is prepended to the args given to the jvm
+  .sbtopts          if this file exists in the current directory, it is prepended to the args given to **sbt**
+  /etc/sbt/jvmopts  if this file exists, it is prepended to the args given to the jvm
+  /etc/sbt/sbtopts  if this file exists, it is prepended to the args given to **sbt**
+  -Dkey=val         pass -Dkey=val directly to the jvm
+  -J-X              pass option -X directly to the jvm (-J is stripped)
+  -S-X              add -X to sbt's scalacOptions (-S is stripped)
 
-In the case of duplicated or conflicting options, the order above
-shows precedence: JAVA_OPTS lowest, command line options highest.
+In the case of duplicated or conflicting options, the order below shows precedence: 
+  JAVA_OPTS lowest, 
+  /etc/sbt/sbtopts, 
+  local .sbtopts, 
+  /etc/sbt/jvmopts, 
+  local .jvmopts, 
+  command line options highest.
+
 EOM
 }
 
@@ -316,6 +328,9 @@ get_jvm_opts () {
   # echo "${JAVA_OPTS:-$default_jvm_opts}"
   # echo "${SBT_OPTS:-$default_sbt_opts}"
 
+  # if jvmopts files exist, prepend their contents to JVM arguments
+  # local .jvmopts file is 'stronger' than default /etc/sbt/jvmopts
+  [[ -f "$etc_jvm_opts_file" ]] && cat "$etc_jvm_opts_file"
   [[ -f "$jvm_opts_file" ]] && cat "$jvm_opts_file"
 }
 
@@ -371,15 +386,15 @@ process_args ()
   done
 }
 
-# if .sbtopts exists, prepend its contents to $@ so it can be processed by this runner
-[[ -f "$sbt_opts_file" ]] && {
-  sbtargs=()
-  while IFS= read -r arg; do
-    sbtargs=( "${sbtargs[@]}" "$arg" )
-  done <"$sbt_opts_file"
-
-  set -- "${sbtargs[@]}" "$@"
+loadConfigFile() {
+  cat "$1" | sed '/^\#/d'
 }
+
+# if sbtopts files exist, prepend their contents to $@ so it can be processed by this runner
+# local .sbtopts file is 'stronger' than default /etc/sbt/sbtopts
+[[ -f "$sbt_opts_file" ]] && set -- $(loadConfigFile "$sbt_opts_file") "$@"
+[[ -f "$etc_sbt_opts_file" ]] && set -- $(loadConfigFile "$etc_sbt_opts_file") "$@"
+
 
 # process the combined args, then reset "$@" to the residuals
 process_args "$@"
