@@ -4,7 +4,7 @@
 # Author: Paul Phillips <paulp@typesafe.com>
 
 # todo - make this dynamic
-declare -r sbt_release_version=0.12.2-RC1
+declare -r sbt_release_version=0.12.2-RC2
 declare -r sbt_snapshot_version=0.13.0-SNAPSHOT
 
 unset sbt_jar sbt_dir sbt_create sbt_snapshot sbt_launch_dir
@@ -308,11 +308,18 @@ addResidual () {
   residual_args=( "${residual_args[@]}" "$1" )
 }
 addResolver () {
-  addSbt "set every resolvers += $1"
+  addSbt "set resolvers in ThisBuild += $1"
 }
 addDebugger () {
   addJava "-Xdebug -Xrunjdwp:transport=dt_socket,server=y,suspend=n,address=$1"
 }
+setScalaVersion () {
+  addSbt "set scalaVersion in ThisBuild := \"$1\""
+  if [[ "$1" == *SNAPSHOT* ]]; then
+    addResolver Opts.resolver.sonatypeSnapshots
+  fi
+}
+
 get_jvm_opts () {
   # echo "${JAVA_OPTS:-$default_jvm_opts}"
   # echo "${SBT_OPTS:-$default_sbt_opts}"
@@ -356,7 +363,7 @@ process_args ()
        -sbt-jar) require_arg path "$1" "$2" && sbt_jar="$2" && shift 2 ;;
    -sbt-version) require_arg version "$1" "$2" && sbt_explicit_version="$2" && shift 2 ;;
 -sbt-launch-dir) require_arg path "$1" "$2" && sbt_launch_dir="$2" && shift 2 ;;
- -scala-version) require_arg version "$1" "$2" && addSbt "set scalaVersion in ThisBuild := \"$2\"" && shift 2 ;;
+ -scala-version) require_arg version "$1" "$2" && setScalaVersion "$2" && shift 2 ;;
 -binary-version) require_arg version "$1" "$2" && addSbt "set scalaBinaryVersion in ThisBuild := \"$2\"" && shift 2 ;;
     -scala-home) require_arg path "$1" "$2" && addSbt "set every scalaHome := Some(file(\"$2\"))" && shift 2 ;;
      -java-home) require_arg path "$1" "$2" && java_cmd="$2/bin/java" && shift 2 ;;
