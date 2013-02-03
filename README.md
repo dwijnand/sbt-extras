@@ -24,6 +24,7 @@ well as a snapshot version of scala, then run the sbt "about" command.
     # Executing command line:
     java
     -XX:+CMSClassUnloadingEnabled
+    -XX:+UseConcMarkSweepGC
     -Xms1536m
     -Xmx1536m
     -XX:MaxPermSize=384m
@@ -96,7 +97,7 @@ Current -help output:
 
       # jvm options and output control
       JAVA_OPTS     environment variable holding jvm args, if unset uses "-Dfile.encoding=UTF8"
-      SBT_OPTS      environment variable holding jvm args, if unset uses "-XX:+CMSClassUnloadingEnabled"
+      SBT_OPTS      environment variable holding jvm args, if unset uses "-XX:+CMSClassUnloadingEnabled -XX:+UseConcMarkSweepGC"
       .jvmopts      if file is in sbt root, it is prepended to the args given to the jvm
       .sbtopts      if file is in sbt root, it is prepended to the args given to **sbt**
       -Dkey=val     pass -Dkey=val directly to the jvm
