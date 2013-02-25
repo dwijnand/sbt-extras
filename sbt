@@ -1,6 +1,8 @@
 #!/usr/bin/env bash
 #
 # A more capable sbt runner, coincidentally also called sbt.
+# Can be copied to / symlinked from scalas and screpl,
+# see http://www.scala-sbt.org/release/docs/Detailed-Topics/Scripts.
 # Author: Paul Phillips <paulp@typesafe.com>
 
 # todo - make this dynamic
@@ -414,8 +416,10 @@ echoerr "Detected sbt version $(sbt_version)"
 # no args - alert them there's stuff in here
 (( $argumentCount > 0 )) || echo "Starting $script_name: invoke with -help for other options"
 
+TOOL="`basename "$0"`"
+
 # verify this is an sbt dir or -create was given
-[[ -f ./build.sbt || -d ./project || -n "$sbt_create" ]] || {
+[[ -f ./build.sbt || -d ./project || -n "$sbt_create" || $TOOL =~ scalas|screpl ]] || {
   cat <<EOM
 $(pwd) doesn't appear to be an sbt project.
 If you want to start sbt anyway, run:
@@ -452,12 +456,37 @@ fi
 # "set every traceLevel := $trace_level" \
 [[ -n $log_level ]] && logLevalArg="set logLevel in Global := Level.$log_level"
 
-# run sbt
-execRunner "$java_cmd" \
-  $(get_mem_opts $sbt_mem) \
-  $(get_jvm_opts) \
-  ${java_args[@]} \
-  -jar "$sbt_jar" \
-  "$logLevalArg" \
-  "${sbt_commands[@]}" \
-  "${residual_args[@]}"
+case $TOOL in
+  scalas)
+    # run scalas
+    addJava "-Dsbt.main.class=sbt.ScriptMain"
+    execRunner "$java_cmd" \
+      $(get_mem_opts $sbt_mem) \
+      $(get_jvm_opts) \
+      ${java_args[@]} \
+      -jar "$sbt_jar" \
+      "${residual_args[@]}"
+    ;;
+  screpl)
+    # run screpl
+    addJava "-Dsbt.main.class=sbt.ConsoleMain"
+    execRunner "$java_cmd" \
+      $(get_mem_opts $sbt_mem) \
+      $(get_jvm_opts) \
+      ${java_args[@]} \
+      -jar "$sbt_jar" \
+      "${residual_args[@]}"
+    ;;
+  *)
+    # run sbt
+    execRunner "$java_cmd" \
+      $(get_mem_opts $sbt_mem) \
+      $(get_jvm_opts) \
+      ${java_args[@]} \
+      -jar "$sbt_jar" \
+      "$logLevalArg" \
+      "${sbt_commands[@]}" \
+      "${residual_args[@]}"
+    ;;
+esac
+  
