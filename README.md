@@ -63,14 +63,12 @@ Current -help output:
       -v | -verbose      this runner is chattier
       -d | -debug        set sbt log level to Debug
       -q | -quiet        set sbt log level to Error
-      -trace <level>     display stack traces with a max of <level> frames (default: 15)
+      -trace <level>     display stack traces with a max of <level> frames (default: -1, traces suppressed)
       -no-colors         disable ANSI color codes
       -sbt-create        start sbt even if current directory contains no sbt project
       -sbt-dir   <path>  path to global settings/plugins directory (default: ~/.sbt/<version>)
       -sbt-boot  <path>  path to shared boot directory (default: ~/.sbt/boot in 0.11+)
       -ivy       <path>  path to local Ivy repository (default: ~/.ivy2)
-      -mem    <integer>  set memory options (default: 1536, which is
-                           -Xms1536m -Xmx1536m -XX:MaxPermSize=384m -XX:ReservedCodeCacheSize=192m )
       -no-share          use all local caches; no sharing
       -offline           put sbt in offline mode
       -jvm-debug <port>  Turn on JVM debugging, open at the given port.
@@ -87,25 +85,27 @@ Current -help output:
 
       # scala version (default: as chosen by sbt)
       -28                       use 2.8.2
-      -29                       use 2.9.2
-      -210                      use 2.10.0-RC2
+      -29                       use 2.9.3
+      -210                      use 2.10.0
       -scala-home <path>        use the scala build at the specified directory
       -scala-version <version>  use the specified version of scala
+      -binary-version <version> use the specified scala version when searching for dependencies
 
-      # java version (default: java from PATH, currently java version "1.7.0_06")
+      # java version (default: java from PATH, currently java version "1.7.0_15")
       -java-home <path>         alternate JAVA_HOME
 
-      # jvm options and output control
-      JAVA_OPTS     environment variable holding jvm args, if unset uses "-Dfile.encoding=UTF8"
-      SBT_OPTS      environment variable holding jvm args, if unset uses "-XX:+CMSClassUnloadingEnabled -XX:+UseConcMarkSweepGC"
-      .jvmopts      if file is in sbt root, it is prepended to the args given to the jvm
-      .sbtopts      if file is in sbt root, it is prepended to the args given to **sbt**
-      -Dkey=val     pass -Dkey=val directly to the jvm
-      -J-X          pass option -X directly to the jvm (-J is stripped)
-      -S-X          add -X to sbt's scalacOptions (-S is stripped)
+      # passing options to the jvm - note it does NOT use JAVA_OPTS due to pollution
+      # The default set is used if JVM_OPTS is unset and no -jvm-opts file is found
+      <default>        -Dfile.encoding=UTF8 -XX:MaxPermSize=256m -Xms512m -Xmx1g -XX:+CMSClassUnloadingEnabled -XX:+UseConcMarkSweepGC
+      JVM_OPTS         environment variable holding jvm args
+      -jvm-opts <path> file containing jvm args (if not given, .jvmopts in project root is used if present)
+      -Dkey=val        pass -Dkey=val directly to the jvm
+      -J-X             pass option -X directly to the jvm (-J is stripped)
 
-    In the case of duplicated or conflicting options, the order above
-    shows precedence: JAVA_OPTS lowest, command line options highest.
+      # passing options to sbt, OR to this runner
+      SBT_OPTS         environment variable holding sbt args
+      -sbt-opts <path> file containing sbt args (if not given, .sbtopts in project root is used if present)
+      -S-X             add -X to sbt's scalacOptions (-S is stripped)
 
 ## SBT Extra plugin
 
