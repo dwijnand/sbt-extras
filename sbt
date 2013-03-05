@@ -9,7 +9,7 @@ declare -r sbt_snapshot_version=0.13.0-SNAPSHOT
 
 declare sbt_jar sbt_dir sbt_create sbt_snapshot sbt_launch_dir
 declare scala_version java_home sbt_explicit_version
-declare verbose debug quiet noshare trace_level log_level
+declare verbose debug quiet noshare batch trace_level log_level
 
 for arg in "$@"; do
   case $arg in
@@ -146,7 +146,15 @@ execRunner () {
     echo ""
   }
 
-  exec "$@"
+  if [[ -n $batch ]]; then
+    # the only effective way I've found to avoid sbt hanging when backgrounded.
+    exec 0<&-
+    ( "$@" & )
+    # I'm sure there's some way to get our hands on the pid and wait for it
+    # but it exceeds my present level of ambition.
+  else
+    exec "$@"
+  fi
 }
 
 sbt_groupid () {
@@ -333,7 +341,7 @@ process_args ()
      -debug-inc) addJava "-Dxsbt.inc.debug=true" && shift ;;
        -offline) addSbt "set offline := true" && shift ;;
      -jvm-debug) require_arg port "$1" "$2" && addDebugger $2 && shift 2 ;;
-         -batch) exec </dev/null && shift ;;
+         -batch) batch=true && shift ;;
         -prompt) require_arg "expr" "$1" "$2" && addSbt "set shellPrompt in ThisBuild := (s => { val e = Project.extract(s) ; $2 })" && shift 2 ;;
 
     -sbt-create) sbt_create=true && shift ;;
@@ -419,12 +427,12 @@ EOM
   exit 1
 }
 
-if [[ "$noshare" -eq 1 ]]; then
+if [[ -n $noshare ]]; then
   addJava "$noshare_opts"
 else
   [[ -n "$sbt_dir" ]] || {
     sbt_dir=~/.sbt/$(sbt_version)
-    echoerr "Using $sbt_dir as sbt dir, -sbt-dir to override."
+    vlog "Using $sbt_dir as sbt dir, -sbt-dir to override."
   }
   addJava "-Dsbt.global.base=$sbt_dir"
 fi
@@ -438,7 +446,7 @@ else
 fi
 
 # since sbt 0.7 doesn't understand iflast
-[[ ${#residual_args[@]} -eq 0 ]] && residual_args=( "shell" )
+[[ ${#residual_args[@]} -eq 0 ]] && [[ -z "$batch" ]] && residual_args=( "shell" )
 
 # traceLevel is 0.12+
 [[ -n $trace_level ]] && setTraceLevel
@@ -453,4 +461,3 @@ execRunner "$java_cmd" \
   "$logLevalArg" \
   "${sbt_commands[@]}" \
   "${residual_args[@]}"
-
