@@ -20,7 +20,7 @@ done
 
 build_props_sbt () {
   if [[ -r project/build.properties ]]; then
-    versionLine=$(grep ^sbt.version project/build.properties)
+    versionLine=$(grep ^sbt.version project/build.properties | tr -d '\r')
     versionString=${versionLine##sbt.version=}
     echo "$versionString"
   fi
