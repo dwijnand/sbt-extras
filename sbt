@@ -107,7 +107,7 @@ declare -r script_name="$(basename $script_path)"
 # some non-read-onlies set with defaults
 declare java_cmd=java
 declare sbt_launch_dir="$script_dir/.lib"
-declare sbt_universal_launcher="$script_dir/lib/sbt-launch.jar"
+declare sbt_universal_launcher="$script_dir/launchers/sbt-launch.jar"
 declare sbt_jar=$sbt_universal_launcher
 declare sbt_opts_file=.sbtopts
 declare jvm_opts_file=.jvmopts
