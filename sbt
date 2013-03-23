@@ -93,6 +93,12 @@ make_url () {
   echo "http://typesafe.artifactoryonline.com/typesafe/ivy-$category/$groupid/sbt-launch/$version/sbt-launch.jar"
 }
 
+readarr () {
+  while read ; do
+    eval "$1+=(\"$REPLY\")"
+  done
+}
+
 declare -r default_jvm_opts="-Dfile.encoding=UTF8 -XX:MaxPermSize=256m -Xms512m -Xmx1g -XX:+CMSClassUnloadingEnabled -XX:+UseConcMarkSweepGC"
 declare -r noshare_opts="-Dsbt.global.base=project/.sbtboot -Dsbt.boot.directory=project/.boot -Dsbt.ivy.home=project/.ivy"
 declare -r latest_28="2.8.2"
@@ -378,7 +384,7 @@ process_args "$@"
 # if there are file/environment sbt_opts, process again so we
 # can supply args to this runner
 if [[ -r "$sbt_opts_file" ]]; then
-  readarray -t extra_sbt_opts < "$sbt_opts_file"
+  readarr extra_sbt_opts < "$sbt_opts_file"
 elif [[ -n "$SBT_OPTS" ]]; then
   extra_sbt_opts=( $SBT_OPTS )
 fi
@@ -441,7 +447,7 @@ else
 fi
 
 if [[ -r "$jvm_opts_file" ]]; then
-  readarray -t extra_jvm_opts < "$jvm_opts_file"
+  readarr extra_jvm_opts < "$jvm_opts_file"
 elif [[ -n "$JVM_OPTS" ]]; then
   extra_jvm_opts=( $JVM_OPTS )
 else
