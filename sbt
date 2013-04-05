@@ -4,18 +4,26 @@
 # Author: Paul Phillips <paulp@typesafe.com>
 
 # todo - make this dynamic
-declare -r sbt_release_version=0.12.2
+declare -r sbt_release_version=0.12.3
 declare -r sbt_milestone_version=0.13.0-M1
 declare -r sbt_snapshot_version=0.13.0-SNAPSHOT
 
 declare sbt_jar sbt_dir sbt_create sbt_snapshot sbt_launch_dir
 declare scala_version java_home sbt_explicit_version
 declare verbose debug quiet noshare batch trace_level log_level
+declare sbt_saved_stty
 
+echoerr () { [[ -z $quiet ]]           && echo    "$@" >&2; }
+vlog ()    { [[ -n "$verbose$debug" ]] && echoerr "$@"; }
+dlog ()    { [[ -n $debug ]]           && echoerr "$@"; }
+
+# we'd like these set before we get around to properly processing arguments
 for arg in "$@"; do
   case $arg in
-    -q|-quiet)  quiet=true ;;
-            *)             ;;
+    -q|-quiet)    quiet=true ;;
+    -d|-debug)    debug=true ;;
+  -v|-verbose)  verbose=true ;;
+            *)               ;;
   esac
 done
 
@@ -37,10 +45,10 @@ update_build_props_sbt () {
     perl -pi -e "s/^sbt\.version=.*\$/sbt.version=${ver}/" project/build.properties
     grep -q '^sbt.version=' project/build.properties || echo "sbt.version=${ver}" >> project/build.properties
 
-    echo !!!
-    echo !!! Updated file project/build.properties setting sbt.version to: $ver
-    echo !!! Previous value was: $old
-    echo !!!
+    echoerr !!!
+    echoerr !!! Updated file project/build.properties setting sbt.version to: $ver
+    echoerr !!! Previous value was: $old
+    echoerr !!!
   fi
 }
 
@@ -57,15 +65,19 @@ sbt_version () {
   fi
 }
 
-echoerr () {
-  [[ -z $quiet ]] && echo "$@" >&2
+# restore stty settings (echo in particular)
+onSbtRunnerExit() {
+  [[ -n $sbt_saved_stty ]] || return
+  dlog ""
+  dlog "restoring stty: $sbt_saved_stty"
+  stty $sbt_saved_stty
+  unset sbt_saved_stty
 }
-vlog () {
-  [[ $verbose || $debug ]] && echoerr "$@"
-}
-dlog () {
-  [[ $debug ]] && echoerr "$@"
-}
+
+# save stty and trap exit, to ensure echo is reenabled if we are interrupted.
+trap onSbtRunnerExit EXIT
+sbt_saved_stty=$(stty -g 2>/dev/null)
+dlog "Saved stty: $sbt_saved_stty"
 
 # this seems to cover the bases on OSX, and someone will
 # have to tell me about the others.
@@ -106,9 +118,6 @@ declare -r script_name="$(basename $script_path)"
 
 # some non-read-onlies set with defaults
 declare java_cmd=java
-declare sbt_launch_dir="$script_dir/.lib"
-declare sbt_universal_launcher="$script_dir/launchers/sbt-launch.jar"
-declare sbt_jar=$sbt_universal_launcher
 declare sbt_opts_file=.sbtopts
 declare jvm_opts_file=.jvmopts
 
@@ -124,8 +133,10 @@ declare -a extra_jvm_opts extra_sbt_opts
 # if set, use JAVA_HOME over java found in path
 [[ -e "$JAVA_HOME/bin/java" ]] && java_cmd="$JAVA_HOME/bin/java"
 
-# use ~/.sbt/launch to store sbt jars if script_dir is not writable
-[[ -w "$sbt_launch_dir" ]] || sbt_launch_dir="$HOME/.sbt/launch"
+# directory to store sbt launchers
+declare sbt_launch_dir="$HOME/.sbt/launchers"
+[[ -d "$sbt_launch_dir" ]] || mkdir -p "$sbt_launch_dir"
+[[ -w "$sbt_launch_dir" ]] || sbt_launch_dir="$(mktemp -d -t sbt_extras_launchers)"
 
 build_props_scala () {
   if [[ -r project/build.properties ]]; then
@@ -157,7 +168,7 @@ execRunner () {
     # I'm sure there's some way to get our hands on the pid and wait for it
     # but it exceeds my present level of ambition.
   else
-    exec "$@"
+    { "$@"; }
   fi
 }
 
@@ -208,7 +219,10 @@ jar_url () {
 }
 
 jar_file () {
-  echo "$sbt_launch_dir/$1/sbt-launch.jar"
+  case $1 in
+    0.13.*) echo "$sbt_launch_dir/$1/sbt-launch.jar" ;;
+         *) echo "$sbt_launch_dir/$sbt_release_version/sbt-launch.jar" ;;
+  esac
 }
 
 download_url () {
@@ -258,10 +272,10 @@ Usage: $script_name [options]
   # sbt version (default: from project/build.properties if present, else latest release)
   !!! The only way to accomplish this pre-0.12.0 if there is a build.properties file which
   !!! contains an sbt.version property is to update the file on disk.  That's what this does.
-  -sbt-version  <version>   use the specified version of sbt
+  -sbt-version  <version>   use the specified version of sbt (default: $sbt_release_version)
   -sbt-jar      <path>      use the specified jar as the sbt launcher
-  -sbt-milestone            use a milestone version of sbt
-  -sbt-snapshot             use a snapshot version of sbt
+  -sbt-milestone            use a milestone version of sbt (currently: $sbt_milestone_version)
+  -sbt-snapshot             use a snapshot version of sbt (currently: $sbt_snapshot_version)
   -sbt-launch-dir <path>    directory to hold sbt launchers (default: $sbt_launch_dir)
 
   # scala version (default: as chosen by sbt)
@@ -405,12 +419,12 @@ setTraceLevel() {
 
 # Update build.properties no disk to set explicit version - sbt gives us no choice
 [[ -n "$sbt_explicit_version" ]] && update_build_props_sbt "$sbt_explicit_version"
-echoerr "Detected sbt version $(sbt_version)"
+vlog "Detected sbt version $(sbt_version)"
 
-[[ -n "$scala_version" ]] && echo "Overriding scala version to $scala_version"
+[[ -n "$scala_version" ]] && echoerr "Overriding scala version to $scala_version"
 
 # no args - alert them there's stuff in here
-(( $argumentCount > 0 )) || echo "Starting $script_name: invoke with -help for other options"
+(( $argumentCount > 0 )) || vlog "Starting $script_name: invoke with -help for other options"
 
 # verify this is an sbt dir or -create was given
 [[ -r ./build.sbt || -d ./project || -n "$sbt_create" ]] || {
