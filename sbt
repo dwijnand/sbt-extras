@@ -5,7 +5,7 @@
 
 # todo - make this dynamic
 declare -r sbt_release_version=0.12.3
-declare -r sbt_milestone_version=0.13.0-M1
+declare -r sbt_beta_version=0.13.0-Beta2
 declare -r sbt_snapshot_version=0.13.0-SNAPSHOT
 
 declare sbt_jar sbt_dir sbt_create sbt_snapshot sbt_launch_dir
@@ -274,7 +274,7 @@ Usage: $script_name [options]
   !!! contains an sbt.version property is to update the file on disk.  That's what this does.
   -sbt-version  <version>   use the specified version of sbt (default: $sbt_release_version)
   -sbt-jar      <path>      use the specified jar as the sbt launcher
-  -sbt-milestone            use a milestone version of sbt (currently: $sbt_milestone_version)
+  -sbt-beta                 use a beta version of sbt (currently: $sbt_beta_version)
   -sbt-snapshot             use a snapshot version of sbt (currently: $sbt_snapshot_version)
   -sbt-launch-dir <path>    directory to hold sbt launchers (default: $sbt_launch_dir)
 
@@ -365,7 +365,7 @@ process_args ()
 
     -sbt-create) sbt_create=true && shift ;;
   -sbt-snapshot) sbt_explicit_version=$sbt_snapshot_version && shift ;;
- -sbt-milestone) sbt_explicit_version=$sbt_milestone_version && shift ;;
+      -sbt-beta) sbt_explicit_version=$sbt_beta_version && shift ;;
        -sbt-jar) require_arg path "$1" "$2" && sbt_jar="$2" && shift 2 ;;
    -sbt-version) require_arg version "$1" "$2" && sbt_explicit_version="$2" && shift 2 ;;
 -sbt-launch-dir) require_arg path "$1" "$2" && sbt_launch_dir="$2" && shift 2 ;;
