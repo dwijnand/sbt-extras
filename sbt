@@ -330,7 +330,8 @@ addResolver () {
   addSbt "set resolvers in ThisBuild += $1"
 }
 addDebugger () {
-  addJava "-Xdebug -Xrunjdwp:transport=dt_socket,server=y,suspend=n,address=$1"
+  addJava "-Xdebug"
+  addJava "-Xrunjdwp:transport=dt_socket,server=y,suspend=n,address=$1"
 }
 setScalaVersion () {
   addSbt "set scalaVersion in ThisBuild := \"$1\""
