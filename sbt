@@ -292,7 +292,7 @@ Usage: $script_name [options]
   -scala-version <version>  use the specified version of scala
   -binary-version <version> use the specified scala version when searching for dependencies
 
-  # java version (default: java from PATH, currently $(java -version |& grep version))
+  # java version (default: java from PATH, currently $(java -version 2>&1 | grep version))
   -java-home <path>         alternate JAVA_HOME
 
   # passing options to the jvm - note it does NOT use JAVA_OPTS due to pollution
