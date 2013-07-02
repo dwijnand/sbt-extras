@@ -4,8 +4,8 @@
 # Author: Paul Phillips <paulp@typesafe.com>
 
 # todo - make this dynamic
-declare -r sbt_release_version=0.12.3
-declare -r sbt_beta_version=0.13.0-Beta2
+declare -r sbt_release_version=0.12.4
+declare -r sbt_beta_version=0.13.0-RC1
 declare -r sbt_snapshot_version=0.13.0-SNAPSHOT
 
 declare sbt_jar sbt_dir sbt_create sbt_snapshot sbt_launch_dir
