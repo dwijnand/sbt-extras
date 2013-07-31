@@ -7,6 +7,7 @@ project directory, the runner will figure out the versions of sbt and
 scala required by the project and download them if necessary.
 
 ## Installation
+
 To install, the "sbt" bash script at the root of the project needs to be placed on your path.
 
     curl https://raw.github.com/paulp/sbt-extras/master/sbt > ~/bin/sbt
@@ -97,13 +98,17 @@ Current -help output:
       # passing options to the jvm - note it does NOT use JAVA_OPTS due to pollution
       # The default set is used if JVM_OPTS is unset and no -jvm-opts file is found
       <default>        -Dfile.encoding=UTF8 -XX:MaxPermSize=256m -Xms512m -Xmx1g -XX:+CMSClassUnloadingEnabled -XX:+UseConcMarkSweepGC
-      JVM_OPTS         environment variable holding jvm args
+      JVM_OPTS         environment variable holding either the jvm args directly, or
+                       the reference to a file containing jvm args if given path is prepended by '@' (e.g. '@/etc/jvmopts')
+                       Note: "@"-file is overridden by local '.jvmopts' or '-jvm-opts' argument.
       -jvm-opts <path> file containing jvm args (if not given, .jvmopts in project root is used if present)
       -Dkey=val        pass -Dkey=val directly to the jvm
       -J-X             pass option -X directly to the jvm (-J is stripped)
 
       # passing options to sbt, OR to this runner
-      SBT_OPTS         environment variable holding sbt args
+      SBT_OPTS         environment variable holding either the sbt args directly, or
+                       the reference to a file containing sbt args if given path is prepended by '@' (e.g. '@/etc/sbtopts')
+                       Note: "@"-file is overridden by local '.sbtopts' or '-sbt-opts' argument.
       -sbt-opts <path> file containing sbt args (if not given, .sbtopts in project root is used if present)
       -S-X             add -X to sbt's scalacOptions (-S is stripped)
 
