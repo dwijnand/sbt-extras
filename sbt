@@ -4,11 +4,10 @@
 # Author: Paul Phillips <paulp@typesafe.com>
 
 # todo - make this dynamic
-declare -r sbt_release_version=0.12.4
-declare -r sbt_beta_version=0.13.0-RC4
-declare -r sbt_snapshot_version=0.13.0-SNAPSHOT
+declare -r sbt_release_version=0.13.0
+declare -r sbt_snapshot_version=0.13.1-SNAPSHOT
 
-declare sbt_jar sbt_dir sbt_create sbt_snapshot sbt_launch_dir
+declare sbt_jar sbt_dir sbt_create sbt_launch_dir
 declare scala_version java_home sbt_explicit_version
 declare verbose debug quiet noshare batch trace_level log_level
 declare sbt_saved_stty
@@ -128,7 +127,7 @@ declare -r default_jvm_opts="-Dfile.encoding=UTF8 -XX:MaxPermSize=256m -Xms512m 
 declare -r noshare_opts="-Dsbt.global.base=project/.sbtboot -Dsbt.boot.directory=project/.boot -Dsbt.ivy.home=project/.ivy"
 declare -r latest_28="2.8.2"
 declare -r latest_29="2.9.3"
-declare -r latest_210="2.10.0"
+declare -r latest_210="2.10.3"
 
 declare -r script_path=$(get_script_path "$BASH_SOURCE")
 declare -r script_dir="$(dirname $script_path)"
@@ -202,7 +201,7 @@ sbt_groupid () {
 sbt_artifactory_list () {
   local version0=$(sbt_version)
   local version=${version0%-SNAPSHOT}
-  local url="http://typesafe.artifactoryonline.com/typesafe/ivy-snapshots/$(sbt_groupid)/sbt-launch/"
+  local url="http://http://repo.typesafe.com/typesafe/ivy-snapshots/$(sbt_groupid)/sbt-launch/"
   dlog "Looking for snapshot list at: $url "
 
   curl -s --list-only "$url" | \
@@ -292,7 +291,6 @@ Usage: $script_name [options]
   !!! contains an sbt.version property is to update the file on disk.  That's what this does.
   -sbt-version  <version>   use the specified version of sbt (default: $sbt_release_version)
   -sbt-jar      <path>      use the specified jar as the sbt launcher
-  -sbt-beta                 use a beta version of sbt (currently: $sbt_beta_version)
   -sbt-snapshot             use a snapshot version of sbt (currently: $sbt_snapshot_version)
   -sbt-launch-dir <path>    directory to hold sbt launchers (default: $sbt_launch_dir)
 
@@ -388,7 +386,6 @@ process_args ()
 
     -sbt-create) sbt_create=true && shift ;;
   -sbt-snapshot) sbt_explicit_version=$sbt_snapshot_version && shift ;;
-      -sbt-beta) sbt_explicit_version=$sbt_beta_version && shift ;;
        -sbt-jar) require_arg path "$1" "$2" && sbt_jar="$2" && shift 2 ;;
    -sbt-version) require_arg version "$1" "$2" && sbt_explicit_version="$2" && shift 2 ;;
 -sbt-launch-dir) require_arg path "$1" "$2" && sbt_launch_dir="$2" && shift 2 ;;
