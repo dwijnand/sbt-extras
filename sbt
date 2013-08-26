@@ -5,7 +5,6 @@
 
 # todo - make this dynamic
 declare -r sbt_release_version=0.13.0
-declare -r sbt_snapshot_version=0.13.1-SNAPSHOT
 
 declare sbt_jar sbt_dir sbt_create sbt_launch_dir
 declare scala_version java_home sbt_explicit_version
@@ -198,39 +197,13 @@ sbt_groupid () {
   esac
 }
 
-sbt_artifactory_list () {
-  local version0=$(sbt_version)
-  local version=${version0%-SNAPSHOT}
-  local url="http://http://repo.typesafe.com/typesafe/ivy-snapshots/$(sbt_groupid)/sbt-launch/"
-  dlog "Looking for snapshot list at: $url "
-
-  curl -s --list-only "$url" | \
-    grep -F $version | \
-    perl -e 'print reverse <>' | \
-    perl -pe 's#^<a href="([^"/]+).*#$1#;'
-}
-
 make_release_url () {
   make_url $(sbt_groupid) releases $(sbt_version)
-}
-
-# argument is e.g. 0.13.0-SNAPSHOT
-# finds the actual version (with the build id) at artifactory
-make_snapshot_url () {
-  for ver in $(sbt_artifactory_list); do
-    local url=$(make_url $(sbt_groupid) snapshots $ver)
-    dlog "Testing $url"
-    curl -s --head "$url" >/dev/null
-    dlog "curl returned: $?"
-    echo "$url"
-    return
-  done
 }
 
 jar_url () {
   case $(sbt_version) in
              0.7.*) echo "http://simple-build-tool.googlecode.com/files/sbt-launch-0.7.7.jar" ;;
-        *-SNAPSHOT) make_snapshot_url ;;
                  *) make_release_url ;;
   esac
 }
@@ -291,7 +264,6 @@ Usage: $script_name [options]
   !!! contains an sbt.version property is to update the file on disk.  That's what this does.
   -sbt-version  <version>   use the specified version of sbt (default: $sbt_release_version)
   -sbt-jar      <path>      use the specified jar as the sbt launcher
-  -sbt-snapshot             use a snapshot version of sbt (currently: $sbt_snapshot_version)
   -sbt-launch-dir <path>    directory to hold sbt launchers (default: $sbt_launch_dir)
 
   # scala version (default: as chosen by sbt)
@@ -341,17 +313,15 @@ addResidual () {
   residual_args=( "${residual_args[@]}" "$1" )
 }
 addResolver () {
-  addSbt "set resolvers in ThisBuild += $1"
+  addSbt "set resolvers += $1"
 }
 addDebugger () {
   addJava "-Xdebug"
   addJava "-Xrunjdwp:transport=dt_socket,server=y,suspend=n,address=$1"
 }
 setScalaVersion () {
-  addSbt "set scalaVersion in ThisBuild := \"$1\""
-  if [[ "$1" == *SNAPSHOT* ]]; then
-    addResolver Opts.resolver.sonatypeSnapshots
-  fi
+  [[ "$1" == *-SNAPSHOT ]] && addResolver 'Resolver.sonatypeRepo("snapshots")'
+  addSbt "++ \"$1\""
 }
 
 process_args ()
@@ -385,7 +355,6 @@ process_args ()
         -prompt) require_arg "expr" "$1" "$2" && addSbt "set shellPrompt in ThisBuild := (s => { val e = Project.extract(s) ; $2 })" && shift 2 ;;
 
     -sbt-create) sbt_create=true && shift ;;
-  -sbt-snapshot) sbt_explicit_version=$sbt_snapshot_version && shift ;;
        -sbt-jar) require_arg path "$1" "$2" && sbt_jar="$2" && shift 2 ;;
    -sbt-version) require_arg version "$1" "$2" && sbt_explicit_version="$2" && shift 2 ;;
 -sbt-launch-dir) require_arg path "$1" "$2" && sbt_launch_dir="$2" && shift 2 ;;
@@ -407,7 +376,6 @@ process_args ()
     esac
   done
 }
-
 
 # process the direct command line arguments
 process_args "$@"
@@ -483,7 +451,7 @@ else
     sbt_dir=~/.sbt/$(sbt_version)
     vlog "Using $sbt_dir as sbt dir, -sbt-dir to override."
   }
-  addJava "-Dsbt.global.base=$sbt_dir"
+  # addJava "-Dsbt.global.base=$sbt_dir"
 fi
 
 if [[ -r "$jvm_opts_file" ]]; then
@@ -503,7 +471,7 @@ fi
 # traceLevel is 0.12+
 [[ -n $trace_level ]] && setTraceLevel
 
-[[ -n $log_level ]] && [[ $log_level != Info ]] && logLevalArg="set logLevel in Global := Level.$log_level"
+# [[ -n $log_level ]] && [[ $log_level != Info ]] && logLevalArg="set logLevel in Global := Level.$log_level"
 
 # run sbt
 execRunner "$java_cmd" \
