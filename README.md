@@ -1,14 +1,14 @@
 sbt: the rebel cut
 ==================
 
-An alternative script for running [sbt](https://github.com/sbt/sbt).
+An alternative script for running [sbt](https://github.com/sbt/sbt "sbt home").
 It works with sbt 0.13.0 projects and (in principle) all earlier versions.
 If you're in an sbt project directory, the system will figure out the
 required versions of sbt and scala, downloading them if necessary.
 
 ## Installation
 
-Put the (self-contained) sbt script somewhere on your path.
+Put the (self-contained) [sbt script](https://raw.github.com/paulp/sbt-extras/master/sbt "sbt") somewhere on your path.
 
     curl -s https://raw.github.com/paulp/sbt-extras/master/sbt > ~/bin/sbt && chmod 0755 ~/bin/sbt
 
@@ -20,17 +20,16 @@ sbt -v[erbosely] creating a new project built with the latest scala 2.10.x.
     Detected sbt version 0.13.0
     Using $HOME/.sbt/0.13.0 as sbt dir, -sbt-dir to override.
     # Executing command line:
-    /System/Library/Java/JavaVirtualMachines/1.6.0.jdk/Contents/Home/bin/java
+    $JAVA_HOME/bin/java
     -Xmx1g
     -jar
-    /Users/paulp/.sbt/launchers/0.13.0/sbt-launch.jar
+    $HOME/.sbt/launchers/0.13.0/sbt-launch.jar
     "++ 2.10.3-RC1"
     about
 
     [info] Setting version to 2.10.3-RC1
     [info] This is sbt 0.13.0
     [info] The current project is built against Scala 2.10.3-RC1
-    [info]
     [info] sbt, sbt plugins, and build definitions are using Scala 2.10.2
 
 ## sbt -h
@@ -58,7 +57,7 @@ sbt -v[erbosely] creating a new project built with the latest scala 2.10.x.
       !!! contains an sbt.version property is to update the file on disk.  That's what this does.
       -sbt-version  <version>   use the specified version of sbt (default: 0.13.0)
       -sbt-jar      <path>      use the specified jar as the sbt launcher
-      -sbt-launch-dir <path>    directory to hold sbt launchers (default: /Users/paulp/.sbt/launchers)
+      -sbt-launch-dir <path>    directory to hold sbt launchers (default: $HOME/.sbt/launchers)
 
       # scala version (default: as chosen by sbt)
       -28                       use 2.8.2
