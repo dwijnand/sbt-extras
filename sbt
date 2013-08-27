@@ -27,7 +27,7 @@ done
 
 build_props_sbt () {
   if [[ -r project/build.properties ]]; then
-    versionLine=$(grep ^sbt.version project/build.properties | tr -d '\r')
+    versionLine=$(grep ^sbt.version project/build.properties | tr -d ' \r')
     versionString=${versionLine##sbt.version=}
     echo "$versionString"
   fi
@@ -40,8 +40,8 @@ update_build_props_sbt () {
   if [[ $ver == $old ]]; then
     return
   elif [[ -r project/build.properties ]]; then
-    perl -pi -e "s/^sbt\.version=.*\$/sbt.version=${ver}/" project/build.properties
-    grep -q '^sbt.version=' project/build.properties || echo "sbt.version=${ver}" >> project/build.properties
+    perl -pi -e "s/^sbt\.version[ ]*=.*\$/sbt.version=${ver}/" project/build.properties
+    grep -q '^sbt.version[ ]*=' project/build.properties || printf "\nsbt.version=${ver}\n" >> project/build.properties
 
     echoerr !!!
     echoerr !!! Updated file project/build.properties setting sbt.version to: $ver
@@ -402,7 +402,7 @@ setTraceLevel() {
 # set scalacOptions if we were given any -S opts
 [[ ${#scalac_args[@]} -eq 0 ]] || addSbt "set scalacOptions in ThisBuild += \"${scalac_args[@]}\""
 
-# Update build.properties no disk to set explicit version - sbt gives us no choice
+# Update build.properties on disk to set explicit version - sbt gives us no choice
 [[ -n "$sbt_explicit_version" ]] && update_build_props_sbt "$sbt_explicit_version"
 vlog "Detected sbt version $(sbt_version)"
 
