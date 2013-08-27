@@ -73,9 +73,11 @@ onSbtRunnerExit() {
 }
 
 # save stty and trap exit, to ensure echo is reenabled if we are interrupted.
-trap onSbtRunnerExit EXIT
-sbt_saved_stty=$(stty -g 2>/dev/null)
-dlog "Saved stty: $sbt_saved_stty"
+if [[ -n $batch ]]; then
+  trap onSbtRunnerExit EXIT
+  sbt_saved_stty=$(stty -g 2>/dev/null)
+  dlog "Saved stty: $sbt_saved_stty"
+fi
 
 # this seems to cover the bases on OSX, and someone will
 # have to tell me about the others.
