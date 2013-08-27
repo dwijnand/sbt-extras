@@ -16,37 +16,52 @@ It is a good idea to uninstall any pre-existing sbt installations you may have.
 
 ## Sample usage
 
-Sample usage: create a new project using a snapshot version of sbt as
-well as a snapshot version of scala, then run the sbt "about" command.
+Sample usage: create a new project using snapshot version of scala 2.11.0, then run the sbt "about" command.
 
-    % sbt -v -sbt-snapshot -210 -sbt-create about
-    Detected sbt version 0.11.3-SNAPSHOT
-    sbt snapshot is 0.11.3-20111207-052114
+    % sbt -v -scala-version 2.11.0-SNAPSHOT -sbt-create about
+    No extra sbt options have been defined
+    Detected sbt version 0.13.0
+    Using /Users/paulp/.sbt/0.13.0 as sbt dir, -sbt-dir to override.
+    Using default jvm options
     # Executing command line:
     java
+    -Dfile.encoding=UTF8
+    -XX:MaxPermSize=256m
+    -Xms512m
+    -Xmx1g
     -XX:+CMSClassUnloadingEnabled
     -XX:+UseConcMarkSweepGC
-    -Xms1536m
-    -Xmx1536m
-    -XX:MaxPermSize=384m
-    -XX:ReservedCodeCacheSize=192m
-    -Dfile.encoding=UTF8
     -jar
-    /r/sbt-extras/.lib/0.11.3-SNAPSHOT/sbt-launch.jar
-    "set resolvers in ThisBuild += ScalaToolsSnapshots"
-    "++ 2.10.0-SNAPSHOT"
+    /Users/paulp/.sbt/launchers/0.13.0/sbt-launch.jar
+    "set resolvers += Resolver.sonatypeRepo("snapshots")"
+    "++ "2.11.0-SNAPSHOT""
     about
 
-    [info] Loading global plugins from /Users/paulp/.sbt/plugins
     [info] Set current project to default-71999b (in build file:/Users/paulp/Desktop/new/)
+    [info] Defining *:resolvers
+    [info] The new value will be used by *:externalResolvers
     [info] Reapplying settings...
     [info] Set current project to default-71999b (in build file:/Users/paulp/Desktop/new/)
-    Setting version to 2.10.0-SNAPSHOT
+    [info] Setting version to 2.11.0-SNAPSHOT
     [info] Set current project to default-71999b (in build file:/Users/paulp/Desktop/new/)
-    [info] This is sbt 0.11.3-20111207-052114
+    [info] Updating {file:/Users/paulp/Desktop/new/}default-71999b...
+    [info] Resolving jline#jline;2.11 ...
+    [info] downloading https://oss.sonatype.org/content/repositories/snapshots/org/scala-lang/scala-library/2.11.0-SNAPSHOT/scala-library-2.11.0-20130827.010728-375.jar ...
+    [info]  [SUCCESSFUL ] org.scala-lang#scala-library;2.11.0-SNAPSHOT!scala-library.jar (87077ms)
+    [info] downloading https://oss.sonatype.org/content/repositories/snapshots/org/scala-lang/scala-compiler/2.11.0-SNAPSHOT/scala-compiler-2.11.0-20130827.010728-374.jar ...
+    [info]  [SUCCESSFUL ] org.scala-lang#scala-compiler;2.11.0-SNAPSHOT!scala-compiler.jar (58319ms)
+    [info] downloading https://oss.sonatype.org/content/repositories/snapshots/org/scala-lang/scala-xml/2.11.0-SNAPSHOT/scala-xml-2.11.0-20130827.010728-46.jar ...
+    [info]  [SUCCESSFUL ] org.scala-lang#scala-xml;2.11.0-SNAPSHOT!scala-xml.jar (5290ms)
+    [info] downloading https://oss.sonatype.org/content/repositories/snapshots/org/scala-lang/scala-parser-combinators/2.11.0-SNAPSHOT/scala-parser-combinators-2.11.0-20130827.010728-46.jar ...
+    [info]  [SUCCESSFUL ] org.scala-lang#scala-parser-combinators;2.11.0-SNAPSHOT!scala-parser-combinators.jar (19014ms)
+    [info] downloading https://oss.sonatype.org/content/repositories/snapshots/org/scala-lang/scala-reflect/2.11.0-SNAPSHOT/scala-reflect-2.11.0-20130827.010728-374.jar ...
+    [info]  [SUCCESSFUL ] org.scala-lang#scala-reflect;2.11.0-SNAPSHOT!scala-reflect.jar (15601ms)
+    [info] Done updating.
+    [info] This is sbt 0.13.0
     [info] The current project is {file:/Users/paulp/Desktop/new/}default-71999b
-    [info] The current project is built against Scala 2.10.0-SNAPSHOT
-    [info] sbt, sbt plugins, and build definitions are using Scala 2.9.1
+    [info] The current project is built against Scala 2.11.0-SNAPSHOT
+    [info]
+    [info] sbt, sbt plugins, and build definitions are using Scala 2.10.2
 
 Sample, contrived usage of `prompt` option, using both `e` and `s`:
 
@@ -81,13 +96,13 @@ Current -help output:
       !!! contains an sbt.version property is to update the file on disk.  That's what this does.
       -sbt-version  <version>   use the specified version of sbt
       -sbt-jar      <path>      use the specified jar as the sbt launcher
-      -sbt-snapshot             use a snapshot version of sbt
       -sbt-launch-dir <path>    directory to hold sbt launchers (default: ./.lib)
 
       # scala version (default: as chosen by sbt)
       -28                       use 2.8.2
       -29                       use 2.9.3
-      -210                      use 2.10.0
+      -210                      use 2.10.3-RC1
+      -211                      use 2.11.0-M4
       -scala-home <path>        use the scala build at the specified directory
       -scala-version <version>  use the specified version of scala
       -binary-version <version> use the specified scala version when searching for dependencies
