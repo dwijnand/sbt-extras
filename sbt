@@ -126,7 +126,8 @@ declare -r default_jvm_opts="-Dfile.encoding=UTF8 -XX:MaxPermSize=256m -Xms512m 
 declare -r noshare_opts="-Dsbt.global.base=project/.sbtboot -Dsbt.boot.directory=project/.boot -Dsbt.ivy.home=project/.ivy"
 declare -r latest_28="2.8.2"
 declare -r latest_29="2.9.3"
-declare -r latest_210="2.10.3"
+declare -r latest_210="2.10.3-RC1"
+declare -r latest_211="2.11.0-M4"
 
 declare -r script_path=$(get_script_path "$BASH_SOURCE")
 declare -r script_dir="$(dirname $script_path)"
@@ -371,6 +372,7 @@ process_args ()
             -28) addSbt "++ $latest_28" && shift ;;
             -29) addSbt "++ $latest_29" && shift ;;
            -210) addSbt "++ $latest_210" && shift ;;
+           -211) addSbt "++ $latest_211" && shift ;;
 
               *) addResidual "$1" && shift ;;
     esac
