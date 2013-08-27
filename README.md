@@ -2,17 +2,15 @@ sbt: the rebel cut
 ==================
 
 An alternative script for running [sbt](https://github.com/sbt/sbt).
-It works with sbt 0.13.0 projects and in principle all earlier versions.
+It works with sbt 0.13.0 projects and (in principle) all earlier versions.
 If you're in an sbt project directory, the system will figure out the
 required versions of sbt and scala, downloading them if necessary.
 
 ## Installation
 
-To install, the "sbt" bash script at the root of this project needs to be on your PATH.
+Put the (self-contained) sbt script somewhere on your path.
 
-    curl https://raw.github.com/paulp/sbt-extras/master/sbt > ~/bin/sbt
-
-It is a good idea to uninstall any pre-existing sbt installations you may have.
+    curl -s https://raw.github.com/paulp/sbt-extras/master/sbt > ~/bin/sbt && chmod 0755 ~/bin/sbt
 
 ## Sample usage
 
