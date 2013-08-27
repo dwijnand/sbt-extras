@@ -97,11 +97,9 @@ die() {
 }
 
 make_url () {
-  groupid="$1"
-  category="$2"
-  version="$3"
+  version="$1"
 
-  echo "http://typesafe.artifactoryonline.com/typesafe/ivy-$category/$groupid/sbt-launch/$version/sbt-launch.jar"
+  echo "http://typesafe.artifactoryonline.com/typesafe/ivy-releases/org.scala-sbt/sbt-launch/$version/sbt-launch.jar"
 }
 
 readarr () {
@@ -189,23 +187,10 @@ execRunner () {
   fi
 }
 
-sbt_groupid () {
-  case $(sbt_version) in
-        0.7.*) echo org.scala-tools.sbt ;;
-       0.10.*) echo org.scala-tools.sbt ;;
-    0.11.[12]) echo org.scala-tools.sbt ;;
-            *) echo org.scala-sbt ;;
-  esac
-}
-
-make_release_url () {
-  make_url $(sbt_groupid) releases $(sbt_version)
-}
-
 jar_url () {
-  case $(sbt_version) in
-             0.7.*) echo "http://simple-build-tool.googlecode.com/files/sbt-launch-0.7.7.jar" ;;
-                 *) make_release_url ;;
+  case $1 in
+    0.13.*) make_url $1 ;;
+         *) make_url $sbt_release_version ;;
   esac
 }
 
@@ -220,7 +205,7 @@ download_url () {
   local url="$1"
   local jar="$2"
 
-  echo "Downloading sbt launcher $(sbt_version):"
+  echo "Downloading sbt launcher for $(sbt_version):"
   echo "  From  $url"
   echo "    To  $jar"
 
@@ -234,8 +219,9 @@ download_url () {
 }
 
 acquire_sbt_jar () {
-  sbt_url="$(jar_url)"
-  sbt_jar="$(jar_file $(sbt_version))"
+  for_sbt_version="$(sbt_version)"
+  sbt_url="$(jar_url $for_sbt_version)"
+  sbt_jar="$(jar_file $for_sbt_version)"
 
   [[ -r "$sbt_jar" ]] || download_url "$sbt_url" "$sbt_jar"
 }
