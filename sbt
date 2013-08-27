@@ -435,7 +435,9 @@ EOM
 }
 
 if [[ -n $noshare ]]; then
-  addJava "$noshare_opts"
+  for opt in ${noshare_opts}; do
+    addJava "$opt"
+  done
 else
   [[ -n "$sbt_dir" ]] || {
     sbt_dir=~/.sbt/$(sbt_version)
