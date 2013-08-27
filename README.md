@@ -1,14 +1,14 @@
 sbt: the rebel cut
 ==================
 
-An alternative script for running [sbt](https://github.com/harrah/xsbt).
-It works with sbt 0.7.x projects as well as 0.10+. If you're in an sbt
-project directory, the runner will figure out the versions of sbt and
-scala required by the project and download them if necessary.
+An alternative script for running [sbt](https://github.com/sbt/sbt).
+It works with sbt 0.13.0 projects and in principle all earlier versions.
+If you're in an sbt project directory, the system will figure out the
+required versions of sbt and scala, downloading them if necessary.
 
 ## Installation
 
-To install, the "sbt" bash script at the root of the project needs to be placed on your path.
+To install, the "sbt" bash script at the root of this project needs to be on your PATH.
 
     curl https://raw.github.com/paulp/sbt-extras/master/sbt > ~/bin/sbt
 
@@ -16,62 +16,25 @@ It is a good idea to uninstall any pre-existing sbt installations you may have.
 
 ## Sample usage
 
-Sample usage: create a new project using snapshot version of scala 2.11.0, then run the sbt "about" command.
-
-    % sbt -v -scala-version 2.11.0-SNAPSHOT -sbt-create about
-    No extra sbt options have been defined
+Sample usage: -v[erbosely] create a new project built with the latest scala 2.10.x.
+    % sbt -v -210 -sbt-create about
     Detected sbt version 0.13.0
-    Using /Users/paulp/.sbt/0.13.0 as sbt dir, -sbt-dir to override.
-    Using default jvm options
+    Using $HOME/.sbt/0.13.0 as sbt dir, -sbt-dir to override.
     # Executing command line:
-    java
-    -Dfile.encoding=UTF8
-    -XX:MaxPermSize=256m
-    -Xms512m
+    /System/Library/Java/JavaVirtualMachines/1.6.0.jdk/Contents/Home/bin/java
     -Xmx1g
-    -XX:+CMSClassUnloadingEnabled
-    -XX:+UseConcMarkSweepGC
     -jar
     /Users/paulp/.sbt/launchers/0.13.0/sbt-launch.jar
-    "set resolvers += Resolver.sonatypeRepo("snapshots")"
-    "++ "2.11.0-SNAPSHOT""
+    "++ 2.10.3-RC1"
     about
 
-    [info] Set current project to default-71999b (in build file:/Users/paulp/Desktop/new/)
-    [info] Defining *:resolvers
-    [info] The new value will be used by *:externalResolvers
-    [info] Reapplying settings...
-    [info] Set current project to default-71999b (in build file:/Users/paulp/Desktop/new/)
-    [info] Setting version to 2.11.0-SNAPSHOT
-    [info] Set current project to default-71999b (in build file:/Users/paulp/Desktop/new/)
-    [info] Updating {file:/Users/paulp/Desktop/new/}default-71999b...
-    [info] Resolving jline#jline;2.11 ...
-    [info] downloading https://oss.sonatype.org/content/repositories/snapshots/org/scala-lang/scala-library/2.11.0-SNAPSHOT/scala-library-2.11.0-20130827.010728-375.jar ...
-    [info]  [SUCCESSFUL ] org.scala-lang#scala-library;2.11.0-SNAPSHOT!scala-library.jar (87077ms)
-    [info] downloading https://oss.sonatype.org/content/repositories/snapshots/org/scala-lang/scala-compiler/2.11.0-SNAPSHOT/scala-compiler-2.11.0-20130827.010728-374.jar ...
-    [info]  [SUCCESSFUL ] org.scala-lang#scala-compiler;2.11.0-SNAPSHOT!scala-compiler.jar (58319ms)
-    [info] downloading https://oss.sonatype.org/content/repositories/snapshots/org/scala-lang/scala-xml/2.11.0-SNAPSHOT/scala-xml-2.11.0-20130827.010728-46.jar ...
-    [info]  [SUCCESSFUL ] org.scala-lang#scala-xml;2.11.0-SNAPSHOT!scala-xml.jar (5290ms)
-    [info] downloading https://oss.sonatype.org/content/repositories/snapshots/org/scala-lang/scala-parser-combinators/2.11.0-SNAPSHOT/scala-parser-combinators-2.11.0-20130827.010728-46.jar ...
-    [info]  [SUCCESSFUL ] org.scala-lang#scala-parser-combinators;2.11.0-SNAPSHOT!scala-parser-combinators.jar (19014ms)
-    [info] downloading https://oss.sonatype.org/content/repositories/snapshots/org/scala-lang/scala-reflect/2.11.0-SNAPSHOT/scala-reflect-2.11.0-20130827.010728-374.jar ...
-    [info]  [SUCCESSFUL ] org.scala-lang#scala-reflect;2.11.0-SNAPSHOT!scala-reflect.jar (15601ms)
-    [info] Done updating.
+    [info] Setting version to 2.10.3-RC1
     [info] This is sbt 0.13.0
-    [info] The current project is {file:/Users/paulp/Desktop/new/}default-71999b
-    [info] The current project is built against Scala 2.11.0-SNAPSHOT
+    [info] The current project is built against Scala 2.10.3-RC1
     [info]
     [info] sbt, sbt plugins, and build definitions are using Scala 2.10.2
 
-Sample, contrived usage of `prompt` option, using both `e` and `s`:
-
-    % sbt -prompt 'e.evalTask(Keys.scalacOptions, s) + "> "'
-    [info] <snip>
-    List(-deprecation)> set scalacOptions += "-Xlint"
-    [info] <snip>
-    List(-deprecation, -Xlint)>
-
-Current -help output:
+## sbt -h
 
     Usage: sbt [options]
 
@@ -126,40 +89,3 @@ Current -help output:
                        Note: "@"-file is overridden by local '.sbtopts' or '-sbt-opts' argument.
       -sbt-opts <path> file containing sbt args (if not given, .sbtopts in project root is used if present)
       -S-X             add -X to sbt's scalacOptions (-S is stripped)
-
-## SBT Extra plugin
-
-To see the plugin in action, including the thrilling custom sbt command "help-names":
-
-    cd template-project && ../sbt -sbt-rc help-names zomg zomg2
-
-The template files are:
-
-    project/plugins/project/Build.scala   # you can use this as-is if you want
-    project/Build.scala                   # this is a starting point for your real Build.scala
-
-The Template build isn't quite finished.  There will most likely be a build.sbt DSL variant that does not require a project scala file.
-
-## Simple SBT DSL
-
-SBT extras defines a simplified task DSL for those who are defining simple tasks that do not need to be relied upon, or you are unsure and can refactor later.   Once including the sbt-extra-plugin, all you have to do is place the following in your build.sbt to create tasks:
-
-    simple_task("zomg") is { println("ZOMG") }
-
-or if you need to depend on other keys:
-
-    simple_task("zomg2") on (name, version) is { (n,v) => println("ZOMG " + n + " = " + v + " !!!!!") }
-
-The DSL currently supports between 0 and 9 dependencies.  The DSL does not allow defining tasks on different configurations, although this will be added shortly.
-
-### Simple Setttings
-
-SBT distinguishes between defining Setting and Tasks through the `apply` and `map` methods.   The Simple DSL has no such distinction.   Defining a setting is as easy as:
-
-    simple_setting("name") is "project-name"
-
-Settings can also depend on other settings.
-
-    simple_setting("name") on (version) is { v => "project-name" + v }
-
-Since a Setting can *only* be defined using other settings, attempting to use a non-setting in the on calls results in a type error.
