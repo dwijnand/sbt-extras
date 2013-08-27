@@ -457,8 +457,7 @@ else
   extra_jvm_opts=( $default_jvm_opts )
 fi
 
-# since sbt 0.7 doesn't understand iflast
-[[ ${#residual_args[@]} -eq 0 ]] && [[ -z "$batch" ]] && residual_args=( "shell" )
+[[ -z "$batch" ]] && residual_args=( "shell" ${residual_args[@]} )
 
 # traceLevel is 0.12+
 [[ -n $trace_level ]] && setTraceLevel
