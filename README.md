@@ -79,10 +79,10 @@ Current -help output:
       # sbt version (default: from project/build.properties if present, else latest release)
       !!! The only way to accomplish this pre-0.12.0 if there is a build.properties file which
       !!! contains an sbt.version property is to update the file on disk.  That's what this does.
-      -sbt-version  <version>   use the specified version of sbt
+      -sbt-version  <version>   use the specified version of sbt (default: 0.13.0)
       -sbt-jar      <path>      use the specified jar as the sbt launcher
       -sbt-snapshot             use a snapshot version of sbt
-      -sbt-launch-dir <path>    directory to hold sbt launchers (default: ./.lib)
+      -sbt-launch-dir <path>    directory to hold sbt launchers (default: ~/.sbt/launchers)
 
       # scala version (default: as chosen by sbt)
       -28                       use 2.8.2
