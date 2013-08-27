@@ -308,7 +308,7 @@ addDebugger () {
 }
 setScalaVersion () {
   [[ "$1" == *-SNAPSHOT ]] && addResolver 'Resolver.sonatypeRepo("snapshots")'
-  addSbt "++ \"$1\""
+  addSbt "++ $1"
 }
 
 process_args ()
@@ -355,10 +355,10 @@ process_args ()
             -D*) addJava "$1" && shift ;;
             -J*) addJava "${1:2}" && shift ;;
             -S*) addScalac "${1:2}" && shift ;;
-            -28) addSbt "++ $latest_28" && shift ;;
-            -29) addSbt "++ $latest_29" && shift ;;
-           -210) addSbt "++ $latest_210" && shift ;;
-           -211) addSbt "++ $latest_211" && shift ;;
+            -28) setScalaVersion $latest_28 && shift ;;
+            -29) setScalaVersion $latest_29 && shift ;;
+           -210) setScalaVersion $latest_210 && shift ;;
+           -211) setScalaVersion $latest_211 && shift ;;
 
               *) addResidual "$1" && shift ;;
     esac
