@@ -16,7 +16,8 @@ It is a good idea to uninstall any pre-existing sbt installations you may have.
 
 ## Sample usage
 
-Sample usage: -v[erbosely] create a new project built with the latest scala 2.10.x.
+sbt -v[erbosely] creating a new project built with the latest scala 2.10.x.
+
     % sbt -v -210 -sbt-create about
     Detected sbt version 0.13.0
     Using $HOME/.sbt/0.13.0 as sbt dir, -sbt-dir to override.
