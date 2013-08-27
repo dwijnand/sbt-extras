@@ -413,7 +413,11 @@ vlog "Detected sbt version $(sbt_version)"
 [[ -n "$scala_version" ]] && echoerr "Overriding scala version to $scala_version"
 
 # no args - alert them there's stuff in here
-(( $argumentCount > 0 )) || vlog "Starting $script_name: invoke with -help for other options"
+(( $argumentCount > 0 )) || {
+  vlog "Starting $script_name: invoke with -help for other options"
+  # Unless in batch mode, add shell to the empty args
+  [[ -n "$batch" ]] || residual_args=( shell )
+}
 
 # verify this is an sbt dir or -create was given
 [[ -r ./build.sbt || -d ./project || -n "$sbt_create" ]] || {
@@ -458,8 +462,6 @@ else
   vlog "Using default jvm options"
   extra_jvm_opts=( $default_jvm_opts )
 fi
-
-[[ -z "$batch" ]] && residual_args=( "shell" ${residual_args[@]} )
 
 # traceLevel is 0.12+
 [[ -n $trace_level ]] && setTraceLevel
