@@ -100,8 +100,8 @@ die() {
 
 make_url () {
   version="$1"
-
-  echo "http://typesafe.artifactoryonline.com/typesafe/ivy-releases/org.scala-sbt/sbt-launch/$version/sbt-launch.jar"
+  
+  echo "$sbt_launch_repo/org.scala-sbt/sbt-launch/$version/sbt-launch.jar"
 }
 
 readarr () {
@@ -139,6 +139,7 @@ declare -r script_name="$(basename $script_path)"
 declare java_cmd=java
 declare sbt_opts_file=$(init_default_option_file SBT_OPTS .sbtopts)
 declare jvm_opts_file=$(init_default_option_file JVM_OPTS .jvmopts)
+declare sbt_launch_repo="http://typesafe.artifactoryonline.com/typesafe/ivy-releases"
 
 # pull -J and -D options to give to java.
 declare -a residual_args
@@ -256,6 +257,7 @@ Usage: $script_name [options]
   -sbt-version  <version>   use the specified version of sbt (default: $sbt_release_version)
   -sbt-jar      <path>      use the specified jar as the sbt launcher
   -sbt-launch-dir <path>    directory to hold sbt launchers (default: $sbt_launch_dir)
+  -sbt-launch-repo <url>    repo url for downloading sbt launcher jar (default: $sbt_launch_repo)
 
   # scala version (default: as chosen by sbt)
   -28                       use $latest_28
@@ -349,6 +351,7 @@ process_args ()
        -sbt-jar) require_arg path "$1" "$2" && sbt_jar="$2" && shift 2 ;;
    -sbt-version) require_arg version "$1" "$2" && sbt_explicit_version="$2" && shift 2 ;;
 -sbt-launch-dir) require_arg path "$1" "$2" && sbt_launch_dir="$2" && shift 2 ;;
+-sbt-launch-repo) require_arg path "$1" "$2" && sbt_launch_repo="$2" && shift 2 ;;
  -scala-version) require_arg version "$1" "$2" && setScalaVersion "$2" && shift 2 ;;
 -binary-version) require_arg version "$1" "$2" && addSbt "set scalaBinaryVersion in ThisBuild := \"$2\"" && shift 2 ;;
     -scala-home) require_arg path "$1" "$2" && addSbt "set every scalaHome := Some(file(\"$2\"))" && shift 2 ;;
