@@ -73,11 +73,9 @@ onSbtRunnerExit() {
 }
 
 # save stty and trap exit, to ensure echo is reenabled if we are interrupted.
-if [[ -n $batch ]]; then
-  trap onSbtRunnerExit EXIT
-  sbt_saved_stty=$(stty -g 2>/dev/null)
-  dlog "Saved stty: $sbt_saved_stty"
-fi
+trap onSbtRunnerExit EXIT
+sbt_saved_stty=$(stty -g 2>/dev/null)
+dlog "Saved stty: $sbt_saved_stty"
 
 # this seems to cover the bases on OSX, and someone will
 # have to tell me about the others.
@@ -182,14 +180,9 @@ execRunner () {
   }
 
   if [[ -n $batch ]]; then
-    # the only effective way I've found to avoid sbt hanging when backgrounded.
-    exec 0<&-
-    ( "$@" & )
-    # I'm sure there's some way to get our hands on the pid and wait for it
-    # but it exceeds my present level of ambition.
-  else
-    { "$@"; }
+    exec </dev/null
   fi
+  exec "$@"
 }
 
 jar_url () {
@@ -418,8 +411,7 @@ vlog "Detected sbt version $(sbt_version)"
 # no args - alert them there's stuff in here
 (( $argumentCount > 0 )) || {
   vlog "Starting $script_name: invoke with -help for other options"
-  # Unless in batch mode, add shell to the empty args
-  [[ -n "$batch" ]] || residual_args=( shell )
+  residual_args=( shell )
 }
 
 # verify this is an sbt dir or -create was given
