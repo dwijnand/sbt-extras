@@ -261,6 +261,7 @@ Usage: $script_name [options]
   -28                       use $latest_28
   -29                       use $latest_29
   -210                      use $latest_210
+  -211                      use $latest_211
   -scala-home <path>        use the scala build at the specified directory
   -scala-version <version>  use the specified version of scala
   -binary-version <version> use the specified scala version when searching for dependencies
