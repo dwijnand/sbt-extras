@@ -62,8 +62,8 @@ sbt -v[erbosely] creating a new project built with the latest scala 2.10.x.
       # scala version (default: as chosen by sbt)
       -28                       use 2.8.2
       -29                       use 2.9.3
-      -210                      use 2.10.3 (or latest 2.10.x release or RC)
-      -211                      use 2.11.0-M4 (or latest milestone)
+      -210                      use 2.10.3-RC1 (or latest 2.10.x release or RC)
+      -211                      use 2.11.0-M5 (or latest milestone)
       -scala-home <path>        use the scala build at the specified directory
       -scala-version <version>  use the specified version of scala
       -binary-version <version> use the specified scala version when searching for dependencies

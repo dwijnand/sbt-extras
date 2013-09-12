@@ -129,7 +129,7 @@ declare -r noshare_opts="-Dsbt.global.base=project/.sbtboot -Dsbt.boot.directory
 declare -r latest_28="2.8.2"
 declare -r latest_29="2.9.3"
 declare -r latest_210="2.10.3-RC1"
-declare -r latest_211="2.11.0-M4"
+declare -r latest_211="2.11.0-M5"
 
 declare -r script_path=$(get_script_path "$BASH_SOURCE")
 declare -r script_dir="$(dirname $script_path)"
@@ -263,6 +263,7 @@ Usage: $script_name [options]
   -28                       use $latest_28
   -29                       use $latest_29
   -210                      use $latest_210
+  -211                      use $latest_211
   -scala-home <path>        use the scala build at the specified directory
   -scala-version <version>  use the specified version of scala
   -binary-version <version> use the specified scala version when searching for dependencies
