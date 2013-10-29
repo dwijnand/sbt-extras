@@ -5,6 +5,7 @@
 
 # todo - make this dynamic
 declare -r sbt_release_version=0.13.0
+declare -r sbt_unreleased_version=0.13.1-M1
 declare -r buildProps=project/build.properties
 
 declare sbt_jar sbt_dir sbt_create sbt_launch_dir
@@ -244,6 +245,7 @@ Usage: $script_name [options]
   !!! The only way to accomplish this pre-0.12.0 if there is a build.properties file which
   !!! contains an sbt.version property is to update the file on disk.  That's what this does.
   -sbt-version  <version>   use the specified version of sbt (default: $sbt_release_version)
+  -sbt-dev                  use an unreleased version of sbt (currently: $sbt_unreleased_version)
   -sbt-jar      <path>      use the specified jar as the sbt launcher
   -sbt-launch-dir <path>    directory to hold sbt launchers (default: $sbt_launch_dir)
   -sbt-launch-repo <url>    repo url for downloading sbt launcher jar (default: $sbt_launch_repo)
@@ -340,6 +342,7 @@ process_args ()
     -sbt-create) sbt_create=true && shift ;;
        -sbt-jar) require_arg path "$1" "$2" && sbt_jar="$2" && shift 2 ;;
    -sbt-version) require_arg version "$1" "$2" && sbt_explicit_version="$2" && shift 2 ;;
+       -sbt-dev) sbt_explicit_version="$sbt_unreleased_version" && shift ;;
 -sbt-launch-dir) require_arg path "$1" "$2" && sbt_launch_dir="$2" && shift 2 ;;
 -sbt-launch-repo) require_arg path "$1" "$2" && sbt_launch_repo="$2" && shift 2 ;;
  -scala-version) require_arg version "$1" "$2" && setScalaVersion "$2" && shift 2 ;;
