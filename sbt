@@ -151,7 +151,7 @@ declare -a extra_jvm_opts extra_sbt_opts
 # directory to store sbt launchers
 declare sbt_launch_dir="$HOME/.sbt/launchers"
 [[ -d "$sbt_launch_dir" ]] || mkdir -p "$sbt_launch_dir"
-[[ -w "$sbt_launch_dir" ]] || sbt_launch_dir="$(mktemp -d -t sbt_extras_launchers)"
+[[ -w "$sbt_launch_dir" ]] || sbt_launch_dir="$(mktemp -d -t sbt_extras_launchers.XXXXXX)"
 
 build_props_scala () {
   if [[ -r $buildProps ]]; then
