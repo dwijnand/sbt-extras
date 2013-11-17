@@ -77,6 +77,7 @@ dlog "Saved stty: $sbt_saved_stty"
 
 # this seems to cover the bases on OSX, and someone will
 # have to tell me about the others.
+set --norc
 get_script_path () {
   local path="$1"
   [[ -L "$path" ]] || { echo "$path" ; return; }
