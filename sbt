@@ -4,8 +4,8 @@
 # Author: Paul Phillips <paulp@typesafe.com>
 
 # todo - make this dynamic
-declare -r sbt_release_version=0.13.0
-declare -r sbt_unreleased_version=0.13.1-RC2
+declare -r sbt_release_version=0.13.1
+declare -r sbt_unreleased_version=0.13.2-SNAPSHOT # -sbt-dev doesn't work at present
 declare -r buildProps=project/build.properties
 
 declare sbt_jar sbt_dir sbt_create sbt_launch_dir
@@ -245,7 +245,6 @@ Usage: $script_name [options]
   !!! The only way to accomplish this pre-0.12.0 if there is a build.properties file which
   !!! contains an sbt.version property is to update the file on disk.  That's what this does.
   -sbt-version  <version>   use the specified version of sbt (default: $sbt_release_version)
-  -sbt-dev                  use an unreleased version of sbt (currently: $sbt_unreleased_version)
   -sbt-jar      <path>      use the specified jar as the sbt launcher
   -sbt-launch-dir <path>    directory to hold sbt launchers (default: $sbt_launch_dir)
   -sbt-launch-repo <url>    repo url for downloading sbt launcher jar (default: $sbt_launch_repo)
