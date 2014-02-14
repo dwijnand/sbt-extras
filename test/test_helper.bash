@@ -6,8 +6,9 @@ PATH="$BATS_TEST_DIRNAME/../bin:$PATH"
 PATH="$TMP/bin:$PATH"
 export PATH
 
-unset SBT_OPTS
+unset JAVA_HOME
 unset JVM_OPTS
+unset SBT_OPTS
 export sbt_release_version="0.13.1"
 export sbt_unreleased_version="0.13.2-SNAPSHOT"
 export cms_opts="-XX:+CMSClassUnloadingEnabled -XX:+UseConcMarkSweepGC"
