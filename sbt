@@ -391,9 +391,13 @@ argumentCount=$#
 
 # only exists in 0.12+
 setTraceLevel() {
-  case $(sbt_version) in
-     0.{7,10,11}.*) echoerr "Cannot set trace level in sbt version $(sbt_version)" ;;
-                 *) addSbt "set every traceLevel := $trace_level" ;;
+  case "$(sbt_version)" in
+    "0.7."* | "0.10."* | "0.11."* )
+      echoerr "Cannot set trace level in sbt version $(sbt_version)"
+    ;;
+    *)
+      addSbt "set every traceLevel := $trace_level"
+    ;;
   esac
 }
 
@@ -441,7 +445,7 @@ else
   case "$(sbt_version)" in
     "0.7."* | "0.10."* | "0.11."* | "0.12."* )
       [[ -n "$sbt_dir" ]] || {
-        sbt_dir=~/.sbt/$(sbt_version)
+        sbt_dir="$HOME/.sbt/$(sbt_version)"
         vlog "Using $sbt_dir as sbt dir, -sbt-dir to override."
       }
     ;;
@@ -466,13 +470,16 @@ fi
 # traceLevel is 0.12+
 [[ -n $trace_level ]] && setTraceLevel
 
-[[ -n $log_level ]] && [[ $log_level != Info ]] && logLevalArg="set logLevel in Global := Level.$log_level"
+
+if [[ -n $log_level ]] && [[ $log_level != Info ]]; then
+  sbt_commands=("set logLevel in Global := Level.$log_level" "${sbt_commands[@]}")
+fi
+
 
 # run sbt
 execRunner "$java_cmd" \
   "${extra_jvm_opts[@]}" \
   "${java_args[@]}" \
   -jar "$sbt_jar" \
-  "$logLevalArg" \
   "${sbt_commands[@]}" \
   "${residual_args[@]}"
