@@ -438,11 +438,18 @@ if [[ -n $noshare ]]; then
     addJava "$opt"
   done
 else
-  [[ -n "$sbt_dir" ]] || {
-    sbt_dir=~/.sbt/$(sbt_version)
-    vlog "Using $sbt_dir as sbt dir, -sbt-dir to override."
-  }
-  # addJava "-Dsbt.global.base=$sbt_dir"
+  case "$(sbt_version)" in
+    "0.7."* | "0.10."* | "0.11."* | "0.12."* )
+      [[ -n "$sbt_dir" ]] || {
+        sbt_dir=~/.sbt/$(sbt_version)
+        vlog "Using $sbt_dir as sbt dir, -sbt-dir to override."
+      }
+    ;;
+  esac
+
+  if [[ -n "$sbt_dir" ]]; then
+    addJava "-Dsbt.global.base=$sbt_dir"
+  fi
 fi
 
 if [[ -r "$jvm_opts_file" ]]; then
