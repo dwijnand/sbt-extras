@@ -97,7 +97,12 @@ die() {
 make_url () {
   version="$1"
 
-  echo "$sbt_launch_repo/org.scala-sbt/sbt-launch/$version/sbt-launch.jar"
+  case "$version" in
+        0.7.*) echo "http://simple-build-tool.googlecode.com/files/sbt-launch-0.7.7.jar" ;;
+      0.10.* ) echo "$sbt_launch_repo/org.scala-tools.sbt/sbt-launch/$version/sbt-launch.jar" ;;
+    0.11.[12]) echo "$sbt_launch_repo/org.scala-tools.sbt/sbt-launch/$version/sbt-launch.jar" ;;
+            *) echo "$sbt_launch_repo/org.scala-sbt/sbt-launch/$version/sbt-launch.jar" ;;
+  esac
 }
 
 readarr () {
@@ -183,17 +188,11 @@ execRunner () {
 }
 
 jar_url () {
-  case $1 in
-    0.13.*) make_url "$1" ;;
-         *) make_url "$sbt_release_version" ;;
-  esac
+  make_url "$1"
 }
 
 jar_file () {
-  case $1 in
-    0.13.*) echo "$sbt_launch_dir/$1/sbt-launch.jar" ;;
-         *) echo "$sbt_launch_dir/$sbt_release_version/sbt-launch.jar" ;;
-  esac
+  echo "$sbt_launch_dir/$1/sbt-launch.jar"
 }
 
 download_url () {
