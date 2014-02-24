@@ -105,12 +105,6 @@ make_url () {
   esac
 }
 
-readarr () {
-  while read ; do
-    eval "$1+=(\"$REPLY\")"
-  done
-}
-
 init_default_option_file () {
   local overriding_var="${!1}"
   local default_file="$2"
@@ -377,7 +371,7 @@ readConfigFile() {
 # can supply args to this runner
 if [[ -r "$sbt_opts_file" ]]; then
   vlog "Using sbt options defined in file $sbt_opts_file"
-  readarr extra_sbt_opts < <(readConfigFile "$sbt_opts_file")
+  while read opt; do extra_sbt_opts+=("$opt"); done < <(readConfigFile "$sbt_opts_file")
 elif [[ -n "$SBT_OPTS" && ! ("$SBT_OPTS" =~ ^@.*) ]]; then
   vlog "Using sbt options defined in variable \$SBT_OPTS"
   extra_sbt_opts=( $SBT_OPTS )
@@ -460,7 +454,7 @@ fi
 
 if [[ -r "$jvm_opts_file" ]]; then
   vlog "Using jvm options defined in file $jvm_opts_file"
-  readarr extra_jvm_opts < <(readConfigFile "$jvm_opts_file")
+  while read opt; do extra_jvm_opts+=("$opt"); done < <(readConfigFile "$jvm_opts_file")
 elif [[ -n "$JVM_OPTS" && ! ("$JVM_OPTS" =~ ^@.*) ]]; then
   vlog "Using jvm options defined in \$JVM_OPTS variable"
   extra_jvm_opts=( $JVM_OPTS )

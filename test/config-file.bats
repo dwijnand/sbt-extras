@@ -16,6 +16,7 @@ configFile () { cat <<EOM
 # Comment 2, followed by blank line
 
 -Xmx1g
+-Dsome.prop="pass a # in a string"
 
 -Xss4m
 # Comment 4
@@ -24,6 +25,7 @@ EOM
 
 expectedOutput () { cat <<EOM
 -Xmx1g
+-Dsome.prop="pass a # in a string"
 -Xss4m
 -jar
 ${TMP}/.sbt/launchers/0.13.1/sbt-launch.jar
