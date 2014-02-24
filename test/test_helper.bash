@@ -1,10 +1,6 @@
 export TMP="$BATS_TEST_DIRNAME/tmp"
 export HOME="$TMP"
-
-PATH=/usr/bin:/usr/sbin:/bin/:/sbin
-PATH="$BATS_TEST_DIRNAME/../bin:$PATH"
-PATH="$TMP/bin:$PATH"
-export PATH
+export PATH="$BATS_TEST_DIRNAME/../bin:$TMP/bin:/usr/bin:/usr/sbin:/bin:/sbin"
 
 unset JAVA_HOME
 unset JVM_OPTS
