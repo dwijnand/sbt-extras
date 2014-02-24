@@ -15,7 +15,7 @@ stub_java() {
   stub_java
   run sbt -scala-version "2.10.2"
   assert_success
-  { java_options <<EOS 
+  { java_options <<EOS
 -jar
 ${TMP}/.sbt/launchers/${sbt_release_version}/sbt-launch.jar
 ++ 2.10.2
@@ -29,7 +29,7 @@ EOS
   stub_java
   run sbt -scala-version "2.11.0-SNAPSHOT"
   assert_success
-  { java_options <<EOS 
+  { java_options <<EOS
 -jar
 ${TMP}/.sbt/launchers/${sbt_release_version}/sbt-launch.jar
 set resolvers += Resolver.sonatypeRepo("snapshots")
