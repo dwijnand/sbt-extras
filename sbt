@@ -366,9 +366,11 @@ process_args ()
 # process the direct command line arguments
 process_args "$@"
 
-# skip #-styled comments
+# skip #-styled comments and blank lines
 readConfigFile() {
-  while read line; do echo "${line/\#.*/}"; done < "$1"
+  while read line; do
+    [[ $line =~ ^# ]] || [[ -z $line ]] || echo "$line"
+  done < "$1"
 }
 
 # if there are file/environment sbt_opts, process again so we
