@@ -1,0 +1,5 @@
+script: ./bin/run-tests --tap
+language: c
+notifications:
+  email:
+    on_success: never
