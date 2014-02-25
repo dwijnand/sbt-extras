@@ -1,6 +1,8 @@
 sbt: the rebel cut
 ==================
 
+[![Build Status](https://travis-ci.org/paulp/sbt-extras.png)](https://travis-ci.org/paulp/sbt-extras)
+
 An alternative script for running [sbt](https://github.com/sbt/sbt "sbt home").
 It works with sbt 0.13.0 projects and (in principle) all earlier versions.
 If you're in an sbt project directory, the system will figure out the
