@@ -1,186 +1,73 @@
 #!/bin/sh
 #
-# ivycp   by paul phillips   part of sbt-extras
+# ivycp  by paul phillips  part of sbt-extras
 # https://github.com/paulp/sbt-extras
-#
-# Todo - make it possible to leave out lots more
-#
 
-unset verbose
+ivyjar="${IVYJAR:-/usr/local/Cellar/ivy/2.3.0/libexec/ivy-2.3.0.jar}"
+dir="$(mktemp -dt ivycp)"
+build="$dir/build.xml"
+program="$(basename $0)"
 
-if ! which ivy >/dev/null; then
-  cat <<"EOM"
-Error: no `ivy` command line program found.
-
-On OSX with homebrew, you can 'brew install ivy', otherwise
-save the following as executable 'ivy' and place it on your path.
-
-#!/bin/sh
-#
-
-cd /path/to/ivy/distribution && java $JAVA_OPTS -jar ivy-2.3.0.jar "$@"
-
-EOM
+[[ -f "$ivyjar" ]] || {
+  echo "Error: can't find ivy.jar. You must set IVYCP to the path."
   exit 1
-fi
+}
 
-prog="$(basename $0)"
-
-usage () {
+[[ $# -gt 0 ]] || {
   cat <<EOM
-Usage: $prog [-v] [dependency dependency ...]
+Usage: $program [dependency dependency ...]
 
 Resolves all dependencies through the ivy cache, downloading any required jars.
 When complete, echoes a classpath containing all dependencies, including
-transitively required ones.  The format for dependencies is
+transitively required ones.  The format for dependencies can be any of
 
+  org%name
   org%name%version
+  org;name
+  org;name;version
 
-If no version is given, 'latest.release' will be used.
+When no version is given, 'latest.release' is assumed.
 
 Examples:
 
-  $prog com.typesafe.akka%akka play%play_2.10
-  scala -Ylog-classpath -cp \$($prog com.typesafe.akka%akka-actor com.google.guava%guava)
+  $program com.typesafe.akka%akka play%play_2.10
+  scala -cp \$(ivycp org.scalaz%scalaz-iteratee_2.10) -e 'println(scalaz.iteratee.Iteratee)'
+EOM
+  exit 0
+}
 
+dependencyLine () {
+  local org="$1"
+  local name="$2"
+  local rev="${3:-latest.release}"
+
+cat <<EOM
+      <dependency org="$org" name="$name" rev="$rev"/>
 EOM
 }
 
-while getopts :v opt; do
-  case $opt in
-    v) verbose=true ;;
-    h) usage && exit 0 ;;
-  esac
-done
-
-# This removes all the options from $@, as getopts doesn't touch it.
-# After this, "$@" contains the non-option arguments.
-shift $((OPTIND-1))
-
-[[ $# -eq 0 ]] && usage && exit 0
-
-resolverNames="shared public"
-dir="$(mktemp -dt ivyfetch)"
-cd $dir
-
-# [[ $verbose ]] || echo >&2 "[Working... tail $dir/log for progress.]"
-
-genIvySettings () {
-  cat <<EOM
-<ivysettings>
-  <settings defaultResolver="default"/>
-  <include url="\${ivy.default.settings.dir}/ivysettings-public.xml"/>
-  <include url="\${ivy.default.settings.dir}/ivysettings-shared.xml"/>
-  <include url="\${ivy.default.settings.dir}/ivysettings-local.xml"/>
-  <!-- <include url="\${ivy.default.settings.dir}/ivysettings-main-chain.xml"/> -->
-  $("$@")
-  <include url="\${ivy.default.settings.dir}/ivysettings-default-chain.xml"/>
-</ivysettings>
-EOM
-}
-
-ibiblio() {
-  resolverNames="$resolverNames $1"
-
-  cat <<EOM
-  <ibiblio name="${1}" m2compatible="true" root="${2}"/>
-EOM
-}
-
-ibiblioLines () {
-  local name="$1"
-  local url="$2"
-  ibiblio "${name}-releases" "${url}releases/"
-  ibiblio "${name}-snapshots" "${url}snapshots/"
-}
-
-chainLines () {
-  echo '  <chain name="main" dual="true" returnFirst="true" checkmodified="true">'
-  for id in $@; do
-    echo "    <resolver ref=\"$id\" />"
+dependencyLines () {
+  for arg in "$@"; do
+    ( IFS=";%" && set -- $arg && dependencyLine "$@" )
   done
-  echo '  </chain>'
 }
 
-ivyChain () {
-  echo '<include url="${ivy.default.settings.dir}/ivysettings-shared.xml"/>'
-  echo '<resolvers>'
-
-  # <ibiblio name="oss-releases" m2compatible="true" root="https://oss.sonatype.org/content/repositories/releases/"/>
-
-  # ibiblioLines oss        https://oss.sonatype.org/content/repositories/
-  # ibiblioLines typesafe   http://repo.typesafe.com/typesafe/maven-
-  # ibiblioLines akka       http://repo.akka.io/
-
-#   cat <<EOM
-# <url name="typesafe-ivy-releases">
-#   <ivy pattern="http://repo.typesafe.com/typesafe/ivy-releases/[organisation]/[module]/[revision]/[artifact]-[revision].[ext]" />
-# </url>
-# EOM
-
-# <ibiblio name="akka-maven-releases" m2compatible="true" root="http://repo.akka.io/releases"/>
-# <url name="akka-maven-releases" m2compatible="true">
-#   <ivy pattern="http://repo.akka.io/releases/[organisation]/[module]/[revision]/[artifact]/[revision]/.[ext]" />
-# </url>
-# <ibiblio name="akka-maven-releases" m2compatible="true" root="http://repo.akka.io/releases"/>
-  # chainLines typesafe-ivy-releases akka-maven-releases $resolverNames
-
-  chainLines $resolverNames
-
-  echo '</resolvers>'
-}
-
-resolveLine () {
-  local delims="%;:"
-  # local fmt='  <dependency org="%s" name="%s" rev="%s" />'
-  local fmt='  <dependency org="%s" name="%s" rev="%s" force="true" changing="true" transitive="true" />'
-  local descriptor="$1"
-  local found=$(echo "$descriptor" | tr -dc "$delims")
-  local delimiter=${found:0:1}
-
-  [[ ${#found} -eq 1 ]] && descriptor="${descriptor}${delimiter}latest.release"
-
-  ( IFS=$delimiter && set -- "$descriptor" && printf "$fmt" $* && echo "" )
-}
-
-genIvyResolve () {
+genBuildXml () {
   cat <<EOM
-<ivy-module version="2.0">
-<info organisation="org.improving" module="ivycp" />
-<dependencies>
-  $( for dep in "$@"; do resolveLine "$dep" ; done )
-  <exclude type="javadoc" ext="jar" conf="*"/>
-  <exclude type="source" ext="jar" conf="*"/>
-</dependencies>
-</ivy-module>
+<?xml version="1.0" encoding="UTF-8"?>
+<project name="ivycp" default="build" xmlns:ivy="antlib:org.apache.ivy.ant">
+  <taskdef resource="org/apache/ivy/ant/antlib.xml" uri="antlib:org.apache.ivy.ant" classpath="$ivyjar"/>
+  <target name="build">
+    <ivy:resolve type="bundle,jar">
+$1
+    </ivy:resolve>
+    <ivy:retrieve symlink="true"/>
+  </target>
+</project>
 EOM
 }
 
-
-echorun () {
-  [[ $verbose ]] && echo "% $@"
-  "$@"
-}
-
-run () {
-  [[ $verbose ]] || exec &>log
-  genIvySettings ivyChain >ivysettings.xml
-  genIvyResolve "$@" >ivy.xml
-  [[ $verbose ]] && cat >&2 ivysettings.xml ivy.xml
-
-  echorun ivy -debug \
-    -cachepath $dir/classpath \
-    -settings $dir/ivysettings.xml \
-    -ivy $dir/ivy.xml
-}
-
-( run "$@" )
-
-# and finally, the object of our desire
-if [[ -f $dir/classpath ]]; then
-  cat $dir/classpath
-else
-  echo "error: ivy failed."
-  [[ -f $dir/log ]] && cat $dir/log
-  exit 1
-fi
+genBuildXml "$(dependencyLines "$@")" > "$build"
+ant -q -f "$build" >/dev/null
+set -- $(readlink "$dir/lib"/*)
+( IFS=: && echo "$*" )
