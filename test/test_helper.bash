@@ -5,16 +5,16 @@ export PATH="$BATS_TEST_DIRNAME/../bin:$TMP/bin:/usr/bin:/usr/sbin:/bin:/sbin"
 unset JAVA_HOME
 unset JVM_OPTS
 unset SBT_OPTS
-export sbt_release_version="0.13.1"
-export sbt_unreleased_version="0.13.2-SNAPSHOT"
+export sbt_release_version="0.13.2"
+export sbt_unreleased_version="0.13.5-SNAPSHOT"
 export cms_opts="-XX:+CMSClassUnloadingEnabled -XX:+UseConcMarkSweepGC"
 export jit_opts="-XX:ReservedCodeCacheSize=256m -XX:+TieredCompilation"
 export default_jvm_opts="-Dfile.encoding=UTF8 -XX:MaxPermSize=384m -Xms512m -Xmx1536m -Xss2m $jit_opts $cms_opts"
 export noshare_opts="-Dsbt.global.base=project/.sbtboot -Dsbt.boot.directory=project/.boot -Dsbt.ivy.home=project/.ivy"
 export latest_28="2.8.2"
 export latest_29="2.9.3"
-export latest_210="2.10.3"
-export latest_211="2.11.0-M5"
+export latest_210="2.10.4"
+export latest_211="2.11.0-RC4"
 
 create_project() {
   export sbt_project="${TMP}/myproject"

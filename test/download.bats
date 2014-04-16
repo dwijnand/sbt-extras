@@ -104,9 +104,9 @@ EOS
   run sbt
   assert_success
   assert_output <<EOS
-Downloading sbt launcher for 0.13.1:
-  From  http://typesafe.artifactoryonline.com/typesafe/ivy-releases/org.scala-sbt/sbt-launch/0.13.1/sbt-launch.jar
-    To  ${TMP}/.sbt/launchers/0.13.1/sbt-launch.jar
+Downloading sbt launcher for 0.13.2:
+  From  http://typesafe.artifactoryonline.com/typesafe/ivy-releases/org.scala-sbt/sbt-launch/0.13.2/sbt-launch.jar
+    To  ${TMP}/.sbt/launchers/0.13.2/sbt-launch.jar
 EOS
   unstub curl
 }
@@ -147,9 +147,9 @@ EOS
   run sbt -sbt-dev
   assert_success
   assert_output <<EOS
-Downloading sbt launcher for 0.13.2-SNAPSHOT:
-  From  http://typesafe.artifactoryonline.com/typesafe/ivy-releases/org.scala-sbt/sbt-launch/0.13.2-SNAPSHOT/sbt-launch.jar
-    To  ${TMP}/.sbt/launchers/0.13.2-SNAPSHOT/sbt-launch.jar
+Downloading sbt launcher for 0.13.5-SNAPSHOT:
+  From  http://typesafe.artifactoryonline.com/typesafe/ivy-releases/org.scala-sbt/sbt-launch/0.13.5-SNAPSHOT/sbt-launch.jar
+    To  ${TMP}/.sbt/launchers/0.13.5-SNAPSHOT/sbt-launch.jar
 EOS
   unstub curl
 }
@@ -161,12 +161,12 @@ EOS
   assert_success
   assert_output <<EOS
 !!!
-!!! Updated file project/build.properties setting sbt.version to: 0.13.2-SNAPSHOT
+!!! Updated file project/build.properties setting sbt.version to: 0.13.5-SNAPSHOT
 !!! Previous value was: 0.13.1
 !!!
-Downloading sbt launcher for 0.13.2-SNAPSHOT:
-  From  http://typesafe.artifactoryonline.com/typesafe/ivy-releases/org.scala-sbt/sbt-launch/0.13.2-SNAPSHOT/sbt-launch.jar
-    To  ${TMP}/.sbt/launchers/0.13.2-SNAPSHOT/sbt-launch.jar
+Downloading sbt launcher for 0.13.5-SNAPSHOT:
+  From  http://typesafe.artifactoryonline.com/typesafe/ivy-releases/org.scala-sbt/sbt-launch/0.13.5-SNAPSHOT/sbt-launch.jar
+    To  ${TMP}/.sbt/launchers/0.13.5-SNAPSHOT/sbt-launch.jar
 EOS
   unstub curl
 }
@@ -198,22 +198,22 @@ EOS
   run sbt -sbt-launch-dir "${sbt_project}/xsbt"
   assert_success
   assert_output <<EOS
-Downloading sbt launcher for 0.13.1:
-  From  http://typesafe.artifactoryonline.com/typesafe/ivy-releases/org.scala-sbt/sbt-launch/0.13.1/sbt-launch.jar
-    To  ${sbt_project}/xsbt/0.13.1/sbt-launch.jar
+Downloading sbt launcher for 0.13.2:
+  From  http://typesafe.artifactoryonline.com/typesafe/ivy-releases/org.scala-sbt/sbt-launch/0.13.2/sbt-launch.jar
+    To  ${sbt_project}/xsbt/0.13.2/sbt-launch.jar
 EOS
   unstub curl
 }
 
 @test "uses special launcher repository if -sbt-launch-repo was given" {
-  echo "stub.version=0.13.1" > "${sbt_project}/project/build.properties"
+  echo "stub.version=0.13.2" > "${sbt_project}/project/build.properties"
   stub_curl
   run sbt -sbt-launch-repo "http://127.0.0.1:8080/ivy-releases"
   assert_success
   assert_output <<EOS
-Downloading sbt launcher for 0.13.1:
-  From  http://127.0.0.1:8080/ivy-releases/org.scala-sbt/sbt-launch/0.13.1/sbt-launch.jar
-    To  ${TMP}/.sbt/launchers/0.13.1/sbt-launch.jar
+Downloading sbt launcher for 0.13.2:
+  From  http://127.0.0.1:8080/ivy-releases/org.scala-sbt/sbt-launch/0.13.2/sbt-launch.jar
+    To  ${TMP}/.sbt/launchers/0.13.2/sbt-launch.jar
 EOS
   unstub curl
 }
