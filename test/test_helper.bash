@@ -14,7 +14,7 @@ export noshare_opts="-Dsbt.global.base=project/.sbtboot -Dsbt.boot.directory=pro
 export latest_28="2.8.2"
 export latest_29="2.9.3"
 export latest_210="2.10.4"
-export latest_211="2.11.0-RC4"
+export latest_211="2.11.0"
 
 create_project() {
   export sbt_project="${TMP}/myproject"
