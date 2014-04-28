@@ -14,7 +14,7 @@ declare verbose debug quiet noshare batch trace_level log_level
 declare sbt_saved_stty
 
 echoerr () { [[ -z "$quiet" ]]           && echo    "$@" >&2; }
-vlog ()    { [[ -n "$verbose$debug" ]] && echoerr "$@"; }
+vlog ()    { [[ -n "$verbose$debug" ]]   && echoerr "$@"; }
 dlog ()    { [[ -n "$debug" ]]           && echoerr "$@"; }
 
 # we'd like these set before we get around to properly processing arguments
