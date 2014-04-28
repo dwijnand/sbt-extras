@@ -10,9 +10,9 @@ required versions of sbt and scala, downloading them if necessary.
 
 ## Installation
 
-Put the (self-contained) [sbt script](https://raw.github.com/paulp/sbt-extras/master/sbt "sbt") somewhere on your path.
+Put the (self-contained) [sbt script](https://raw.githubusercontent.com/paulp/sbt-extras/master/sbt "sbt") somewhere on your path.
 
-    curl -s https://raw.github.com/paulp/sbt-extras/master/sbt > ~/bin/sbt && chmod 0755 ~/bin/sbt
+    curl -s https://raw.githubusercontent.com/paulp/sbt-extras/master/sbt > ~/bin/sbt && chmod 0755 ~/bin/sbt
 
 ## Sample usage
 
