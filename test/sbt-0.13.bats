@@ -4,8 +4,8 @@ load test_helper
 
 setup() {
   create_project
-  create_launcher "0.13.1"
-  echo "sbt.version=0.13.1" > "$sbt_project/project/build.properties"
+  create_launcher "0.13.2"
+  echo "sbt.version=0.13.2" > "$sbt_project/project/build.properties"
 }
 
 stub_java() {
@@ -18,7 +18,7 @@ stub_java() {
   assert_success
   { java_options <<EOS
 -jar
-${HOME}/.sbt/launchers/0.13.1/sbt-launch.jar
+${HOME}/.sbt/launchers/0.13.2/sbt-launch.jar
 set every traceLevel := 1
 shell
 EOS
@@ -32,7 +32,7 @@ EOS
   assert_success
   { java_options <<EOS
 -jar
-${HOME}/.sbt/launchers/0.13.1/sbt-launch.jar
+${HOME}/.sbt/launchers/0.13.2/sbt-launch.jar
 shell
 EOS
   } | assert_output
@@ -46,7 +46,7 @@ EOS
   { java_options <<EOS
 -Dsbt.global.base=${sbt_project}/sbt.base
 -jar
-${HOME}/.sbt/launchers/0.13.1/sbt-launch.jar
+${HOME}/.sbt/launchers/0.13.2/sbt-launch.jar
 shell
 EOS
   } | assert_output

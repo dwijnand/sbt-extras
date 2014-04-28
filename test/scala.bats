@@ -27,13 +27,13 @@ EOS
 
 @test "enables resolver for snapshots if -scala-version was given and the version is SNAPSHOT" {
   stub_java
-  run sbt -scala-version "2.11.0-SNAPSHOT"
+  run sbt -scala-version "2.12.0-SNAPSHOT"
   assert_success
   { java_options <<EOS
 -jar
 ${TMP}/.sbt/launchers/${sbt_release_version}/sbt-launch.jar
 set resolvers += Resolver.sonatypeRepo("snapshots")
-++ 2.11.0-SNAPSHOT
+++ 2.12.0-SNAPSHOT
 shell
 EOS
   } | assert_output
