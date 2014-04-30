@@ -5,7 +5,7 @@
 
 # todo - make this dynamic
 declare -r sbt_release_version="0.13.2"
-declare -r sbt_unreleased_version="0.13.3-SNAPSHOT" # -sbt-dev doesn't work at present
+declare -r sbt_unreleased_version="0.13.5-M4"
 declare -r buildProps="project/build.properties"
 
 declare sbt_jar sbt_dir sbt_create sbt_launch_dir
@@ -14,7 +14,7 @@ declare verbose debug quiet noshare batch trace_level log_level
 declare sbt_saved_stty
 
 echoerr () { [[ -z "$quiet" ]]           && echo    "$@" >&2; }
-vlog ()    { [[ -n "$verbose$debug" ]] && echoerr "$@"; }
+vlog ()    { [[ -n "$verbose$debug" ]]   && echoerr "$@"; }
 dlog ()    { [[ -n "$debug" ]]           && echoerr "$@"; }
 
 # we'd like these set before we get around to properly processing arguments
