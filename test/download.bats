@@ -3,7 +3,7 @@
 load test_helper
 
 setup() {
-  create_project
+  create_project $sbt_release_version
   stub java 'true'
 }
 

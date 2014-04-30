@@ -16,9 +16,6 @@ export sbt_latest_dev="0.13.5-M4"
 export sbt_release_version="$sbt_latest_13"
 export sbt_unreleased_version="$sbt_latest_dev"
 
-export cms_opts="-XX:+CMSClassUnloadingEnabled -XX:+UseConcMarkSweepGC"
-export jit_opts="-XX:ReservedCodeCacheSize=256m -XX:+TieredCompilation"
-export default_jvm_opts="-Dfile.encoding=UTF8 -XX:MaxPermSize=384m -Xms512m -Xmx1536m -Xss2m $jit_opts $cms_opts"
 export noshare_opts="-Dsbt.global.base=project/.sbtboot -Dsbt.boot.directory=project/.boot -Dsbt.ivy.home=project/.ivy"
 export latest_28="2.8.2"
 export latest_29="2.9.3"
@@ -46,52 +43,28 @@ sbt_anticipating () {
   unstub java
 }
 
-echo_default_jvm_opts () {
-  OLDIFS=$IFS
-  IFS=" "
-  for arg in $default_jvm_opts; do echo "$arg"; done
-  IFS="$OLDIFS"
-}
-
-echo_closing_jvm_opts () {
-  cat <<EOM
--Dsbt.global.base=$HOME/.sbt/$1
--jar
-$HOME/.sbt/launchers/$1/sbt-launch.jar
-shell
-EOM
-}
-
-standard_java_options () {
-  echo_default_jvm_opts
-  echo_closing_jvm_opts
-}
-
 setup_version_project () {
-  create_project
-
-  if [[ $# -eq 0 ]]; then
-    create_launcher $sbt_release_version
-  else
-    create_launcher $1
+  create_project_with_launcher "$@"
+  if [[ $# -gt 0 ]]; then
     echo "sbt.version=$1" > "$sbt_project/project/build.properties"
   fi
 }
 
+create_project_with_launcher() {
+  local version="${1:-$sbt_release_version}"
+  create_project $version
+  create_launcher $version
+}
+
 create_project() {
-  export sbt_project="${TMP}/myproject"
-  mkdir -p "${sbt_project}/project"
-  cd "${sbt_project}"
+  export sbt_project="$TMP/myproject"
+  export sbt_tested_version="$1"
+  mkdir -p "$sbt_project/project" && cd "$sbt_project"
 }
 
 create_launcher() {
-  mkdir -p "${TMP}/.sbt/launchers/$1"
-  touch "${TMP}/.sbt/launchers/$1/sbt-launch.jar"
-}
-
-java_options() {
-  echo_default_jvm_opts
-  cat
+  mkdir -p "$TMP/.sbt/launchers/$1"
+  touch "$TMP/.sbt/launchers/$1/sbt-launch.jar"
 }
 
 teardown() {
@@ -103,21 +76,21 @@ stub() {
   local prefix="$(echo "$program" | tr a-z- A-Z_)"
   shift
 
-  export "${prefix}_STUB_PLAN"="${TMP}/${program}-stub-plan"
-  export "${prefix}_STUB_RUN"="${TMP}/${program}-stub-run"
+  export "${prefix}_STUB_PLAN"="$TMP/${program}-stub-plan"
+  export "${prefix}_STUB_RUN"="$TMP/${program}-stub-run"
   export "${prefix}_STUB_END"=
 
-  mkdir -p "${TMP}/bin"
-  ln -sf "${BATS_TEST_DIRNAME}/stubs/stub" "${TMP}/bin/${program}"
+  mkdir -p "$TMP/bin"
+  ln -sf "${BATS_TEST_DIRNAME}/stubs/stub" "$TMP/bin/${program}"
 
-  touch "${TMP}/${program}-stub-plan"
-  for arg in "$@"; do printf "%s\n" "$arg" >> "${TMP}/${program}-stub-plan"; done
+  touch "$TMP/${program}-stub-plan"
+  for arg in "$@"; do printf "%s\n" "$arg" >> "$TMP/${program}-stub-plan"; done
 }
 
 unstub() {
   local program="$1"
   local prefix="$(echo "$program" | tr a-z- A-Z_)"
-  local path="${TMP}/bin/${program}"
+  local path="$TMP/bin/${program}"
 
   export "${prefix}_STUB_END"=1
 
@@ -125,7 +98,7 @@ unstub() {
   "$path" || STATUS="$?"
 
   rm -f "$path"
-  rm -f "${TMP}/${program}-stub-plan" "${TMP}/${program}-stub-run"
+  rm -f "$TMP/${program}-stub-plan" "$TMP/${program}-stub-run"
   return "$STATUS"
 }
 
@@ -139,7 +112,7 @@ flunk() {
   { if [ "$#" -eq 0 ]; then cat -
     else echo "$@"
     fi
-  } | sed "s:${TMP}:\${TMP}:g" >&2
+  } | sed "s:$TMP:\$TMP:g" >&2
   return 1
 }
 

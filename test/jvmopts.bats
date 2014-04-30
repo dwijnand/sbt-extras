@@ -72,6 +72,9 @@ EOS
   unstub java
 }
 
+@test "passes special jvm options if -D was given" { sbt_expecting "-Dfoo=foo" -Dfoo=foo; }
+@test "passes special jvm options if -J was given" { sbt_expecting "-Dbar=bar" -J-Dbar=bar; }
+
 @test "prefers jvm options in .jvmopts than one in \$JVM_OPTS if both present" {
   echo "-foo" > .jvmopts
   export JVM_OPTS="-bar"
@@ -82,37 +85,5 @@ EOS
 @test "uses default jvm options if none presents" {
   assert [ ! -f .jvmopts ]
   assert [ -z "$JVM_OPTS" ]
-
-  stub_java
-  run sbt -v
-  assert_output_contains "Using default jvm options"
-  unstub java
-}
-
-@test "passes special jvm options if -D was given" {
-  stub_java
-  run sbt -Dfoo=foo
-  assert_success
-  { java_options <<EOS
--Dfoo=foo
--jar
-${TMP}/.sbt/launchers/${sbt_release_version}/sbt-launch.jar
-shell
-EOS
-  } | assert_output
-  unstub java
-}
-
-@test "passes special jvm options if -J was given" {
-  stub_java
-  run sbt -J-Dbar=bar
-  assert_success
-  { java_options <<EOS
--Dbar=bar
--jar
-${TMP}/.sbt/launchers/${sbt_release_version}/sbt-launch.jar
-shell
-EOS
-  } | assert_output
-  unstub java
+  sbt_expecting "Using default jvm options" -v
 }
