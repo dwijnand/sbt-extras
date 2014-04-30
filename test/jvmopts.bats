@@ -4,14 +4,20 @@ load test_helper
 
 setup() { setup_version_project; }
 
+# Usage: f <string which should be in output> [args to sbt]
+sbt_expecting () {
+  local expecting="$1" && shift
+  stub_java
+  run sbt "$@"
+  assert_success
+  assert_output_contains "$expecting"
+  unstub java
+}
+
 @test "reads jvm options from .jvmopts" {
   echo "-foo" > .jvmopts
 
-  stub_java
-  run sbt -v
-  assert_success
-  assert_output_contains "Using jvm options defined in file .jvmopts"
-  unstub java
+  sbt_expecting "Using jvm options defined in file .jvmopts" -v
 
   stub_java
   run sbt
@@ -28,11 +34,7 @@ EOS
 @test "reads jvm options from a file specified via -sbt-opts" {
   echo "-bar" > .java-options
 
-  stub_java
-  run sbt -jvm-opts .java-options -v
-  assert_success
-  assert_output_contains "Using jvm options defined in file .java-options"
-  unstub java
+  sbt_expecting "Using jvm options defined in file .java-options" -jvm-opts .java-options -v
 
   stub_java
   run sbt -jvm-opts .java-options
@@ -49,11 +51,7 @@ EOS
 @test "reads jvm options from \$JVM_OPTS" {
   export JVM_OPTS="-baz"
 
-  stub_java
-  run sbt -v
-  assert_success
-  assert_output_contains "Using jvm options defined in \$JVM_OPTS variable"
-  unstub java
+  sbt_expecting "Using jvm options defined in \$JVM_OPTS variable" -v
 
   stub_java
   run sbt
@@ -70,11 +68,7 @@ EOS
   export JVM_OPTS="@.java-options"
   echo "-baz" > .java-options
 
-  stub_java
-  run sbt -v
-  assert_success
-  assert_output_contains "Using jvm options defined in file .java-options"
-  unstub java
+  sbt_expecting "Using jvm options defined in file .java-options" -v
 
   stub_java
   run sbt
@@ -92,11 +86,7 @@ EOS
   echo "-foo" > .jvmopts
   export JVM_OPTS="-bar"
 
-  stub_java
-  run sbt -v
-  assert_success
-  assert_output_contains "Using jvm options defined in file .jvmopts"
-  unstub java
+  sbt_expecting "Using jvm options defined in file .jvmopts" -v
 }
 
 @test "uses default jvm options if none presents" {

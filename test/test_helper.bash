@@ -26,14 +26,16 @@ export latest_210="2.10.4"
 export latest_211="2.11.0"
 
 setup_version_project () {
+  local version="${1:-$sbt_release_version}"
   create_project
+  create_launcher $version
+  [[ $# -gt 0 ]] && echo "sbt.version=$version" > "$sbt_project/project/build.properties"
 
-  if [[ $# -eq 0 ]]; then
-    create_launcher $sbt_release_version
-  else
-    create_launcher $1
-    echo "sbt.version=$1" > "$sbt_project/project/build.properties"
-  fi
+  export project_java_opts="
+-Dsbt.global.base=${HOME}/.sbt/$version
+-jar
+${HOME}/.sbt/launchers/$version/sbt-launch.jar
+shell"
 }
 
 create_project() {

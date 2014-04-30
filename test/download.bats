@@ -12,13 +12,11 @@ teardown() {
   rm -fr "$TMP"/* "$TMP"/.sbt
 }
 
-stub_curl() {
-  stub curl '--fail --silent http://* --output * : mkdir -p "$(dirname "$5")" && touch "$5"'
-}
+curl_opts='--fail --silent http://* --output * : mkdir -p "$(dirname "$5")" && touch "$5"'
+wget_opts='--quiet -O * http://* : mkdir -p "$(dirname "$3")" && touch "$3"'
 
-stub_wget() {
-  stub wget '--quiet -O * http://* : mkdir -p "$(dirname "$3")" && touch "$3"'
-}
+stub_curl() { stub curl "$curl_opts"; }
+stub_wget() { stub wget "$wget_opts"; }
 
 launcher_url () {
   case "$1" in
