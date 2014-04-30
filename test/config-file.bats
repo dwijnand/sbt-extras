@@ -2,10 +2,7 @@
 
 load test_helper
 
-setup() {
-  create_project
-  create_launcher "${sbt_release_version}"
-}
+setup() { setup_version_project; }
 
 configFile () { cat <<EOM
 # Comment 1
