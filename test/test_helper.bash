@@ -35,6 +35,15 @@ sbt_expecting () {
   unstub java
 }
 
+sbt_rejecting () {
+  local reject="$1" && shift
+  stub_java
+  run sbt "$@"
+  assert_success
+  assert_output_not_contains "$reject"
+  unstub java
+}
+
 echo_default_jvm_opts () {
   OLDIFS=$IFS
   IFS=" "
@@ -166,9 +175,13 @@ assert_output() {
   assert_equal "$expected" "$output"
 }
 
-assert_output_contains() {
-  local expected="$1"
-  echo "$output" | grep -F -- "$expected" >/dev/null || {
+assert_output_contains()     { assert_output_with_grep "$@"; }
+assert_output_not_contains() { assert_output_with_grep "$@" -v; }
+
+assert_output_with_grep() {
+  local expected="$1" && shift
+
+  echo "$output" | grep -F "$@" -- "$expected" >/dev/null || {
     { echo "expected output to contain $expected"
       echo "actual: $output"
     } | flunk
