@@ -26,21 +26,23 @@ export latest_210="2.10.4"
 export latest_211="2.11.0"
 
 # Usage: f <string which should be in output> [args to sbt]
-sbt_expecting () {
-  local expecting="$1" && shift
-  stub_java
-  run sbt "$@"
-  assert_success
-  assert_output_contains "$expecting"
-  unstub java
-}
+sbt_expecting () { sbt_anticipating expect "$@"; }
+# Usage: f <string which must not be in output> [args to sbt]
+sbt_rejecting () { sbt_anticipating reject "$@"; }
 
-sbt_rejecting () {
-  local reject="$1" && shift
+sbt_anticipating () {
+  local cmd="$1" && shift
+  local text="$1" && shift
+
   stub_java
   run sbt "$@"
   assert_success
-  assert_output_not_contains "$reject"
+
+  case $cmd in
+    expect) assert_output_contains "$text" ;;
+    reject) assert_output_not_contains "$text" ;;
+  esac
+
   unstub java
 }
 
