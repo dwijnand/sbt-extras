@@ -4,16 +4,6 @@ load test_helper
 
 setup() { setup_version_project; }
 
-# Usage: f <string which should be in output> [args to sbt]
-sbt_expecting () {
-  local expecting="$1" && shift
-  stub_java
-  run sbt "$@"
-  assert_success
-  assert_output_contains "$expecting"
-  unstub java
-}
-
 @test "reads jvm options from .jvmopts" {
   echo "-foo" > .jvmopts
 

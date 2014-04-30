@@ -4,7 +4,7 @@ load test_helper
 
 setup() { setup_version_project $sbt_latest_10; }
 
-@test "fails to set trace level for sbt $sbt_latest_10" {
+@test "fails to set trace level for sbt 0.10.x" {
   stub_java
   run sbt -trace 1
   assert_success
@@ -19,7 +19,7 @@ EOS
   unstub java
 }
 
-@test "enables default sbt.global.base for sbt $sbt_latest_10" {
+@test "enables default sbt.global.base for sbt 0.10.x" {
   stub_java
   run sbt
   assert_success
@@ -33,7 +33,7 @@ EOS
   unstub java
 }
 
-@test "enables special sbt.global.base for sbt $sbt_latest_10 if -sbt-dir was given" {
+@test "enables special sbt.global.base for sbt 0.10.x if -sbt-dir was given" {
   stub_java
   run sbt -sbt-dir "${sbt_project}/sbt.base"
   assert_success

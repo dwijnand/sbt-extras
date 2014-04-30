@@ -25,17 +25,46 @@ export latest_29="2.9.3"
 export latest_210="2.10.4"
 export latest_211="2.11.0"
 
-setup_version_project () {
-  local version="${1:-$sbt_release_version}"
-  create_project
-  create_launcher $version
-  [[ $# -gt 0 ]] && echo "sbt.version=$version" > "$sbt_project/project/build.properties"
+# Usage: f <string which should be in output> [args to sbt]
+sbt_expecting () {
+  local expecting="$1" && shift
+  stub_java
+  run sbt "$@"
+  assert_success
+  assert_output_contains "$expecting"
+  unstub java
+}
 
-  export project_java_opts="
--Dsbt.global.base=${HOME}/.sbt/$version
+echo_default_jvm_opts () {
+  OLDIFS=$IFS
+  IFS=" "
+  for arg in $default_jvm_opts; do echo "$arg"; done
+  IFS="$OLDIFS"
+}
+
+echo_closing_jvm_opts () {
+  cat <<EOM
+-Dsbt.global.base=$HOME/.sbt/$1
 -jar
-${HOME}/.sbt/launchers/$version/sbt-launch.jar
-shell"
+$HOME/.sbt/launchers/$1/sbt-launch.jar
+shell
+EOM
+}
+
+standard_java_options () {
+  echo_default_jvm_opts
+  echo_closing_jvm_opts
+}
+
+setup_version_project () {
+  create_project
+
+  if [[ $# -eq 0 ]]; then
+    create_launcher $sbt_release_version
+  else
+    create_launcher $1
+    echo "sbt.version=$1" > "$sbt_project/project/build.properties"
+  fi
 }
 
 create_project() {
@@ -50,12 +79,7 @@ create_launcher() {
 }
 
 java_options() {
-  OLDIFS="$IFS"
-  IFS=" "
-  for arg in ${default_jvm_opts}; do
-    echo "$arg"
-  done
-  IFS="$OLDIFS"
+  echo_default_jvm_opts
   cat
 }
 
@@ -144,7 +168,7 @@ assert_output() {
 
 assert_output_contains() {
   local expected="$1"
-  echo "$output" | grep -F "$expected" >/dev/null || {
+  echo "$output" | grep -F -- "$expected" >/dev/null || {
     { echo "expected output to contain $expected"
       echo "actual: $output"
     } | flunk
