@@ -3,7 +3,7 @@
 load test_helper
 
 setup() {
-  create_launcher "${sbt_release_version}"
+  create_launcher $sbt_release_version
   mkdir -p "${TMP}/newproject"
   cd "${TMP}/newproject"
 }
