@@ -7,10 +7,6 @@ setup() {
   create_launcher "${sbt_release_version}"
 }
 
-stub_java() {
-  stub java 'for arg; do echo "$arg"; done'
-}
-
 configFile () { cat <<EOM
 # Comment 1
 # Comment 2, followed by blank line

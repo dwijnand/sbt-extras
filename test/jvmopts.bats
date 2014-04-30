@@ -7,10 +7,6 @@ setup() {
   create_launcher "${sbt_release_version}"
 }
 
-stub_java() {
-  stub java 'for arg; do echo "$arg"; done'
-}
-
 @test "reads jvm options from .jvmopts" {
   echo "-foo" > .jvmopts
 

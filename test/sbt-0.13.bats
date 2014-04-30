@@ -8,9 +8,6 @@ setup() {
   echo "sbt.version=0.13.2" > "$sbt_project/project/build.properties"
 }
 
-stub_java() {
-  stub java 'for arg; do echo "$arg"; done'
-}
 
 @test "successes to set trace level for sbt 0.13.x" {
   stub_java

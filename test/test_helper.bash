@@ -128,3 +128,7 @@ assert_output_contains() {
     } | flunk
   }
 }
+
+stub_java () {
+  stub java 'for arg; do echo "$arg"; done'
+}
