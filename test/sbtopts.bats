@@ -4,108 +4,48 @@ load test_helper
 
 setup() { setup_version_project; }
 
+custom_options_file=".sbt-custom-options"
+
 @test "reads sbt options from .sbtopts" {
-  echo "foo" > .sbtopts
-
-  stub_java
-  run sbt -v
-  assert_success
-  assert_output_contains "Using sbt options defined in file .sbtopts"
-  unstub java
-
-  stub_java
-  run sbt
-  assert_success
-  { java_options <<EOS
--jar
-${TMP}/.sbt/launchers/${sbt_release_version}/sbt-launch.jar
-foo
-EOS
-  } | assert_output
-  unstub java
+  echo "some-improbable-sbt-option" > .sbtopts
+  sbt_expecting "Using sbt options defined in file .sbtopts" -v
+  sbt_expecting "some-improbable-sbt-option"
 }
 
-@test "reads sbt options from a file specified via -sbt-opts" {
-  echo "bar" > .xsbt-options
-
-  stub_java
-  run sbt -sbt-opts .xsbt-options -v
-  assert_success
-  assert_output_contains "Using sbt options defined in file .xsbt-options"
-  unstub java
-
-  stub_java
-  run sbt -sbt-opts .xsbt-options
-  assert_success
-  { java_options <<EOS
--jar
-${TMP}/.sbt/launchers/${sbt_release_version}/sbt-launch.jar
-bar
-EOS
-  } | assert_output
-  unstub java
+@test "reads sbt options via -sbt-opts" {
+  echo "some-improbable-sbt-option" > $custom_options_file
+  sbt_expecting "Using sbt options defined in file $custom_options_file" -sbt-opts $custom_options_file -v
+  sbt_expecting "some-improbable-sbt-option" -sbt-opts $custom_options_file
 }
 
-@test "reads sbt options from \$SBT_OPTS" {
-  export SBT_OPTS="baz"
+@test 'reads sbt options from $SBT_OPTS' {
+  export SBT_OPTS="some-improbable-sbt-option"
+  sbt_expecting 'Using sbt options defined in variable $SBT_OPTS' -v
+  sbt_expecting "some-improbable-sbt-option"
+}
 
-  stub_java
-  run sbt -v
-  assert_success
-  assert_output_contains "Using sbt options defined in variable \$SBT_OPTS"
-  unstub java
-
-  stub_java
-  run sbt
-  assert_success
-  { java_options <<EOS
--jar
-${TMP}/.sbt/launchers/${sbt_release_version}/sbt-launch.jar
-baz
-EOS
-  } | assert_output
-  unstub java
+@test 'reads sbt options from a file given in $SBT_OPTS' {
+  export SBT_OPTS="some-improbable-sbt-option"
+  sbt_expecting 'Using sbt options defined in variable $SBT_OPTS' -v
+  sbt_expecting "some-improbable-sbt-option"
 }
 
 @test "reads sbt options from a file specified via \$SBT_OPTS" {
-  export SBT_OPTS="@.xsbt-options"
-  echo "baz" > .xsbt-options
-
-  stub_java
-  run sbt -v
-  assert_success
-  assert_output_contains "Using sbt options defined in file .xsbt-options"
-  unstub java
-
-  stub_java
-  run sbt
-  assert_success
-  { java_options <<EOS
--jar
-${TMP}/.sbt/launchers/${sbt_release_version}/sbt-launch.jar
-baz
-EOS
-  } | assert_output
-  unstub java
+  export SBT_OPTS="@$custom_options_file"
+  echo "some-improbable-sbt-option" > $custom_options_file
+  sbt_expecting "Using sbt options defined in file $custom_options_file" -v
+  sbt_expecting "some-improbable-sbt-option"
 }
 
-@test "prefers sbt options in .sbtopts than one in \$SBT_OPTS if both present" {
-  echo "foo" > .sbtopts
-  export SBT_OPTS="bar"
-
-  stub_java
-  run sbt -v
-  assert_success
-  assert_output_contains "Using sbt options defined in file .sbtopts"
-  unstub java
+@test 'prefers .sbtopts over $SBT_OPTS' {
+  echo "some-improbable-sbt-option" > .sbtopts
+  export SBT_OPTS="different-improbable-sbt-option"
+  sbt_expecting "Using sbt options defined in file .sbtopts" -v
+  sbt_expecting "some-improbable-sbt-option"
 }
 
 @test "uses default sbt options if none presents" {
   assert [ ! -f .sbtopts ]
   assert [ -z "$SBT_OPTS" ]
-
-  stub_java
-  run sbt -v
-  assert_output_contains "No extra sbt options have been defined"
-  unstub java
+  sbt_expecting "No extra sbt options have been defined" -v
 }
