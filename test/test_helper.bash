@@ -3,11 +3,9 @@ export TEST_BIN="$TEST_ROOT/bin"
 export HOME="$TEST_ROOT" # todo - eliminate
 export PATH="$BATS_TEST_DIRNAME/../bin:$TEST_BIN:/usr/bin:/usr/sbin:/bin:/sbin"
 
-# echo >&2 "TEST_ROOT=$TEST_ROOT"
-# echo >&2 "$(ls -1 $TEST_ROOT/bin)"
+# echo >&2 "TEST_ROOT=$TEST_ROOT $(ls -1 $TEST_ROOT/bin)"
 
 unset JAVA_HOME JVM_OPTS SBT_OPTS
-
 
 export sbt_latest_07="0.7.7"
 export sbt_latest_10="0.10.1"
@@ -16,11 +14,6 @@ export sbt_latest_12="0.12.4"
 export sbt_latest_13="0.13.2"
 export sbt_latest_dev="0.13.5-M4"
 export sbt_release_version="$sbt_latest_13"
-
-export latest_28="2.8.2"
-export latest_29="2.9.3"
-export latest_210="2.10.4"
-export latest_211="2.11.0"
 
 write_version_to_properties () { echo "sbt.version=$1" > "$test_build_properties"; }
 
@@ -35,7 +28,8 @@ sbt_version_from_test_filename () {
   esac
 }
 
-setup () {
+setup () { sbt_test_setup; }
+sbt_test_setup () {
   export sbt_test_version="$(sbt_version_from_test_filename)"
   create_project_with_launcher "$sbt_test_version"
   write_version_to_properties "$sbt_test_version"
@@ -71,8 +65,9 @@ create_project_with_launcher() {
 
 create_project() {
   export sbt_project="$TEST_ROOT/myproject"
-  export test_build_properties="$sbt_project/project/build.properties"
-  mkdir -p "$sbt_project/project" && cd "$sbt_project"
+  local pdir="$sbt_project/project"
+  export test_build_properties="$pdir/build.properties"
+  mkdir -p "$pdir" && cd "$sbt_project"
 }
 
 create_launcher() { mkdir_and_touch "$TEST_ROOT/.sbt/launchers/$1/sbt-launch.jar"; }
@@ -94,7 +89,7 @@ stub() {
 unstub() {
   local program="$1"
   local prefix="$(echo "$program" | tr a-z- A-Z_)"
-  local path="$TEST_ROOT/bin/${program}"
+  local path="$TEST_BIN/$program"
   local STATUS=0
 
   export "${prefix}_STUB_END"=1
@@ -122,6 +117,7 @@ normalize_paths () {
 }
 
 mkdir_and_touch () { mkdir -p "$(dirname "$1")" && touch "$1"; }
+mkdircd () { mkdir -p "$1" && cd "$1"; }
 
 assert()        { "$@" || flunk "failed: $@"; }
 flunk()         { normalize_paths "$@" ; return 1; }

@@ -3,43 +3,38 @@
 load test_helper
 
 custom_options_file=".sbt-custom-options"
+custom_option_name="some-improbable-sbt-option"
 
 @test "reads sbt options from .sbtopts" {
-  echo "some-improbable-sbt-option" > .sbtopts
+  echo $custom_option_name > .sbtopts
   sbt_expecting "Using sbt options defined in file .sbtopts" -v
-  sbt_expecting "some-improbable-sbt-option"
+  sbt_expecting $custom_option_name
 }
 
 @test "reads sbt options via -sbt-opts" {
-  echo "some-improbable-sbt-option" > $custom_options_file
+  echo $custom_option_name > $custom_options_file
   sbt_expecting "Using sbt options defined in file $custom_options_file" -sbt-opts $custom_options_file -v
-  sbt_expecting "some-improbable-sbt-option" -sbt-opts $custom_options_file
+  sbt_expecting $custom_option_name -sbt-opts $custom_options_file
 }
 
 @test 'reads sbt options from $SBT_OPTS' {
-  export SBT_OPTS="some-improbable-sbt-option"
+  export SBT_OPTS=$custom_option_name
   sbt_expecting 'Using sbt options defined in variable $SBT_OPTS' -v
-  sbt_expecting "some-improbable-sbt-option"
+  sbt_expecting $custom_option_name
 }
 
-@test 'reads sbt options from a file given in $SBT_OPTS' {
-  export SBT_OPTS="some-improbable-sbt-option"
-  sbt_expecting 'Using sbt options defined in variable $SBT_OPTS' -v
-  sbt_expecting "some-improbable-sbt-option"
-}
-
-@test "reads sbt options from a file specified via \$SBT_OPTS" {
+@test 'reads sbt options from a file specified via $SBT_OPTS' {
   export SBT_OPTS="@$custom_options_file"
-  echo "some-improbable-sbt-option" > $custom_options_file
+  echo $custom_option_name > $custom_options_file
   sbt_expecting "Using sbt options defined in file $custom_options_file" -v
-  sbt_expecting "some-improbable-sbt-option"
+  sbt_expecting $custom_option_name
 }
 
 @test 'prefers .sbtopts over $SBT_OPTS' {
-  echo "some-improbable-sbt-option" > .sbtopts
+  echo $custom_option_name > .sbtopts
   export SBT_OPTS="different-improbable-sbt-option"
   sbt_expecting "Using sbt options defined in file .sbtopts" -v
-  sbt_expecting "some-improbable-sbt-option"
+  sbt_expecting $custom_option_name
 }
 
 @test "uses default sbt options if none presents" {
