@@ -9,7 +9,7 @@ setup() {
 
 teardown() {
   unstub java
-  rm -fr "$TMP"/* "$TMP"/.sbt
+  rm -fr "$TEST_ROOT"/* "$TEST_ROOT"/.sbt
 }
 
 curl_opts='--fail --silent http://* --output * : mkdir -p "$(dirname "$5")" && touch "$5"'
@@ -34,7 +34,7 @@ download_version () {
   assert_output <<EOS
 Downloading sbt launcher for $1:
   From  $(launcher_url $1)
-    To  ${TMP}/.sbt/launchers/$1/sbt-launch.jar
+    To  $TEST_ROOT/.sbt/launchers/$1/sbt-launch.jar
 EOS
   unstub curl
 }
@@ -53,7 +53,7 @@ EOS
   assert_output <<EOS
 Downloading sbt launcher for $sbt_release_version:
   From  http://typesafe.artifactoryonline.com/typesafe/ivy-releases/org.scala-sbt/sbt-launch/$sbt_latest_13/sbt-launch.jar
-    To  ${TMP}/.sbt/launchers/$sbt_release_version/sbt-launch.jar
+    To  $TEST_ROOT/.sbt/launchers/$sbt_release_version/sbt-launch.jar
 EOS
   unstub curl
 }
@@ -67,7 +67,7 @@ EOS
   assert_output <<EOS
 Downloading sbt launcher for $specified_version:
   From  http://typesafe.artifactoryonline.com/typesafe/ivy-releases/org.scala-sbt/sbt-launch/$specified_version/sbt-launch.jar
-    To  ${TMP}/.sbt/launchers/$specified_version/sbt-launch.jar
+    To  $TEST_ROOT/.sbt/launchers/$specified_version/sbt-launch.jar
 EOS
   unstub curl
 }
@@ -84,7 +84,7 @@ EOS
 !!!
 Downloading sbt launcher for $sbt_latest_13:
   From  http://typesafe.artifactoryonline.com/typesafe/ivy-releases/org.scala-sbt/sbt-launch/$sbt_latest_13/sbt-launch.jar
-    To  ${TMP}/.sbt/launchers/$sbt_latest_13/sbt-launch.jar
+    To  $TEST_ROOT/.sbt/launchers/$sbt_latest_13/sbt-launch.jar
 EOS
   unstub curl
 }
@@ -97,7 +97,7 @@ EOS
   assert_output <<EOS
 Downloading sbt launcher for $sbt_latest_dev:
   From  http://typesafe.artifactoryonline.com/typesafe/ivy-releases/org.scala-sbt/sbt-launch/$sbt_latest_dev/sbt-launch.jar
-    To  ${TMP}/.sbt/launchers/$sbt_latest_dev/sbt-launch.jar
+    To  $TEST_ROOT/.sbt/launchers/$sbt_latest_dev/sbt-launch.jar
 EOS
   unstub curl
 }
@@ -114,7 +114,7 @@ EOS
 !!!
 Downloading sbt launcher for $sbt_latest_dev:
   From  http://typesafe.artifactoryonline.com/typesafe/ivy-releases/org.scala-sbt/sbt-launch/$sbt_latest_dev/sbt-launch.jar
-    To  ${TMP}/.sbt/launchers/$sbt_latest_dev/sbt-launch.jar
+    To  $TEST_ROOT/.sbt/launchers/$sbt_latest_dev/sbt-launch.jar
 EOS
   unstub curl
 }
@@ -127,7 +127,7 @@ EOS
   assert_output <<EOS
 Downloading sbt launcher for $sbt_latest_13:
   From  http://typesafe.artifactoryonline.com/typesafe/ivy-releases/org.scala-sbt/sbt-launch/$sbt_latest_13/sbt-launch.jar
-    To  ${TMP}/.sbt/launchers/$sbt_latest_13/sbt-launch.jar
+    To  $TEST_ROOT/.sbt/launchers/$sbt_latest_13/sbt-launch.jar
 EOS
   unstub curl
 }
@@ -161,7 +161,7 @@ EOS
   assert_output <<EOS
 Downloading sbt launcher for $sbt_latest_13:
   From  http://127.0.0.1:8080/ivy-releases/org.scala-sbt/sbt-launch/$sbt_latest_13/sbt-launch.jar
-    To  ${TMP}/.sbt/launchers/$sbt_latest_13/sbt-launch.jar
+    To  $TEST_ROOT/.sbt/launchers/$sbt_latest_13/sbt-launch.jar
 EOS
   unstub curl
 }

@@ -4,8 +4,8 @@ load test_helper
 
 setup() {
   create_launcher $sbt_release_version
-  mkdir -p "${TMP}/newproject"
-  cd "${TMP}/newproject"
+  mkdir -p "$TEST_ROOT/newproject"
+  cd "$TEST_ROOT/newproject"
 }
 
 @test "fails to start sbt on empty project" {

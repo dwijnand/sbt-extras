@@ -1,7 +1,7 @@
 export TEST_ROOT="$BATS_TMPDIR/sbt_test.$$" && mkdir -p "$TEST_ROOT"
 export TMP="$TEST_ROOT"
 export HOME="$TEST_ROOT"
-export PATH="$BATS_TEST_DIRNAME/../bin:$TMP/bin:/usr/local/bin:/usr/bin:/usr/sbin:/bin:/sbin"
+export PATH="$BATS_TEST_DIRNAME/../bin:$TEST_ROOT/bin:/usr/local/bin:/usr/bin:/usr/sbin:/bin:/sbin"
 
 unset JAVA_HOME
 unset JVM_OPTS
@@ -19,6 +19,8 @@ export latest_28="2.8.2"
 export latest_29="2.9.3"
 export latest_210="2.10.4"
 export latest_211="2.11.0"
+
+teardown() { [[ -d "$TEST_ROOT" ]] && rm -rf -- "$TEST_ROOT"; }
 
 # Usage: f <string which should be in output> [args to sbt]
 sbt_expecting () { sbt_anticipating expect "$@"; }
@@ -54,18 +56,14 @@ create_project_with_launcher() {
 }
 
 create_project() {
-  export sbt_project="$TMP/myproject"
+  export sbt_project="$TEST_ROOT/myproject"
   export sbt_tested_version="$1"
   mkdir -p "$sbt_project/project" && cd "$sbt_project"
 }
 
 create_launcher() {
-  mkdir -p "$TMP/.sbt/launchers/$1"
-  touch "$TMP/.sbt/launchers/$1/sbt-launch.jar"
-}
-
-teardown() {
-  rm -fr "$TMP"/* "$TMP"/.sbt
+  mkdir -p "$TEST_ROOT/.sbt/launchers/$1"
+  touch "$TEST_ROOT/.sbt/launchers/$1/sbt-launch.jar"
 }
 
 stub() {
@@ -73,21 +71,21 @@ stub() {
   local prefix="$(echo "$program" | tr a-z- A-Z_)"
   shift
 
-  export "${prefix}_STUB_PLAN"="$TMP/${program}-stub-plan"
-  export "${prefix}_STUB_RUN"="$TMP/${program}-stub-run"
+  export "${prefix}_STUB_PLAN"="$TEST_ROOT/${program}-stub-plan"
+  export "${prefix}_STUB_RUN"="$TEST_ROOT/${program}-stub-run"
   export "${prefix}_STUB_END"=
 
-  mkdir -p "$TMP/bin"
-  ln -sf "${BATS_TEST_DIRNAME}/stubs/stub" "$TMP/bin/${program}"
+  mkdir -p "$TEST_ROOT/bin"
+  ln -sf "${BATS_TEST_DIRNAME}/stubs/stub" "$TEST_ROOT/bin/${program}"
 
-  touch "$TMP/${program}-stub-plan"
-  for arg in "$@"; do printf "%s\n" "$arg" >> "$TMP/${program}-stub-plan"; done
+  touch "$TEST_ROOT/${program}-stub-plan"
+  for arg in "$@"; do printf "%s\n" "$arg" >> "$TEST_ROOT/${program}-stub-plan"; done
 }
 
 unstub() {
   local program="$1"
   local prefix="$(echo "$program" | tr a-z- A-Z_)"
-  local path="$TMP/bin/${program}"
+  local path="$TEST_ROOT/bin/${program}"
 
   export "${prefix}_STUB_END"=1
 
@@ -95,7 +93,7 @@ unstub() {
   "$path" || STATUS="$?"
 
   rm -f "$path"
-  rm -f "$TMP/${program}-stub-plan" "$TMP/${program}-stub-run"
+  rm -f "$TEST_ROOT/${program}-stub-plan" "$TEST_ROOT/${program}-stub-run"
   return "$STATUS"
 }
 
