@@ -2,19 +2,22 @@
 
 load test_helper
 
+custom_options_file=".java-options"
+custom_option_name="-improbable-jvm-option"
+
 @test "-D options passed to jvm" { sbt_expecting "-Dfoo=foo" -Dfoo=foo; }
 @test "-J options passed to jvm" { sbt_expecting "-Dbar=bar" -J-Dbar=bar; }
 
 @test "reads jvm options from .jvmopts" {
-  echo "-improbable-sbt-option" > .jvmopts
+  echo "$custom_option_name" > .jvmopts
   sbt_expecting "Using jvm options defined in file .jvmopts" -v
-  sbt_expecting "-improbable-sbt-option"
+  sbt_expecting "$custom_option_name"
 }
 
 @test "reads jvm options from a file specified via -sbt-opts" {
-  echo "-improbable-sbt-option" > .java-options
-  sbt_expecting "Using jvm options defined in file .java-options" -jvm-opts .java-options -v
-  sbt_expecting "-improbable-sbt-option" -jvm-opts .java-options
+  echo "$custom_option_name" > $custom_options_file
+  sbt_expecting "Using jvm options defined in file $custom_options_file" -jvm-opts $custom_options_file -v
+  sbt_expecting "$custom_option_name" -jvm-opts $custom_options_file
 }
 
 @test 'reads jvm options from $JVM_OPTS' {
@@ -24,10 +27,10 @@ load test_helper
 }
 
 @test 'reads jvm options from $JVM_OPTS specified file' {
-  export JVM_OPTS="@.java-options"
-  echo "-improbable-sbt-option" > .java-options
-  sbt_expecting "Using jvm options defined in file .java-options" -v
-  sbt_expecting "-improbable-sbt-option"
+  export JVM_OPTS="@$custom_options_file"
+  echo "$custom_option_name" > $custom_options_file
+  sbt_expecting "Using jvm options defined in file $custom_options_file" -v
+  sbt_expecting "$custom_option_name"
 }
 
 @test 'prefers .jvmopts over $JVM_OPTS' {
