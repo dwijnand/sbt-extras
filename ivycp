@@ -3,53 +3,46 @@
 # ivycp  by paul phillips  part of sbt-extras
 # https://github.com/paulp/sbt-extras
 
-ivyjar="${IVYJAR:-/usr/local/Cellar/ivy/2.3.0/libexec/ivy-2.3.0.jar}"
+die () { echo >&2 "Error: $@" && exit 1; }
+
+ivyjar="$IVYJAR"
+[[ -f "$ivyjar" ]] || ivyjar="$HOME/.ivy2/cache/org.apache.ivy/ivy/jars/ivy-2.3.0.jar"
+[[ -f "$ivyjar" ]] || ivyjar="$(brew --prefix)/Cellar/ivy/2.3.0/libexec/ivy-2.3.0.jar"
+[[ -f "$ivyjar" ]] || die "Can't find ivy.jar. Set IVYJAR to its path."
+
 dir="$(mktemp -dt ivycp)"
 build="$dir/build.xml"
-program="$(basename $0)"
-
-[[ -f "$ivyjar" ]] || {
-  echo "Error: can't find ivy.jar. You must set IVYCP to the path."
-  exit 1
-}
+program="$(basename "$0")"
 
 [[ $# -gt 0 ]] || {
   cat <<EOM
 Usage: $program [dependency dependency ...]
 
-Resolves all dependencies through the ivy cache, downloading any required jars.
-When complete, echoes a classpath containing all dependencies, including
-transitively required ones.  The format for dependencies can be any of
+Resolves and downloads all specified dependencies and creates a
+classpath out of the transitive closure. The dependency format is
 
-  org%name
-  org%name%version
-  org;name
-  org;name;version
+  org%name%rev%conf
 
-When no version is given, 'latest.release' is assumed.
+The elements can be separated with : or ; in addition to %.
+Only organization and name are required, with the others
+defaulting to rev=latest.release and conf=default. Examples
+using this program to create a classpath on the fly:
 
-Examples:
+  $program org.scalaz%scalaz-core_2.11 org.jboss.netty%netty
+  java -jar $(ivycp org.eclipse.jetty%jetty-start) --list-config
 
-  $program com.typesafe.akka%akka play%play_2.10
-  scala -cp \$(ivycp org.scalaz%scalaz-iteratee_2.10) -e 'println(scalaz.iteratee.Iteratee)'
 EOM
   exit 0
 }
 
 dependencyLine () {
-  local org="$1"
-  local name="$2"
-  local rev="${3:-latest.release}"
-
-cat <<EOM
-      <dependency org="$org" name="$name" rev="$rev"/>
-EOM
+  local fmt='      <dependency org="%s" name="%s" rev="%s" conf="%s" />'"\n"
+  IFS=" " read org name rev conf <<<"$@"
+  printf "$fmt" $org $name "${rev:-latest.release}" "${conf:-default}"
 }
 
 dependencyLines () {
-  for arg in "$@"; do
-    ( IFS=";%" && set -- $arg && dependencyLine "$@" )
-  done
+  for arg in "$@"; do ( IFS=":;% " && set -- $arg && dependencyLine "$@" ); done
 }
 
 genBuildXml () {
@@ -70,11 +63,13 @@ EOM
 genBuildXml "$(dependencyLines "$@")" > "$build"
 ant -q -f "$build" >/dev/null
 code="$?"
+
 if (( code == 0 )); then
   set -- $(readlink "$dir/lib"/*)
   ( IFS=: && echo "$*" )
 else
   echo >&2 "Dependency retrieval failed: $?"
+  # ( cd "$dir" && cat build.xml && ant )
 fi
 
 exit "$code"
