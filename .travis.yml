@@ -1,5 +1,9 @@
-script: ./bin/run-tests --tap
+script: ./bin/run-tests --tap ./test
 language: c
 notifications:
   email:
     on_success: never
+
+jdk:
+  - openjdk6
+  - openjdk7
