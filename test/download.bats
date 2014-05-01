@@ -27,7 +27,7 @@ launcher_url () {
 }
 
 download_version () {
-  set_test_sbt_version "$1"
+  write_version_to_properties "$1"
   stub_curl
   run sbt
   assert_success
@@ -73,7 +73,7 @@ EOS
 }
 
 @test "downloads specified version when -sbt-version was given, even if there is build.properties" {
-  set_test_sbt_version $sbt_latest_12
+  write_version_to_properties $sbt_latest_12
   stub_curl
   run sbt -sbt-version $sbt_latest_13
   assert_success
@@ -103,7 +103,7 @@ EOS
 }
 
 @test "downloads unreleased version when -sbt-dev was given, even if there is build.properties" {
-  set_test_sbt_version $sbt_latest_13
+  write_version_to_properties $sbt_latest_13
   stub_curl
   run sbt -sbt-dev
   assert_success

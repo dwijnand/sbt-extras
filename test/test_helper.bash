@@ -22,17 +22,23 @@ export latest_29="2.9.3"
 export latest_210="2.10.4"
 export latest_211="2.11.0"
 
-set_test_sbt_version () { echo "sbt.version=$1" > "$test_build_properties"; }
+write_version_to_properties () { echo "sbt.version=$1" > "$test_build_properties"; }
+
+sbt_version_from_test_filename () {
+  case "$BATS_TEST_FILENAME" in
+    *-0.13.bats) echo $sbt_latest_13 ;;
+    *-0.12.bats) echo $sbt_latest_12 ;;
+    *-0.11.bats) echo $sbt_latest_11 ;;
+    *-0.10.bats) echo $sbt_latest_10 ;;
+     *-0.7.bats) echo $sbt_latest_07 ;;
+              *) echo $sbt_release_version ;;
+  esac
+}
 
 setup () {
-  case "$BATS_TEST_FILENAME" in
-    *-0.13.bats) setup_version_project $sbt_latest_13 ;;
-    *-0.12.bats) setup_version_project $sbt_latest_12 ;;
-    *-0.11.bats) setup_version_project $sbt_latest_11 ;;
-    *-0.10.bats) setup_version_project $sbt_latest_10 ;;
-     *-0.7.bats) setup_version_project $sbt_latest_07 ;;
-              *) setup_version_project ;;
-  esac
+  export sbt_test_version="$(sbt_version_from_test_filename)"
+  create_project_with_launcher "$sbt_test_version"
+  write_version_to_properties "$sbt_test_version"
 }
 
 teardown () { [[ -d "$TEST_ROOT" ]] && rm -rf -- "$TEST_ROOT"; }
@@ -57,11 +63,6 @@ sbt_anticipating () {
   unstub java
 }
 
-setup_version_project () {
-  create_project_with_launcher "$@"
-  [[ $# -eq 0 ]] || set_test_sbt_version "$1"
-}
-
 create_project_with_launcher() {
   local version="${1:-$sbt_release_version}"
   create_project $version
@@ -70,7 +71,6 @@ create_project_with_launcher() {
 
 create_project() {
   export sbt_project="$TEST_ROOT/myproject"
-  export sbt_tested_version="$1"
   export test_build_properties="$sbt_project/project/build.properties"
   mkdir -p "$sbt_project/project" && cd "$sbt_project"
 }
