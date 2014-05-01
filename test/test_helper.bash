@@ -1,11 +1,13 @@
-export TEST_ROOT="$BATS_TMPDIR/sbt_test.$$" && mkdir -p "$TEST_ROOT"
-export TMP="$TEST_ROOT"
-export HOME="$TEST_ROOT"
-export PATH="$BATS_TEST_DIRNAME/../bin:$TEST_ROOT/bin:/usr/local/bin:/usr/bin:/usr/sbin:/bin:/sbin"
+export TEST_ROOT="$BATS_TMPDIR/$(basename "$BATS_TEST_FILENAME").$$" && mkdir -p "$TEST_ROOT"
+export TEST_BIN="$TEST_ROOT/bin"
+export HOME="$TEST_ROOT" # todo - eliminate
+export PATH="$BATS_TEST_DIRNAME/../bin:$TEST_BIN:/usr/bin:/usr/sbin:/bin:/sbin"
 
-unset JAVA_HOME
-unset JVM_OPTS
-unset SBT_OPTS
+# echo >&2 "TEST_ROOT=$TEST_ROOT"
+# echo >&2 "$(ls -1 $TEST_ROOT/bin)"
+
+unset JAVA_HOME JVM_OPTS SBT_OPTS
+
 
 export sbt_latest_07="0.7.7"
 export sbt_latest_10="0.10.1"
@@ -20,7 +22,9 @@ export latest_29="2.9.3"
 export latest_210="2.10.4"
 export latest_211="2.11.0"
 
-teardown() { [[ -d "$TEST_ROOT" ]] && rm -rf -- "$TEST_ROOT"; }
+set_test_sbt_version () { echo "sbt.version=$1" > "$test_build_properties"; }
+
+teardown () { [[ -d "$TEST_ROOT" ]] && rm -rf -- "$TEST_ROOT"; }
 
 # Usage: f <string which should be in output> [args to sbt]
 sbt_expecting () { sbt_anticipating expect "$@"; }
@@ -44,9 +48,7 @@ sbt_anticipating () {
 
 setup_version_project () {
   create_project_with_launcher "$@"
-  if [[ $# -gt 0 ]]; then
-    echo "sbt.version=$1" > "$sbt_project/project/build.properties"
-  fi
+  [[ $# -eq 0 ]] || set_test_sbt_version "$1"
 }
 
 create_project_with_launcher() {
@@ -58,6 +60,7 @@ create_project_with_launcher() {
 create_project() {
   export sbt_project="$TEST_ROOT/myproject"
   export sbt_tested_version="$1"
+  export test_build_properties="$sbt_project/project/build.properties"
   mkdir -p "$sbt_project/project" && cd "$sbt_project"
 }
 

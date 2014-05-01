@@ -27,7 +27,7 @@ launcher_url () {
 }
 
 download_version () {
-  echo "sbt.version=$1" > "${sbt_project}/project/build.properties"
+  set_test_sbt_version "$1"
   stub_curl
   run sbt
   assert_success
@@ -46,7 +46,7 @@ EOS
 @test "downloads sbt 0.13.x" { download_version "$sbt_latest_13"; }
 
 @test "downloads release version if build.properties is missing" {
-  assert [ ! -f "${sbt_project}/project/build.properties" ]
+  assert [ ! -f "$test_build_properties" ]
   stub_curl
   run sbt
   assert_success
@@ -60,7 +60,7 @@ EOS
 
 @test "downloads specified version when -sbt-version was given" {
   specified_version="0.12.2"
-  assert [ ! -f "${sbt_project}/project/build.properties" ]
+  assert [ ! -f "$test_build_properties" ]
   stub_curl
   run sbt -sbt-version $specified_version
   assert_success
@@ -73,7 +73,7 @@ EOS
 }
 
 @test "downloads specified version when -sbt-version was given, even if there is build.properties" {
-  echo "sbt.version=$sbt_latest_12" > "${sbt_project}/project/build.properties"
+  set_test_sbt_version $sbt_latest_12
   stub_curl
   run sbt -sbt-version $sbt_latest_13
   assert_success
@@ -90,7 +90,7 @@ EOS
 }
 
 @test "downloads unreleased version when -sbt-dev was given" {
-  assert [ ! -f "${sbt_project}/project/build.properties" ]
+  assert [ ! -f "$test_build_properties" ]
   stub_curl
   run sbt -sbt-dev
   assert_success
@@ -103,7 +103,7 @@ EOS
 }
 
 @test "downloads unreleased version when -sbt-dev was given, even if there is build.properties" {
-  echo "sbt.version=$sbt_latest_13" > "${sbt_project}/project/build.properties"
+  set_test_sbt_version $sbt_latest_13
   stub_curl
   run sbt -sbt-dev
   assert_success
@@ -120,7 +120,7 @@ EOS
 }
 
 @test "allows surrounding white spaces around '=' in build.properties" {
-  echo "sbt.version = $sbt_latest_13" > "${sbt_project}/project/build.properties"
+  echo "sbt.version = $sbt_latest_13" > "$test_build_properties"
   stub_curl
   run sbt
   assert_success
@@ -141,7 +141,7 @@ EOS
 }
 
 @test "uses special launcher directory if -sbt-launch-dir was given" {
-  echo "stub.version=$sbt_latest_13" > "${sbt_project}/project/build.properties"
+  echo "stub.version=$sbt_latest_13" > "$test_build_properties"
   stub_curl
   run sbt -sbt-launch-dir "${sbt_project}/xsbt"
   assert_success
@@ -154,7 +154,7 @@ EOS
 }
 
 @test "uses special launcher repository if -sbt-launch-repo was given" {
-  echo "stub.version=$sbt_latest_13" > "${sbt_project}/project/build.properties"
+  echo "stub.version=$sbt_latest_13" > "$test_build_properties"
   stub_curl
   run sbt -sbt-launch-repo "http://127.0.0.1:8080/ivy-releases"
   assert_success
