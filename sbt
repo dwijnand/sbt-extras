@@ -377,7 +377,7 @@ else
   vlog "No extra sbt options have been defined"
 fi
 
-[[ -n "$extra_sbt_opts" ]] && process_args "${extra_sbt_opts[@]}"
+[[ -n "${extra_sbt_opts[*]}" ]] && process_args "${extra_sbt_opts[@]}"
 
 # reset "$@" to the residual args
 set -- "${residual_args[@]}"
