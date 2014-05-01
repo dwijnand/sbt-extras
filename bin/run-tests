@@ -1,7 +1,14 @@
-#!/bin/sh
+#!/usr/bin/env bash
 #
 
-set -e
 cd "$(dirname "$0")/.."
-[ -d bats ] || git clone https://github.com/sstephenson/bats.git bats
-./bats/bin/bats "$@" ./test
+
+# The version of bats in brew only works if it's installed --HEAD
+# so trying to use it is more trouble than it's worth.
+# bats="$(which bats 2>/dev/null)"
+bats=""
+
+[[ $# -gt 0   ]] || set -- ./test
+[[ -x "$bats" ]] || bats="./bats/bin/bats"
+[[ -x "$bats" ]] || git clone https://github.com/sstephenson/bats.git bats
+[[ -x "$bats" ]] && "$bats" "$@"
