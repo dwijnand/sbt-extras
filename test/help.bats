@@ -5,5 +5,5 @@ load test_helper
 @test "shows usage of sbt-extras" {
   run sbt -help
   assert_failure
-  assert_output_contains "Usage: sbt [options]"
+  assert_grep "Usage: sbt [options]" -F
 }
