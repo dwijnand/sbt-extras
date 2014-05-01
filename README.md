@@ -57,25 +57,26 @@ sbt -v[erbosely] creating a new project built with the latest scala 2.10.x.
       # sbt version (default: from project/build.properties if present, else latest release)
       !!! The only way to accomplish this pre-0.12.0 if there is a build.properties file which
       !!! contains an sbt.version property is to update the file on disk.  That's what this does.
-      -sbt-version  <version>   use the specified version of sbt (default: 0.13.0)
+      -sbt-version  <version>   use the specified version of sbt (default: 0.13.2)
       -sbt-jar      <path>      use the specified jar as the sbt launcher
-      -sbt-launch-dir <path>    directory to hold sbt launchers (default: $HOME/.sbt/launchers)
+      -sbt-launch-dir <path>    directory to hold sbt launchers (default: ~/.sbt/launchers)
+      -sbt-launch-repo <url>    repo url for downloading sbt launcher jar (default: http://typesafe.artifactoryonline.com/typesafe/ivy-releases)
 
       # scala version (default: as chosen by sbt)
       -28                       use 2.8.2
       -29                       use 2.9.3
-      -210                      use 2.10.3 (or latest 2.10.x release or RC)
-      -211                      use 2.11.0-M4 (or latest milestone)
+      -210                      use 2.10.4
+      -211                      use 2.11.0
       -scala-home <path>        use the scala build at the specified directory
       -scala-version <version>  use the specified version of scala
       -binary-version <version> use the specified scala version when searching for dependencies
 
-      # java version (default: java from PATH, currently java version "1.6.0_51")
+      # java version (default: java from PATH, currently java version "1.8.0_05")
       -java-home <path>         alternate JAVA_HOME
 
       # passing options to the jvm - note it does NOT use JAVA_OPTS due to pollution
       # The default set is used if JVM_OPTS is unset and no -jvm-opts file is found
-      <default>        -Dfile.encoding=UTF8 -XX:MaxPermSize=256m -Xms512m -Xmx1g -XX:+CMSClassUnloadingEnabled -XX:+UseConcMarkSweepGC
+      <default>        -Xms512m -Xmx1536m -Xss2m -XX:ReservedCodeCacheSize=256m -XX:+TieredCompilation -XX:+CMSClassUnloadingEnabled -XX:+UseConcMarkSweepGC
       JVM_OPTS         environment variable holding either the jvm args directly, or
                        the reference to a file containing jvm args if given path is prepended by '@' (e.g. '@/etc/jvmopts')
                        Note: "@"-file is overridden by local '.jvmopts' or '-jvm-opts' argument.

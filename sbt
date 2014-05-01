@@ -8,7 +8,7 @@ declare -r sbt_release_version="0.13.2"
 declare -r sbt_unreleased_version="0.13.5-M4"
 declare -r buildProps="project/build.properties"
 
-declare sbt_jar sbt_dir sbt_create sbt_launch_dir
+declare sbt_jar sbt_dir sbt_create
 declare scala_version java_home sbt_explicit_version
 declare verbose debug quiet noshare batch trace_level log_level
 declare sbt_saved_stty
@@ -119,7 +119,7 @@ init_default_option_file () {
 
 declare -r cms_opts="-XX:+CMSClassUnloadingEnabled -XX:+UseConcMarkSweepGC"
 declare -r jit_opts="-XX:ReservedCodeCacheSize=256m -XX:+TieredCompilation"
-declare -r default_jvm_opts="-Dfile.encoding=UTF8 -XX:MaxPermSize=384m -Xms512m -Xmx1536m -Xss2m $jit_opts $cms_opts"
+declare -r default_jvm_opts="-Xms512m -Xmx1536m -Xss2m $jit_opts $cms_opts"
 declare -r noshare_opts="-Dsbt.global.base=project/.sbtboot -Dsbt.boot.directory=project/.boot -Dsbt.ivy.home=project/.ivy"
 declare -r latest_28="2.8.2"
 declare -r latest_29="2.9.3"
@@ -234,12 +234,10 @@ Usage: $script_name [options]
   -batch             Disable interactive mode
   -prompt <expr>     Set the sbt prompt; in expr, 's' is the State and 'e' is Extracted
 
-  # sbt version (default: from $buildProps if present, else latest release)
-  !!! The only way to accomplish this pre-0.12.0 if there is a build.properties file which
-  !!! contains an sbt.version property is to update the file on disk.  That's what this does.
+  # sbt version (default: sbt.version from $buildProps if present, otherwise $sbt_release_version)
   -sbt-version  <version>   use the specified version of sbt (default: $sbt_release_version)
   -sbt-jar      <path>      use the specified jar as the sbt launcher
-  -sbt-launch-dir <path>    directory to hold sbt launchers (default: $sbt_launch_dir)
+  -sbt-launch-dir <path>    directory to hold sbt launchers (default: ~/.sbt/launchers)
   -sbt-launch-repo <url>    repo url for downloading sbt launcher jar (default: $sbt_launch_repo)
 
   # scala version (default: as chosen by sbt)
