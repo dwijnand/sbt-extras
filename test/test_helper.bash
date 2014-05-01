@@ -1,5 +1,5 @@
-export TEST_ROOT="$BATS_TMPDIR/$(basename "$BATS_TEST_FILENAME").$$" && mkdir -p "$TEST_ROOT"
-export TEST_BIN="$TEST_ROOT/bin"
+export TEST_ROOT="$BATS_TMPDIR/$(basename "$BATS_TEST_FILENAME").$$"
+export TEST_BIN="$TEST_ROOT/bin" && mkdir -p "$TEST_BIN"
 export HOME="$TEST_ROOT" # todo - eliminate
 export PATH="$BATS_TEST_DIRNAME/../bin:$TEST_BIN:/usr/bin:/usr/sbin:/bin:/sbin"
 
@@ -7,31 +7,32 @@ export PATH="$BATS_TEST_DIRNAME/../bin:$TEST_BIN:/usr/bin:/usr/sbin:/bin:/sbin"
 
 unset JAVA_HOME JVM_OPTS SBT_OPTS
 
-export sbt_latest_07="0.7.7"
-export sbt_latest_10="0.10.1"
-export sbt_latest_11="0.11.3"
-export sbt_latest_12="0.12.4"
-export sbt_latest_13="0.13.2"
-export sbt_latest_dev="0.13.5-M4"
-export sbt_release_version="$sbt_latest_13"
+export sbt_07="0.7.7"
+export sbt_10="0.10.1"
+export sbt_11="0.11.3"
+export sbt_12="0.12.4"
+export sbt_13="0.13.2"
+export sbt_release="$sbt_13"
+export sbt_dev="0.13.5-M4"
 
 write_version_to_properties () { echo "sbt.version=$1" > "$test_build_properties"; }
 
 sbt_version_from_test_filename () {
   case "$BATS_TEST_FILENAME" in
-    *-0.13.bats) echo $sbt_latest_13 ;;
-    *-0.12.bats) echo $sbt_latest_12 ;;
-    *-0.11.bats) echo $sbt_latest_11 ;;
-    *-0.10.bats) echo $sbt_latest_10 ;;
-     *-0.7.bats) echo $sbt_latest_07 ;;
-              *) echo $sbt_release_version ;;
+     *-0.7.bats) echo $sbt_07 ;;
+    *-0.10.bats) echo $sbt_10 ;;
+    *-0.11.bats) echo $sbt_11 ;;
+    *-0.12.bats) echo $sbt_12 ;;
+    *-0.13.bats) echo $sbt_13 ;;
+              *) echo $sbt_release ;;
   esac
 }
 
 setup () { sbt_test_setup; }
 sbt_test_setup () {
   export sbt_test_version="$(sbt_version_from_test_filename)"
-  create_project_with_launcher "$sbt_test_version"
+  create_project "$sbt_test_version"
+  create_launcher "$sbt_test_version"
   write_version_to_properties "$sbt_test_version"
 }
 
@@ -57,12 +58,6 @@ sbt_anticipating () {
   unstub java
 }
 
-create_project_with_launcher() {
-  local version="${1:-$sbt_release_version}"
-  create_project $version
-  create_launcher $version
-}
-
 create_project() {
   export sbt_project="$TEST_ROOT/myproject"
   local pdir="$sbt_project/project"
@@ -82,7 +77,7 @@ stub() {
   export "${prefix}_STUB_RUN"="$stubRun"
   export "${prefix}_STUB_END"=""
 
-  mkdir -p "$TEST_BIN" && ln -sf "$BATS_TEST_DIRNAME/stubs/stub" "$TEST_BIN/$program"
+  ln -sf "$BATS_TEST_DIRNAME/stubs/stub" "$TEST_BIN/$program"
   touch "$stubPlan" && printf "%s\n" "$@" >> "$stubPlan"
 }
 
