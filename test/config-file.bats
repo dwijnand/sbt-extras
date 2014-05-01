@@ -2,8 +2,6 @@
 
 load test_helper
 
-setup() { setup_version_project; }
-
 configFile () { cat <<EOM
 # Comment 1
 # Comment 2, followed by blank line

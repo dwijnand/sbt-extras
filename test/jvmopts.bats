@@ -2,8 +2,6 @@
 
 load test_helper
 
-setup() { setup_version_project; }
-
 @test "-D options passed to jvm" { sbt_expecting "-Dfoo=foo" -Dfoo=foo; }
 @test "-J options passed to jvm" { sbt_expecting "-Dbar=bar" -J-Dbar=bar; }
 

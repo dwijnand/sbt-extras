@@ -2,8 +2,6 @@
 
 load test_helper
 
-setup() { setup_version_project; }
-
 @test "-ivy triggers sbt.ivy.home"            { sbt_expecting "-Dsbt.ivy.home=$sbt_project/ivy" -ivy "$sbt_project/ivy";                               }
 @test "-no-colors triggers sbt.log.noformat"  { sbt_expecting "-Dsbt.log.noformat=true" -no-colors;                                                    }
 @test "-sbt-boot triggers sbt.boot.directory" { sbt_expecting "-Dsbt.boot.directory=$sbt_project/sbt.boot" -sbt-boot "$sbt_project/sbt.boot";          }

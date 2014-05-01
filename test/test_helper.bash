@@ -24,6 +24,17 @@ export latest_211="2.11.0"
 
 set_test_sbt_version () { echo "sbt.version=$1" > "$test_build_properties"; }
 
+setup () {
+  case "$BATS_TEST_FILENAME" in
+    *-0.13.bats) setup_version_project $sbt_latest_13 ;;
+    *-0.12.bats) setup_version_project $sbt_latest_12 ;;
+    *-0.11.bats) setup_version_project $sbt_latest_11 ;;
+    *-0.10.bats) setup_version_project $sbt_latest_10 ;;
+     *-0.7.bats) setup_version_project $sbt_latest_07 ;;
+              *) setup_version_project ;;
+  esac
+}
+
 teardown () { [[ -d "$TEST_ROOT" ]] && rm -rf -- "$TEST_ROOT"; }
 
 # Usage: f <string which should be in output> [args to sbt]
@@ -64,39 +75,32 @@ create_project() {
   mkdir -p "$sbt_project/project" && cd "$sbt_project"
 }
 
-create_launcher() {
-  mkdir -p "$TEST_ROOT/.sbt/launchers/$1"
-  touch "$TEST_ROOT/.sbt/launchers/$1/sbt-launch.jar"
-}
+create_launcher() { mkdir_and_touch "$TEST_ROOT/.sbt/launchers/$1/sbt-launch.jar"; }
 
 stub() {
-  local program="$1"
+  local program="$1" && shift
   local prefix="$(echo "$program" | tr a-z- A-Z_)"
-  shift
+  local stubPlan="$TEST_ROOT/$program-stub-plan"
+  local stubRun="$TEST_ROOT/$program-stub-run"
 
-  export "${prefix}_STUB_PLAN"="$TEST_ROOT/${program}-stub-plan"
-  export "${prefix}_STUB_RUN"="$TEST_ROOT/${program}-stub-run"
-  export "${prefix}_STUB_END"=
+  export "${prefix}_STUB_PLAN"="$stubPlan"
+  export "${prefix}_STUB_RUN"="$stubRun"
+  export "${prefix}_STUB_END"=""
 
-  mkdir -p "$TEST_ROOT/bin"
-  ln -sf "${BATS_TEST_DIRNAME}/stubs/stub" "$TEST_ROOT/bin/${program}"
-
-  touch "$TEST_ROOT/${program}-stub-plan"
-  for arg in "$@"; do printf "%s\n" "$arg" >> "$TEST_ROOT/${program}-stub-plan"; done
+  mkdir -p "$TEST_BIN" && ln -sf "$BATS_TEST_DIRNAME/stubs/stub" "$TEST_BIN/$program"
+  touch "$stubPlan" && printf "%s\n" "$@" >> "$stubPlan"
 }
 
 unstub() {
   local program="$1"
   local prefix="$(echo "$program" | tr a-z- A-Z_)"
   local path="$TEST_ROOT/bin/${program}"
+  local STATUS=0
 
   export "${prefix}_STUB_END"=1
-
-  local STATUS=0
   "$path" || STATUS="$?"
 
-  rm -f "$path"
-  rm -f "$TEST_ROOT/${program}-stub-plan" "$TEST_ROOT/${program}-stub-run"
+  rm -f "$path" "$TEST_ROOT/${program}-stub-plan" "$TEST_ROOT/${program}-stub-run"
   return "$STATUS"
 }
 
@@ -117,19 +121,18 @@ normalize_paths () {
     sed "s:$HOME:\$ROOT:g"
 }
 
+mkdir_and_touch () { mkdir -p "$(dirname "$1")" && touch "$1"; }
+
 assert()        { "$@" || flunk "failed: $@"; }
 flunk()         { normalize_paths "$@" ; return 1; }
 assert_equal()  { [ "$1" == "$2" ] || printf "expected: %s\nactual:   %s\n" "$1" "$2" | flunk; }
 assert_output() { assert_equal "${1:-$(cat -)}" "$output"; }
+flunk_message() { printf "expected: %s\nactual:   %s\n" "$1" "$2"; return 1; }
 
 assert_grep() {
   local expected="$1" && shift
 
-  echo "$output" | grep "$@" -- "$expected" >/dev/null || {
-    { echo "expected output to contain $expected"
-      echo "actual: $output"
-    } | flunk
-  }
+  grep "$@" -- "$expected" <<<"$output" >/dev/null || flunk_message "$expected" "$output"
 }
 
 stub_java () {

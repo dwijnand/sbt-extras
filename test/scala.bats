@@ -2,8 +2,6 @@
 
 load test_helper
 
-setup() { create_project_with_launcher $sbt_release_version; }
-
 @test "add scalaHome for -scala-home"              { sbt_expecting 'set every scalaHome := Some(file("scala"))' -scala-home scala;                       }
 @test "add scalaBinaryVersion for -binary-version" { sbt_expecting 'set scalaBinaryVersion in ThisBuild := "2.10.2"' -binary-version 2.10.2;             }
 @test "add resolver for snapshot versions"         { sbt_expecting 'set resolvers += Resolver.sonatypeRepo("snapshots")' -scala-version 2.12.0-SNAPSHOT; }

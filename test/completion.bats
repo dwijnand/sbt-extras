@@ -2,8 +2,6 @@
 
 load test_helper
 
-setup() { setup_version_project; }
-
 @test "loads .sbt_completion.sh" {
   cd "$sbt_project"
   echo 'echo "${BASH_SOURCE[0]} has been loaded."' > .sbt_completion.sh

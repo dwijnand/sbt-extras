@@ -2,8 +2,6 @@
 
 load test_helper
 
-setup() { setup_version_project; }
-
 custom_options_file=".sbt-custom-options"
 
 @test "reads sbt options from .sbtopts" {
