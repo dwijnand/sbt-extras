@@ -15,7 +15,8 @@ export sbt_13="0.13.2"
 export sbt_release="$sbt_13"
 export sbt_dev="0.13.5-M4"
 
-write_version_to_properties () { echo "sbt.version=$1" > "$test_build_properties"; }
+write_version_to_properties () { echo_to_properties "sbt.version=$1";  }
+echo_to_properties ()          { echo "$@" > "$test_build_properties"; }
 
 sbt_version_from_test_filename () {
   case "$BATS_TEST_FILENAME" in
@@ -114,6 +115,7 @@ normalize_paths () {
 mkdir_and_touch () { mkdir -p "$(dirname "$1")" && touch "$1"; }
 mkdircd () { mkdir -p "$1" && cd "$1"; }
 
+assert_no_properties () { assert [ ! -f "$test_build_properties" ]; }
 assert()        { "$@" || flunk "failed: $@"; }
 flunk()         { normalize_paths "$@" ; return 1; }
 assert_equal()  { [ "$1" == "$2" ] || printf "expected: %s\nactual:   %s\n" "$1" "$2" | flunk; }
