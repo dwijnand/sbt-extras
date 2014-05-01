@@ -1,6 +1,7 @@
-export TMP="$BATS_TEST_DIRNAME/tmp"
-export HOME="$TMP"
-export PATH="$BATS_TEST_DIRNAME/../bin:$TMP/bin:/usr/bin:/usr/sbin:/bin:/sbin"
+export TEST_ROOT="$BATS_TMPDIR/sbt_test.$$" && mkdir -p "$TEST_ROOT"
+export TMP="$TEST_ROOT"
+export HOME="$TEST_ROOT"
+export PATH="$BATS_TEST_DIRNAME/../bin:$TMP/bin:/usr/local/bin:/usr/bin:/usr/sbin:/bin:/sbin"
 
 unset JAVA_HOME
 unset JVM_OPTS
@@ -99,24 +100,25 @@ unstub() {
 }
 
 assert_success() {
-  if [[ $status -ne 0 ]]; then
-    printf "command failed with exit status $status\noutput: $output\n" | flunk
-  elif [[ $# -gt 0 ]]; then
-    assert_output "$1"
-  fi
+  [ $status -ne 0 ] && printf "command failed with exit status $status\noutput: $output\n" | flunk
+  [[ $# -eq 0 ]] || assert_output "$1"
 }
 
 assert_failure() {
-  if [[ $status -eq 0 ]]; then
-    flunk <<<"expected failed exit status"
-  elif [[ $# -gt 0 ]]; then
-    assert_output "$1"
-  fi
+  [ $status -eq 0 ] && printf "expected failure" | flunk
+  [[ $# -eq 0 ]] || assert_output "$1"
+}
+
+stdin_or_args () { if [[ $# -eq 0 ]]; then cat - ; else echo "$@"; fi; }
+normalize_paths () {
+  stdin_or_args "$@" | \
+    sed "s:$TEST_ROOT:\$ROOT:g" | \
+    sed "s:$HOME:\$ROOT:g"
 }
 
 assert()        { "$@" || flunk "failed: $@"; }
-flunk()         { [[ $# -gt 0 ]] && echo "$@" || cat - ; return 1; }
-assert_equal()  { [ "$1" == "$2" ] || flunk <<<"expected: $1\nactual:   $2\n"; }
+flunk()         { normalize_paths "$@" ; return 1; }
+assert_equal()  { [ "$1" == "$2" ] || printf "expected: %s\nactual:   %s\n" "$1" "$2" | flunk; }
 assert_output() { assert_equal "${1:-$(cat -)}" "$output"; }
 
 assert_grep() {
