@@ -59,10 +59,6 @@ EOS
   run sbt -sbt-version $sbt_13
   assert_success
   assert_output <<EOS
-!!!
-!!! Updated file project/build.properties setting sbt.version to: $sbt_13
-!!! Previous value was: $sbt_12
-!!!
 Downloading sbt launcher for $sbt_13:
   From  http://typesafe.artifactoryonline.com/typesafe/ivy-releases/org.scala-sbt/sbt-launch/$sbt_13/sbt-launch.jar
     To  $TEST_ROOT/.sbt/launchers/$sbt_13/sbt-launch.jar
@@ -76,10 +72,6 @@ EOS
   run sbt -sbt-dev
   assert_success
   assert_output <<EOS
-!!!
-!!! Updated file project/build.properties setting sbt.version to: $sbt_dev
-!!! Previous value was: $sbt_13
-!!!
 Downloading sbt launcher for $sbt_dev:
   From  http://typesafe.artifactoryonline.com/typesafe/ivy-releases/org.scala-sbt/sbt-launch/$sbt_dev/sbt-launch.jar
     To  $TEST_ROOT/.sbt/launchers/$sbt_dev/sbt-launch.jar

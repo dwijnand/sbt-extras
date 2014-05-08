@@ -13,7 +13,7 @@ export sbt_11="0.11.3"
 export sbt_12="0.12.4"
 export sbt_13="0.13.2"
 export sbt_release="$sbt_13"
-export sbt_dev="0.13.5-M4"
+export sbt_dev="0.13.5-RC1"
 
 write_version_to_properties () { echo_to_properties "sbt.version=$1";  }
 echo_to_properties ()          { echo "$@" > "$test_build_properties"; }
@@ -118,7 +118,7 @@ mkdircd () { mkdir -p "$1" && cd "$1"; }
 assert_no_properties () { assert [ ! -f "$test_build_properties" ]; }
 assert()        { "$@" || flunk "failed: $@"; }
 flunk()         { normalize_paths "$@" ; return 1; }
-assert_equal()  { [ "$1" == "$2" ] || printf "expected: %s\nactual:   %s\n" "$1" "$2" | flunk; }
+assert_equal()  { [ "$1" == "$2" ] || printf "\nexpected:\n%s\n\nactual:\n%s\n\n" "$1" "$2" | flunk; }
 assert_output() { assert_equal "${1:-$(cat -)}" "$output"; }
 flunk_message() { printf "expected: %s\nactual:   %s\n" "$1" "$2"; return 1; }
 

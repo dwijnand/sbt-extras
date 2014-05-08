@@ -38,10 +38,14 @@ sbt -v[erbosely] creating a new project built with the latest scala 2.10.x.
 
     Usage: sbt [options]
 
+    Note that options which are passed along to sbt begin with -- whereas
+    options to this runner use a single dash. Any sbt command can be scheduled
+    to run first by prefixing the command with --, so --warn, --error and so on
+    are not special.
+
       -h | -help         print this message
-      -v | -verbose      this runner is chattier
-      -d | -debug        set sbt log level to Debug
-      -q | -quiet        set sbt log level to Error
+      -v                 verbose operation (this runner is chattier)
+      -d, -w, -q         aliases for --debug, --warn, --error (q means quiet)
       -trace <level>     display stack traces with a max of <level> frames (default: -1, traces suppressed)
       -no-colors         disable ANSI color codes
       -sbt-create        start sbt even if current directory contains no sbt project
@@ -54,9 +58,7 @@ sbt -v[erbosely] creating a new project built with the latest scala 2.10.x.
       -batch             Disable interactive mode
       -prompt <expr>     Set the sbt prompt; in expr, 's' is the State and 'e' is Extracted
 
-      # sbt version (default: from project/build.properties if present, else latest release)
-      !!! The only way to accomplish this pre-0.12.0 if there is a build.properties file which
-      !!! contains an sbt.version property is to update the file on disk.  That's what this does.
+      # sbt version (default: sbt.version from project/build.properties if present, otherwise 0.13.2)
       -sbt-version  <version>   use the specified version of sbt (default: 0.13.2)
       -sbt-jar      <path>      use the specified jar as the sbt launcher
       -sbt-launch-dir <path>    directory to hold sbt launchers (default: ~/.sbt/launchers)
@@ -76,7 +78,7 @@ sbt -v[erbosely] creating a new project built with the latest scala 2.10.x.
 
       # passing options to the jvm - note it does NOT use JAVA_OPTS due to pollution
       # The default set is used if JVM_OPTS is unset and no -jvm-opts file is found
-      <default>        -Xms512m -Xmx1536m -Xss2m -XX:ReservedCodeCacheSize=256m -XX:+TieredCompilation -XX:+CMSClassUnloadingEnabled -XX:+UseConcMarkSweepGC
+      <default>        -XX:MaxPermSize=384m -Xms512m -Xmx1536m -Xss2m -XX:ReservedCodeCacheSize=256m -XX:+TieredCompilation -XX:+CMSClassUnloadingEnabled -XX:+UseConcMarkSweepGC
       JVM_OPTS         environment variable holding either the jvm args directly, or
                        the reference to a file containing jvm args if given path is prepended by '@' (e.g. '@/etc/jvmopts')
                        Note: "@"-file is overridden by local '.jvmopts' or '-jvm-opts' argument.

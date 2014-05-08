@@ -8,24 +8,13 @@ declare -r sbt_release_version="0.13.2"
 declare -r sbt_unreleased_version="0.13.5-RC1"
 declare -r buildProps="project/build.properties"
 
-declare sbt_jar sbt_dir sbt_create
+declare sbt_jar sbt_dir sbt_create sbt_version
 declare scala_version java_home sbt_explicit_version
-declare verbose debug quiet noshare batch trace_level log_level
+declare verbose noshare batch trace_level log_level
 declare sbt_saved_stty
 
-echoerr () { [[ -z "$quiet" ]]           && echo    "$@" >&2; }
-vlog ()    { [[ -n "$verbose$debug" ]]   && echoerr "$@"; }
-dlog ()    { [[ -n "$debug" ]]           && echoerr "$@"; }
-
-# we'd like these set before we get around to properly processing arguments
-for arg in "$@"; do
-  case "$arg" in
-    -q|-quiet)    quiet=true ;;
-    -d|-debug)    debug=true ;;
-  -v|-verbose)  verbose=true ;;
-            *)               ;;
-  esac
-done
+echoerr () { echo >&2 "$@"; }
+vlog ()    { [[ -n "$verbose" ]] && echoerr "$@"; }
 
 # spaces are possible, e.g. sbt.version = 0.13.0
 build_props_sbt () {
@@ -41,31 +30,24 @@ update_build_props_sbt () {
     perl -pi -e "s/^sbt\.version\b.*\$/sbt.version=${ver}/" "$buildProps"
     grep -q '^sbt.version[ =]' "$buildProps" || printf "\nsbt.version=%s\n" "$ver" >> "$buildProps"
 
-    echoerr "!!!"
-    echoerr "!!! Updated file $buildProps setting sbt.version to: $ver"
-    echoerr "!!! Previous value was: $old"
-    echoerr "!!!"
+    vlog "!!!"
+    vlog "!!! Updated file $buildProps setting sbt.version to: $ver"
+    vlog "!!! Previous value was: $old"
+    vlog "!!!"
   }
 }
 
-sbt_version () {
-  if [[ -n "$sbt_explicit_version" ]]; then
-    echo "$sbt_explicit_version"
-  else
-    local v="$(build_props_sbt)"
-    if [[ -n "$v" ]]; then
-      echo "$v"
-    else
-      echo "$sbt_release_version"
-    fi
-  fi
+set_sbt_version () {
+  sbt_version="${sbt_explicit_version:-$(build_props_sbt)}"
+  [[ -n "$sbt_version" ]] || sbt_version=$sbt_release_version
+  export sbt_version
 }
 
 # restore stty settings (echo in particular)
 onSbtRunnerExit() {
   [[ -n "$sbt_saved_stty" ]] || return
-  dlog ""
-  dlog "restoring stty: $sbt_saved_stty"
+  vlog ""
+  vlog "restoring stty: $sbt_saved_stty"
   stty "$sbt_saved_stty"
   unset sbt_saved_stty
 }
@@ -73,7 +55,7 @@ onSbtRunnerExit() {
 # save stty and trap exit, to ensure echo is reenabled if we are interrupted.
 trap onSbtRunnerExit EXIT
 sbt_saved_stty="$(stty -g 2>/dev/null)"
-dlog "Saved stty: $sbt_saved_stty"
+vlog "Saved stty: $sbt_saved_stty"
 
 # this seems to cover the bases on OSX, and someone will
 # have to tell me about the others.
@@ -162,17 +144,17 @@ build_props_scala () {
 
 execRunner () {
   # print the arguments one to a line, quoting any containing spaces
-  [[ "$verbose" || "$debug" ]] && echo "# Executing command line:" && {
+  vlog "# Executing command line:" && {
     for arg; do
       if [[ -n "$arg" ]]; then
         if printf "%s\n" "$arg" | grep -q ' '; then
-          printf "\"%s\"\n" "$arg"
+          printf >&2 "\"%s\"\n" "$arg"
         else
-          printf "%s\n" "$arg"
+          printf >&2 "%s\n" "$arg"
         fi
       fi
     done
-    echo ""
+    vlog ""
   }
 
   if [[ -n "$batch" ]]; then
@@ -193,9 +175,9 @@ download_url () {
   local url="$1"
   local jar="$2"
 
-  echo "Downloading sbt launcher for $(sbt_version):"
-  echo "  From  $url"
-  echo "    To  $jar"
+  echoerr "Downloading sbt launcher for $sbt_version:"
+  echoerr "  From  $url"
+  echoerr "    To  $jar"
 
   mkdir -p "${jar%/*}" && {
     if which curl >/dev/null; then
@@ -207,9 +189,8 @@ download_url () {
 }
 
 acquire_sbt_jar () {
-  for_sbt_version="$(sbt_version)"
-  sbt_url="$(jar_url "$for_sbt_version")"
-  sbt_jar="$(jar_file "$for_sbt_version")"
+  sbt_url="$(jar_url "$sbt_version")"
+  sbt_jar="$(jar_file "$sbt_version")"
 
   [[ -r "$sbt_jar" ]] || download_url "$sbt_url" "$sbt_jar"
 }
@@ -218,10 +199,14 @@ usage () {
   cat <<EOM
 Usage: $script_name [options]
 
+Note that options which are passed along to sbt begin with -- whereas
+options to this runner use a single dash. Any sbt command can be scheduled
+to run first by prefixing the command with --, so --warn, --error and so on
+are not special.
+
   -h | -help         print this message
-  -v | -verbose      this runner is chattier
-  -d | -debug        set sbt log level to Debug
-  -q | -quiet        set sbt log level to Error
+  -v                 verbose operation (this runner is chattier)
+  -d, -w, -q         aliases for --debug, --warn, --error (q means quiet)
   -trace <level>     display stack traces with a max of <level> frames (default: -1, traces suppressed)
   -no-colors         disable ANSI color codes
   -sbt-create        start sbt even if current directory contains no sbt project
@@ -272,19 +257,19 @@ EOM
 }
 
 addJava () {
-  dlog "[addJava] arg = '$1'"
+  vlog "[addJava] arg = '$1'"
   java_args=( "${java_args[@]}" "$1" )
 }
 addSbt () {
-  dlog "[addSbt] arg = '$1'"
+  vlog "[addSbt] arg = '$1'"
   sbt_commands=( "${sbt_commands[@]}" "$1" )
 }
 addScalac () {
-  dlog "[addScalac] arg = '$1'"
+  vlog "[addScalac] arg = '$1'"
   scalac_args=( "${scalac_args[@]}" "$1" )
 }
 addResidual () {
-  dlog "[residual] arg = '$1'"
+  vlog "[residual] arg = '$1'"
   residual_args=( "${residual_args[@]}" "$1" )
 }
 addResolver () {
@@ -313,10 +298,10 @@ process_args ()
   while [[ $# -gt 0 ]]; do
     case "$1" in
        -h|-help) usage; exit 1 ;;
-    -v|-verbose) verbose=true && log_level=Info && shift ;;
-      -d|-debug) debug=true && log_level=Debug && shift ;;
-      -q|-quiet) quiet=true && log_level=Error && shift ;;
-
+             -v) verbose=true && shift ;;
+             -d) addSbt "--debug" && shift ;;
+             -w) addSbt "--warn" && shift ;;
+             -q) addSbt "--error" && shift ;;
          -trace) require_arg integer "$1" "$2" && trace_level="$2" && shift 2 ;;
            -ivy) require_arg path "$1" "$2" && addJava "-Dsbt.ivy.home=$2" && shift 2 ;;
      -no-colors) addJava "-Dsbt.log.noformat=true" && shift ;;
@@ -383,15 +368,14 @@ fi
 set -- "${residual_args[@]}"
 argumentCount=$#
 
+# set sbt version
+set_sbt_version
+
 # only exists in 0.12+
 setTraceLevel() {
-  case "$(sbt_version)" in
-    "0.7."* | "0.10."* | "0.11."* )
-      echoerr "Cannot set trace level in sbt version $(sbt_version)"
-    ;;
-    *)
-      addSbt "set every traceLevel := $trace_level"
-    ;;
+  case "$sbt_version" in
+    "0.7."* | "0.10."* | "0.11."* ) echoerr "Cannot set trace level in sbt version $sbt_version" ;;
+                                 *) addSbt "set every traceLevel := $trace_level" ;;
   esac
 }
 
@@ -400,9 +384,9 @@ setTraceLevel() {
 
 # Update build.properties on disk to set explicit version - sbt gives us no choice
 [[ -n "$sbt_explicit_version" ]] && update_build_props_sbt "$sbt_explicit_version"
-vlog "Detected sbt version $(sbt_version)"
+vlog "Detected sbt version $sbt_version"
 
-[[ -n "$scala_version" ]] && echoerr "Overriding scala version to $scala_version"
+[[ -n "$scala_version" ]] && vlog "Overriding scala version to $scala_version"
 
 # no args - alert them there's stuff in here
 (( argumentCount > 0 )) || {
@@ -436,10 +420,10 @@ if [[ -n "$noshare" ]]; then
     addJava "$opt"
   done
 else
-  case "$(sbt_version)" in
+  case "$sbt_version" in
     "0.7."* | "0.10."* | "0.11."* | "0.12."* )
       [[ -n "$sbt_dir" ]] || {
-        sbt_dir="$HOME/.sbt/$(sbt_version)"
+        sbt_dir="$HOME/.sbt/$sbt_version"
         vlog "Using $sbt_dir as sbt dir, -sbt-dir to override."
       }
     ;;
@@ -463,10 +447,6 @@ fi
 
 # traceLevel is 0.12+
 [[ -n "$trace_level" ]] && setTraceLevel
-
-if [[ -n "$log_level" ]] && [[ "$log_level" != Info ]]; then
-  sbt_commands=("set logLevel in Global := Level.$log_level" "${sbt_commands[@]}")
-fi
 
 # run sbt
 execRunner "$java_cmd" \
