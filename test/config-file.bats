@@ -19,7 +19,7 @@ expectedOutput () { cat <<EOM
 -Dsome.prop="pass a # in a string"
 -Xss4m
 -jar
-$TEST_ROOT/.sbt/launchers/0.13.2/sbt-launch.jar
+$TEST_ROOT/.sbt/launchers/0.13.5/sbt-launch.jar
 about
 EOM
 }
