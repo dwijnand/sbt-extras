@@ -51,6 +51,7 @@ EOS
 
 @test "downloads release version if build.properties is missing" { no_props_and_fetch "$sbt_release"; }
 @test "downloads specified version when -sbt-version was given"  { no_props_and_fetch 0.12.2 -sbt-version 0.12.2; }
+@test "downloads released version when -sbt-latest was given"     { no_props_and_fetch "$sbt_release" -sbt-latest; }
 @test "downloads unreleased version when -sbt-dev was given"     { no_props_and_fetch "$sbt_dev" -sbt-dev; }
 
 @test "downloads specified version when -sbt-version was given, even if there is build.properties" {
@@ -62,6 +63,19 @@ EOS
 Downloading sbt launcher for $sbt_13:
   From  http://typesafe.artifactoryonline.com/typesafe/ivy-releases/org.scala-sbt/sbt-launch/$sbt_13/sbt-launch.jar
     To  $TEST_ROOT/.sbt/launchers/$sbt_13/sbt-launch.jar
+EOS
+  unstub curl
+}
+
+@test "downloads released version when -sbt-latest was given, even if there is build.properties" {
+  write_version_to_properties $sbt_12
+  stub_curl
+  run sbt -sbt-latest
+  assert_success
+  assert_output <<EOS
+Downloading sbt launcher for $sbt_release:
+  From  http://typesafe.artifactoryonline.com/typesafe/ivy-releases/org.scala-sbt/sbt-launch/$sbt_release/sbt-launch.jar
+    To  $TEST_ROOT/.sbt/launchers/$sbt_release/sbt-launch.jar
 EOS
   unstub curl
 }

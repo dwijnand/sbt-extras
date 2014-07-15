@@ -317,6 +317,7 @@ process_args ()
     -sbt-create) sbt_create=true && shift ;;
        -sbt-jar) require_arg path "$1" "$2" && sbt_jar="$2" && shift 2 ;;
    -sbt-version) require_arg version "$1" "$2" && sbt_explicit_version="$2" && shift 2 ;;
+    -sbt-latest) sbt_explicit_version="$sbt_release_version" && shift ;;
        -sbt-dev) sbt_explicit_version="$sbt_unreleased_version" && shift ;;
 -sbt-launch-dir) require_arg path "$1" "$2" && sbt_launch_dir="$2" && shift 2 ;;
 -sbt-launch-repo) require_arg path "$1" "$2" && sbt_launch_repo="$2" && shift 2 ;;
