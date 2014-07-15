@@ -12,7 +12,7 @@ required versions of sbt and scala, downloading them if necessary.
 
 Put the (self-contained) [sbt script](https://raw.githubusercontent.com/paulp/sbt-extras/master/sbt "sbt") somewhere on your path.
 
-    curl -s https://raw.githubusercontent.com/paulp/sbt-extras/master/sbt > ~/bin/sbt && chmod 0755 ~/bin/sbt
+    curl -Lo ~/bin/sbt http://tinyurl.com/paulp-sbt && chmod 0755 ~/bin/sbt
 
 ## Sample usage
 
