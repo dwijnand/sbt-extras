@@ -9,7 +9,7 @@ declare -r sbt_unreleased_version="0.13.6-MSERVER-1"
 declare -r buildProps="project/build.properties"
 
 declare sbt_jar sbt_dir sbt_create sbt_version
-declare scala_version java_home sbt_explicit_version
+declare scala_version sbt_explicit_version
 declare verbose noshare batch trace_level log_level
 declare sbt_saved_stty
 
