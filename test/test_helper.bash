@@ -134,6 +134,9 @@ assert_grep() {
   grep "$@" -- "$expected" <<<"$output" >/dev/null || flunk_message "$expected" "$output"
 }
 
-stub_java () {
-  stub java 'for arg; do echo "$arg"; done'
+stub_java() {
+  stub_java_version
+  stub_java_echo
 }
+stub_java_version() { stub java '-version : echo java version \\\"1.8.0_11\\\"'; }
+stub_java_echo()    { stub java '* : for arg; do echo "$arg"; done'; }
