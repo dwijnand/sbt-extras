@@ -52,6 +52,17 @@ sbt_rejecting () {
   unstub java
 }
 
+sbt_expecting_echo () {
+  stub_java_echo
+  sbt_anticipating expect "$@"
+  unstub java
+}
+sbt_rejecting_echo () {
+  stub_java_echo
+  sbt_anticipating reject "$@"
+  unstub java
+}
+
 sbt_anticipating () {
   case "$1" in
     expect) grep_opts="-F" && shift ;;
