@@ -40,9 +40,17 @@ sbt_test_setup () {
 teardown () { [[ -d "$TEST_ROOT" ]] && rm -rf -- "$TEST_ROOT"; }
 
 # Usage: f <string which should be in output> [args to sbt]
-sbt_expecting () { sbt_anticipating expect "$@"; }
+sbt_expecting () {
+  stub_java
+  sbt_anticipating expect "$@"
+  unstub java
+}
 # Usage: f <string which must not be in output> [args to sbt]
-sbt_rejecting () { sbt_anticipating reject "$@"; }
+sbt_rejecting () {
+  stub_java
+  sbt_anticipating reject "$@"
+  unstub java
+}
 
 sbt_anticipating () {
   case "$1" in
@@ -52,11 +60,9 @@ sbt_anticipating () {
   esac
 
   local text="$1" && shift
-  stub_java
   run sbt "$@"
   assert_success
   assert_grep "$text" "$grep_opts"
-  unstub java
 }
 
 create_project() {
