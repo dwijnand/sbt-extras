@@ -49,10 +49,10 @@ EOS
 @test "downloads sbt 0.12.x" { write_prop_and_fetch "$sbt_12"; }
 @test "downloads sbt 0.13.x" { write_prop_and_fetch "$sbt_13"; }
 
-@test "downloads release version if build.properties is missing" { no_props_and_fetch "$sbt_release"; }
-@test "downloads specified version when -sbt-version was given"  { no_props_and_fetch 0.12.2 -sbt-version 0.12.2; }
-@test "downloads released version when -sbt-latest was given"     { no_props_and_fetch "$sbt_release" -sbt-latest; }
-@test "downloads unreleased version when -sbt-dev was given"     { no_props_and_fetch "$sbt_dev" -sbt-dev; }
+@test "downloads release version if build.properties is missing"    { no_props_and_fetch "$sbt_release"; }
+@test "downloads specified version when -sbt-version was given"     { no_props_and_fetch 0.12.2 -sbt-version 0.12.2; }
+@test "downloads released version when -sbt-force-latest was given" { no_props_and_fetch "$sbt_release" -sbt-force-latest; }
+@test "downloads unreleased version when -sbt-dev was given"        { no_props_and_fetch "$sbt_dev" -sbt-dev; }
 
 @test "downloads specified version when -sbt-version was given, even if there is build.properties" {
   write_version_to_properties $sbt_12
@@ -67,10 +67,10 @@ EOS
   unstub curl
 }
 
-@test "downloads released version when -sbt-latest was given, even if there is build.properties" {
+@test "downloads released version when -sbt-force-latest was given, even if there is build.properties" {
   write_version_to_properties $sbt_12
   stub_curl
-  run sbt -sbt-latest
+  run sbt -sbt-force-latest
   assert_success
   assert_output <<EOS
 Downloading sbt launcher for $sbt_release:
