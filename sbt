@@ -224,6 +224,7 @@ are not special.
   -v                 verbose operation (this runner is chattier)
   -d, -w, -q         aliases for --debug, --warn, --error (q means quiet)
   -trace <level>     display stack traces with a max of <level> frames (default: -1, traces suppressed)
+  -debug-inc         enable debugging log for the incremental compiler
   -no-colors         disable ANSI color codes
   -sbt-create        start sbt even if current directory contains no sbt project
   -sbt-dir   <path>  path to global settings/plugins directory (default: ~/.sbt/<version>)
