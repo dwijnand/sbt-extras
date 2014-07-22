@@ -101,7 +101,7 @@ init_default_option_file () {
 
 declare -r cms_opts="-XX:+CMSClassUnloadingEnabled -XX:+UseConcMarkSweepGC"
 declare -r jit_opts="-XX:ReservedCodeCacheSize=256m -XX:+TieredCompilation"
-declare -r default_jvm_opts="-XX:MaxPermSize=384m -Xms512m -Xmx1536m -Xss2m $jit_opts $cms_opts"
+declare -r default_jvm_opts_common="-Xms512m -Xmx1536m -Xss2m $jit_opts $cms_opts"
 declare -r noshare_opts="-Dsbt.global.base=project/.sbtboot -Dsbt.boot.directory=project/.boot -Dsbt.ivy.home=project/.ivy"
 declare -r latest_28="2.8.2"
 declare -r latest_29="2.9.3"
@@ -133,6 +133,22 @@ declare -a extra_jvm_opts extra_sbt_opts
 declare sbt_launch_dir="$HOME/.sbt/launchers"
 [[ -d "$sbt_launch_dir" ]] || mkdir -p "$sbt_launch_dir"
 [[ -w "$sbt_launch_dir" ]] || sbt_launch_dir="$(mktemp -d -t sbt_extras_launchers.XXXXXX)"
+
+java_version () {
+  local version=$("$java_cmd" -version 2>&1 | grep -e 'java version' | awk '{ print $3 }' | tr -d \")
+  vlog "Detected Java version: $version"
+  echo "${version:2:1}"
+}
+
+# MaxPermSize critical on pre-8 jvms but incurs noisy warning on 8+
+default_jvm_opts () {
+  local v="$(java_version)"
+  if [[ $v -ge 8 ]]; then
+    echo "$default_jvm_opts_common"
+  else
+    echo "-XX:MaxPermSize=384m $default_jvm_opts_common"
+  fi
+}
 
 build_props_scala () {
   if [[ -r "$buildProps" ]]; then
@@ -239,7 +255,7 @@ are not special.
 
   # passing options to the jvm - note it does NOT use JAVA_OPTS due to pollution
   # The default set is used if JVM_OPTS is unset and no -jvm-opts file is found
-  <default>        $default_jvm_opts
+  <default>        $(default_jvm_opts)
   JVM_OPTS         environment variable holding either the jvm args directly, or
                    the reference to a file containing jvm args if given path is prepended by '@' (e.g. '@/etc/jvmopts')
                    Note: "@"-file is overridden by local '.jvmopts' or '-jvm-opts' argument.
@@ -442,13 +458,7 @@ elif [[ -n "$JVM_OPTS" && ! ("$JVM_OPTS" =~ ^@.*) ]]; then
   extra_jvm_opts=( $JVM_OPTS )
 else
   vlog "Using default jvm options"
-  java_version=$($java_cmd -version 2>&1 | grep -e 'java version' | awk '{ print $3 }' | tr -d \")
-  vlog "Detected Java version: $java_version"
-  if [[ "$(echo $java_version | sed 's/1.\([0-9]\)..*/\1/')" -ge 8 ]]; then
-    extra_jvm_opts=( $(echo $default_jvm_opts | sed "s%-XX:MaxPermSize=[^ ]* %%") )
-  else
-    extra_jvm_opts=( $default_jvm_opts )
-  fi
+  extra_jvm_opts=( $(default_jvm_opts) )
 fi
 
 # traceLevel is 0.12+
