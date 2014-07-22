@@ -220,6 +220,7 @@ are not special.
   -prompt <expr>     Set the sbt prompt; in expr, 's' is the State and 'e' is Extracted
 
   # sbt version (default: sbt.version from $buildProps if present, otherwise $sbt_release_version)
+  -sbt-force-latest         force the use of the latest release of sbt: $sbt_release_version
   -sbt-version  <version>   use the specified version of sbt (default: $sbt_release_version)
   -sbt-jar      <path>      use the specified jar as the sbt launcher
   -sbt-launch-dir <path>    directory to hold sbt launchers (default: ~/.sbt/launchers)
