@@ -297,46 +297,46 @@ process_args ()
   }
   while [[ $# -gt 0 ]]; do
     case "$1" in
-       -h|-help) usage; exit 1 ;;
-             -v) verbose=true && shift ;;
-             -d) addSbt "--debug" && shift ;;
-             -w) addSbt "--warn" && shift ;;
-             -q) addSbt "--error" && shift ;;
-         -trace) require_arg integer "$1" "$2" && trace_level="$2" && shift 2 ;;
-           -ivy) require_arg path "$1" "$2" && addJava "-Dsbt.ivy.home=$2" && shift 2 ;;
-     -no-colors) addJava "-Dsbt.log.noformat=true" && shift ;;
-      -no-share) noshare=true && shift ;;
-      -sbt-boot) require_arg path "$1" "$2" && addJava "-Dsbt.boot.directory=$2" && shift 2 ;;
-       -sbt-dir) require_arg path "$1" "$2" && sbt_dir="$2" && shift 2 ;;
-     -debug-inc) addJava "-Dxsbt.inc.debug=true" && shift ;;
-       -offline) addSbt "set offline := true" && shift ;;
-     -jvm-debug) require_arg port "$1" "$2" && addDebugger "$2" && shift 2 ;;
-         -batch) batch=true && shift ;;
-        -prompt) require_arg "expr" "$1" "$2" && addSbt "set shellPrompt in ThisBuild := (s => { val e = Project.extract(s) ; $2 })" && shift 2 ;;
+          -h|-help) usage; exit 1 ;;
+                -v) verbose=true && shift ;;
+                -d) addSbt "--debug" && shift ;;
+                -w) addSbt "--warn" && shift ;;
+                -q) addSbt "--error" && shift ;;
+            -trace) require_arg integer "$1" "$2" && trace_level="$2" && shift 2 ;;
+              -ivy) require_arg path "$1" "$2" && addJava "-Dsbt.ivy.home=$2" && shift 2 ;;
+        -no-colors) addJava "-Dsbt.log.noformat=true" && shift ;;
+         -no-share) noshare=true && shift ;;
+         -sbt-boot) require_arg path "$1" "$2" && addJava "-Dsbt.boot.directory=$2" && shift 2 ;;
+          -sbt-dir) require_arg path "$1" "$2" && sbt_dir="$2" && shift 2 ;;
+        -debug-inc) addJava "-Dxsbt.inc.debug=true" && shift ;;
+          -offline) addSbt "set offline := true" && shift ;;
+        -jvm-debug) require_arg port "$1" "$2" && addDebugger "$2" && shift 2 ;;
+            -batch) batch=true && shift ;;
+           -prompt) require_arg "expr" "$1" "$2" && addSbt "set shellPrompt in ThisBuild := (s => { val e = Project.extract(s) ; $2 })" && shift 2 ;;
 
-    -sbt-create) sbt_create=true && shift ;;
-       -sbt-jar) require_arg path "$1" "$2" && sbt_jar="$2" && shift 2 ;;
-   -sbt-version) require_arg version "$1" "$2" && sbt_explicit_version="$2" && shift 2 ;;
-    -sbt-latest) sbt_explicit_version="$sbt_release_version" && shift ;;
-       -sbt-dev) sbt_explicit_version="$sbt_unreleased_version" && shift ;;
--sbt-launch-dir) require_arg path "$1" "$2" && sbt_launch_dir="$2" && shift 2 ;;
--sbt-launch-repo) require_arg path "$1" "$2" && sbt_launch_repo="$2" && shift 2 ;;
- -scala-version) require_arg version "$1" "$2" && setScalaVersion "$2" && shift 2 ;;
--binary-version) require_arg version "$1" "$2" && addSbt "set scalaBinaryVersion in ThisBuild := \"$2\"" && shift 2 ;;
-    -scala-home) require_arg path "$1" "$2" && addSbt "set every scalaHome := Some(file(\"$2\"))" && shift 2 ;;
-     -java-home) require_arg path "$1" "$2" && java_cmd="$2/bin/java" && shift 2 ;;
-      -sbt-opts) require_arg path "$1" "$2" && sbt_opts_file="$2" && shift 2 ;;
-      -jvm-opts) require_arg path "$1" "$2" && jvm_opts_file="$2" && shift 2 ;;
+       -sbt-create) sbt_create=true && shift ;;
+          -sbt-jar) require_arg path "$1" "$2" && sbt_jar="$2" && shift 2 ;;
+      -sbt-version) require_arg version "$1" "$2" && sbt_explicit_version="$2" && shift 2 ;;
+ -sbt-force-latest) sbt_explicit_version="$sbt_release_version" && shift ;;
+          -sbt-dev) sbt_explicit_version="$sbt_unreleased_version" && shift ;;
+   -sbt-launch-dir) require_arg path "$1" "$2" && sbt_launch_dir="$2" && shift 2 ;;
+  -sbt-launch-repo) require_arg path "$1" "$2" && sbt_launch_repo="$2" && shift 2 ;;
+    -scala-version) require_arg version "$1" "$2" && setScalaVersion "$2" && shift 2 ;;
+   -binary-version) require_arg version "$1" "$2" && addSbt "set scalaBinaryVersion in ThisBuild := \"$2\"" && shift 2 ;;
+       -scala-home) require_arg path "$1" "$2" && addSbt "set every scalaHome := Some(file(\"$2\"))" && shift 2 ;;
+        -java-home) require_arg path "$1" "$2" && java_cmd="$2/bin/java" && shift 2 ;;
+         -sbt-opts) require_arg path "$1" "$2" && sbt_opts_file="$2" && shift 2 ;;
+         -jvm-opts) require_arg path "$1" "$2" && jvm_opts_file="$2" && shift 2 ;;
 
-            -D*) addJava "$1" && shift ;;
-            -J*) addJava "${1:2}" && shift ;;
-            -S*) addScalac "${1:2}" && shift ;;
-            -28) setScalaVersion "$latest_28" && shift ;;
-            -29) setScalaVersion "$latest_29" && shift ;;
-           -210) setScalaVersion "$latest_210" && shift ;;
-           -211) setScalaVersion "$latest_211" && shift ;;
+               -D*) addJava "$1" && shift ;;
+               -J*) addJava "${1:2}" && shift ;;
+               -S*) addScalac "${1:2}" && shift ;;
+               -28) setScalaVersion "$latest_28" && shift ;;
+               -29) setScalaVersion "$latest_29" && shift ;;
+              -210) setScalaVersion "$latest_210" && shift ;;
+              -211) setScalaVersion "$latest_211" && shift ;;
 
-              *) addResidual "$1" && shift ;;
+                 *) addResidual "$1" && shift ;;
     esac
   done
 }
