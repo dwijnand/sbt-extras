@@ -9,7 +9,7 @@ declare -r sbt_unreleased_version="0.13.6-MSERVER-1"
 declare -r buildProps="project/build.properties"
 
 declare sbt_jar sbt_dir sbt_create sbt_version
-declare scala_version java_home sbt_explicit_version
+declare scala_version sbt_explicit_version
 declare verbose noshare batch trace_level log_level
 declare sbt_saved_stty
 
@@ -442,7 +442,13 @@ elif [[ -n "$JVM_OPTS" && ! ("$JVM_OPTS" =~ ^@.*) ]]; then
   extra_jvm_opts=( $JVM_OPTS )
 else
   vlog "Using default jvm options"
-  extra_jvm_opts=( $default_jvm_opts )
+  java_version=$($java_cmd -version 2>&1 | grep -e 'java version' | awk '{ print $3 }' | tr -d \")
+  vlog "Detected Java version: $java_version"
+  if [[ "$(echo $java_version | sed 's/1.\([0-9]\)..*/\1/')" -ge 8 ]]; then
+    extra_jvm_opts=( $(echo $default_jvm_opts | sed "s%-XX:MaxPermSize=[^ ]* %%") )
+  else
+    extra_jvm_opts=( $default_jvm_opts )
+  fi
 fi
 
 # traceLevel is 0.12+
