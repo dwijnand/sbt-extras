@@ -237,6 +237,7 @@ are not special.
 
   # sbt version (default: sbt.version from $buildProps if present, otherwise $sbt_release_version)
   -sbt-version  <version>   use the specified version of sbt (default: $sbt_release_version)
+  -sbt-dev                  use the latest pre-release version of sbt: $sbt_unreleased_version
   -sbt-jar      <path>      use the specified jar as the sbt launcher
   -sbt-launch-dir <path>    directory to hold sbt launchers (default: ~/.sbt/launchers)
   -sbt-launch-repo <url>    repo url for downloading sbt launcher jar (default: $sbt_launch_repo)
