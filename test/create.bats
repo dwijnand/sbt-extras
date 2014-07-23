@@ -14,7 +14,7 @@ setup() { sbt_test_setup && mkdircd "$TEST_ROOT/newproject"; }
 @test "starts sbt on empty project if -sbt-create was given" {
   assert [ ! -f "build.sbt" ]
   assert [ ! -d "project" ]
-  stub java true
+  stub_java
   run sbt -sbt-create
   assert_success
   unstub java

@@ -9,7 +9,7 @@ declare -r sbt_unreleased_version="0.13.6-MSERVER-1"
 declare -r buildProps="project/build.properties"
 
 declare sbt_jar sbt_dir sbt_create sbt_version
-declare scala_version java_home sbt_explicit_version
+declare scala_version sbt_explicit_version
 declare verbose noshare batch trace_level log_level
 declare sbt_saved_stty
 
@@ -101,7 +101,7 @@ init_default_option_file () {
 
 declare -r cms_opts="-XX:+CMSClassUnloadingEnabled -XX:+UseConcMarkSweepGC"
 declare -r jit_opts="-XX:ReservedCodeCacheSize=256m -XX:+TieredCompilation"
-declare -r default_jvm_opts="-XX:MaxPermSize=384m -Xms512m -Xmx1536m -Xss2m $jit_opts $cms_opts"
+declare -r default_jvm_opts_common="-Xms512m -Xmx1536m -Xss2m $jit_opts $cms_opts"
 declare -r noshare_opts="-Dsbt.global.base=project/.sbtboot -Dsbt.boot.directory=project/.boot -Dsbt.ivy.home=project/.ivy"
 declare -r latest_28="2.8.2"
 declare -r latest_29="2.9.3"
@@ -133,6 +133,22 @@ declare -a extra_jvm_opts extra_sbt_opts
 declare sbt_launch_dir="$HOME/.sbt/launchers"
 [[ -d "$sbt_launch_dir" ]] || mkdir -p "$sbt_launch_dir"
 [[ -w "$sbt_launch_dir" ]] || sbt_launch_dir="$(mktemp -d -t sbt_extras_launchers.XXXXXX)"
+
+java_version () {
+  local version=$("$java_cmd" -version 2>&1 | grep -e 'java version' | awk '{ print $3 }' | tr -d \")
+  vlog "Detected Java version: $version"
+  echo "${version:2:1}"
+}
+
+# MaxPermSize critical on pre-8 jvms but incurs noisy warning on 8+
+default_jvm_opts () {
+  local v="$(java_version)"
+  if [[ $v -ge 8 ]]; then
+    echo "$default_jvm_opts_common"
+  else
+    echo "-XX:MaxPermSize=384m $default_jvm_opts_common"
+  fi
+}
 
 build_props_scala () {
   if [[ -r "$buildProps" ]]; then
@@ -208,6 +224,7 @@ are not special.
   -v                 verbose operation (this runner is chattier)
   -d, -w, -q         aliases for --debug, --warn, --error (q means quiet)
   -trace <level>     display stack traces with a max of <level> frames (default: -1, traces suppressed)
+  -debug-inc         enable debugging log for the incremental compiler
   -no-colors         disable ANSI color codes
   -sbt-create        start sbt even if current directory contains no sbt project
   -sbt-dir   <path>  path to global settings/plugins directory (default: ~/.sbt/<version>)
@@ -222,6 +239,7 @@ are not special.
   # sbt version (default: sbt.version from $buildProps if present, otherwise $sbt_release_version)
   -sbt-force-latest         force the use of the latest release of sbt: $sbt_release_version
   -sbt-version  <version>   use the specified version of sbt (default: $sbt_release_version)
+  -sbt-dev                  use the latest pre-release version of sbt: $sbt_unreleased_version
   -sbt-jar      <path>      use the specified jar as the sbt launcher
   -sbt-launch-dir <path>    directory to hold sbt launchers (default: ~/.sbt/launchers)
   -sbt-launch-repo <url>    repo url for downloading sbt launcher jar (default: $sbt_launch_repo)
@@ -240,7 +258,7 @@ are not special.
 
   # passing options to the jvm - note it does NOT use JAVA_OPTS due to pollution
   # The default set is used if JVM_OPTS is unset and no -jvm-opts file is found
-  <default>        $default_jvm_opts
+  <default>        $(default_jvm_opts)
   JVM_OPTS         environment variable holding either the jvm args directly, or
                    the reference to a file containing jvm args if given path is prepended by '@' (e.g. '@/etc/jvmopts')
                    Note: "@"-file is overridden by local '.jvmopts' or '-jvm-opts' argument.
@@ -444,7 +462,7 @@ elif [[ -n "$JVM_OPTS" && ! ("$JVM_OPTS" =~ ^@.*) ]]; then
   extra_jvm_opts=( $JVM_OPTS )
 else
   vlog "Using default jvm options"
-  extra_jvm_opts=( $default_jvm_opts )
+  extra_jvm_opts=( $(default_jvm_opts) )
 fi
 
 # traceLevel is 0.12+

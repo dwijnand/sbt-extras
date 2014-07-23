@@ -25,7 +25,7 @@ EOM
 }
 
 @test "tolerates blank lines and comments in jvm_opts file" {
-  stub_java
+  stub_java_echo
   configFile >jvm_opts
   run sbt -jvm-opts jvm_opts about
   assert_success
