@@ -9,6 +9,7 @@ load test_helper
 @test "-offline   => offline setting"      { sbt_expecting "set offline := true" -offline;                                                          }
 @test "-Sopt      => scalac -opt"          { sbt_expecting 'set scalacOptions in ThisBuild += "-P:continuations:enable"' -S-P:continuations:enable; }
 @test "-prompt    => shellPrompt"          { sbt_expecting "set shellPrompt in ThisBuild" -prompt 'bippy> ';                                        }
+@test "-java-home => javaHome"             { sbt_expecting 'set javaHome in ThisBuild := Some(file("..")' -java-home '..';                          }
 
 @test "-jvm-debug => -Xdebug, -Xrunjdwp:transport" {
   sbt_expecting "-Xdebug" -jvm-debug 8000
