@@ -2,7 +2,7 @@
 
 load test_helper
 
-@test "-scala-home => scalaHome"              { sbt_expecting 'set every scalaHome := Some(file("scala"))' -scala-home scala;                       }
+@test "-scala-home => scalaHome"              { sbt_expecting 'set scalaHome in ThisBuild := Some(file("scala"))' -scala-home scala;                       }
 @test "-binary-version => scalaBinaryVersion" { sbt_expecting 'set scalaBinaryVersion in ThisBuild := "2.10.2"' -binary-version 2.10.2;             }
 @test "-scala-version SNAPSHOT => resolver"   { sbt_expecting 'set resolvers += Resolver.sonatypeRepo("snapshots")' -scala-version 2.12.0-SNAPSHOT; }
 @test "-28 => scala 2.8"                      { sbt_expecting "++ 2.8.2" -28;                                                                       }

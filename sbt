@@ -283,6 +283,12 @@ addSbt () {
   vlog "[addSbt] arg = '$1'"
   sbt_commands=( "${sbt_commands[@]}" "$1" )
 }
+setThisBuild () {
+  vlog "[addBuild] args = '$@'"
+  local key="$1" && shift
+  addSbt "set $key in ThisBuild := $@"
+}
+
 addScalac () {
   vlog "[addScalac] arg = '$1'"
   scalac_args=( "${scalac_args[@]}" "$1" )
@@ -331,7 +337,7 @@ process_args ()
           -offline) addSbt "set offline := true" && shift ;;
         -jvm-debug) require_arg port "$1" "$2" && addDebugger "$2" && shift 2 ;;
             -batch) batch=true && shift ;;
-           -prompt) require_arg "expr" "$1" "$2" && addSbt "set shellPrompt in ThisBuild := (s => { val e = Project.extract(s) ; $2 })" && shift 2 ;;
+           -prompt) require_arg "expr" "$1" "$2" && setThisBuild shellPrompt "(s => { val e = Project.extract(s) ; $2 })" && shift 2 ;;
 
        -sbt-create) sbt_create=true && shift ;;
           -sbt-jar) require_arg path "$1" "$2" && sbt_jar="$2" && shift 2 ;;
@@ -341,8 +347,8 @@ process_args ()
    -sbt-launch-dir) require_arg path "$1" "$2" && sbt_launch_dir="$2" && shift 2 ;;
   -sbt-launch-repo) require_arg path "$1" "$2" && sbt_launch_repo="$2" && shift 2 ;;
     -scala-version) require_arg version "$1" "$2" && setScalaVersion "$2" && shift 2 ;;
-   -binary-version) require_arg version "$1" "$2" && addSbt "set scalaBinaryVersion in ThisBuild := \"$2\"" && shift 2 ;;
-       -scala-home) require_arg path "$1" "$2" && addSbt "set every scalaHome := Some(file(\"$2\"))" && shift 2 ;;
+   -binary-version) require_arg version "$1" "$2" && setThisBuild scalaBinaryVersion "\"$2\"" && shift 2 ;;
+       -scala-home) require_arg path "$1" "$2" && setThisBuild scalaHome "Some(file(\"$2\"))" && shift 2 ;;
         -java-home) require_arg path "$1" "$2" && java_cmd="$2/bin/java" && shift 2 ;;
          -sbt-opts) require_arg path "$1" "$2" && sbt_opts_file="$2" && shift 2 ;;
          -jvm-opts) require_arg path "$1" "$2" && jvm_opts_file="$2" && shift 2 ;;
@@ -395,7 +401,7 @@ set_sbt_version
 setTraceLevel() {
   case "$sbt_version" in
     "0.7."* | "0.10."* | "0.11."* ) echoerr "Cannot set trace level in sbt version $sbt_version" ;;
-                                 *) addSbt "set every traceLevel := $trace_level" ;;
+                                 *) setThisBuild traceLevel $trace_level ;;
   esac
 }
 
