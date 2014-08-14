@@ -166,7 +166,12 @@ setJavaHome () {
 }
 
 # if set, use JAVA_HOME over java found in path
-[[ -e "$JAVA_HOME/bin/java" ]] && setJavaHome "$JAVA_HOME"
+if [[ -e "$JAVA_HOME/bin/java" ]]; then
+  java_cmd="$JAVA_HOME/bin/java"
+  # Setting javaHome explicitly helps sbt figure out where javac is.
+  # https://github.com/paulp/sbt-extras/issues/83
+  addSbt "; -- warn ; set javaHome in ThisBuild := Some(file(\"$JAVA_HOME\")) ; -- info"
+fi
 
 # directory to store sbt launchers
 declare sbt_launch_dir="$HOME/.sbt/launchers"
