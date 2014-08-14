@@ -162,7 +162,7 @@ setJavaHome () {
   java_cmd="$1/bin/java"
   # Setting javaHome explicitly helps sbt figure out where javac is.
   # https://github.com/paulp/sbt-extras/issues/83
-  addSbt "set javaHome in ThisBuild := Some(file(\"$1\"))"
+  setThisBuild javaHome "Some(file(\"$1\"))"
 }
 
 # if set, use JAVA_HOME over java found in path
