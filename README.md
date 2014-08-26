@@ -43,10 +43,18 @@ sbt -v[erbosely] creating a new project built with the latest scala 2.10.x.
     to run first by prefixing the command with --, so --warn, --error and so on
     are not special.
 
+    Output filtering: if there is a file in the home directory called .sbtignore
+    and this is not an interactive sbt session, the file is treated as a list of
+    bash regular expressions. Output lines which match any regex are not echoed.
+    One can see exactly which lines would have been suppressed by starting this
+    runner with the -x option.
+
       -h | -help         print this message
       -v                 verbose operation (this runner is chattier)
       -d, -w, -q         aliases for --debug, --warn, --error (q means quiet)
+      -x                 debug this script
       -trace <level>     display stack traces with a max of <level> frames (default: -1, traces suppressed)
+      -debug-inc         enable debugging log for the incremental compiler
       -no-colors         disable ANSI color codes
       -sbt-create        start sbt even if current directory contains no sbt project
       -sbt-dir   <path>  path to global settings/plugins directory (default: ~/.sbt/<version>)
@@ -58,8 +66,10 @@ sbt -v[erbosely] creating a new project built with the latest scala 2.10.x.
       -batch             Disable interactive mode
       -prompt <expr>     Set the sbt prompt; in expr, 's' is the State and 'e' is Extracted
 
-      # sbt version (default: sbt.version from project/build.properties if present, otherwise 0.13.2)
-      -sbt-version  <version>   use the specified version of sbt (default: 0.13.2)
+      # sbt version (default: sbt.version from project/build.properties if present, otherwise 0.13.5)
+      -sbt-force-latest         force the use of the latest release of sbt: 0.13.5
+      -sbt-version  <version>   use the specified version of sbt (default: 0.13.5)
+      -sbt-dev                  use the latest pre-release version of sbt: 0.13.6-M2
       -sbt-jar      <path>      use the specified jar as the sbt launcher
       -sbt-launch-dir <path>    directory to hold sbt launchers (default: ~/.sbt/launchers)
       -sbt-launch-repo <url>    repo url for downloading sbt launcher jar (default: http://typesafe.artifactoryonline.com/typesafe/ivy-releases)
@@ -68,12 +78,12 @@ sbt -v[erbosely] creating a new project built with the latest scala 2.10.x.
       -28                       use 2.8.2
       -29                       use 2.9.3
       -210                      use 2.10.4
-      -211                      use 2.11.0
+      -211                      use 2.11.2
       -scala-home <path>        use the scala build at the specified directory
       -scala-version <version>  use the specified version of scala
       -binary-version <version> use the specified scala version when searching for dependencies
 
-      # java version (default: java from PATH, currently java version "1.8.0_05")
+      # java version (default: java from PATH, currently java version "1.7.0_65")
       -java-home <path>         alternate JAVA_HOME
 
       # passing options to the jvm - note it does NOT use JAVA_OPTS due to pollution
@@ -92,3 +102,33 @@ sbt -v[erbosely] creating a new project built with the latest scala 2.10.x.
                        Note: "@"-file is overridden by local '.sbtopts' or '-sbt-opts' argument.
       -sbt-opts <path> file containing sbt args (if not given, .sbtopts in project root is used if present)
       -S-X             add -X to sbt's scalacOptions (-S is stripped)
+
+## My ~/.sbtignore - fairly aggressive.
+
+```bash
+# sbt ignore regexps
+Starting sbt with output filtering enabled
+^\[info\][ ]+(Resolving|Loading|Done|Attempting|Formatting|Updating)[ ]
+^\[info\] Main Scala API documentation
+^\[info\].*published[ ]+.*(sources\.jar|javadoc\.jar|\.pom)$
+^\[info\].*published ivy to
+^\[warn\] Credentials file
+^\[info\] Wrote.*[.]pom
+This usage is deprecated
+Attempting to overwrite
+delivering ivy file to
+warnings? found$
+re[-]run with [-](unchecked|deprecation|feature) for details
+model contains[ ]
+[ ]delivering[ ]
+^Graphviz dot encountered an error when generating the diagram for:
+^These are usually spurious errors, but if you notice a persistant error on
+^a diagram, please use the -diagrams-debug flag and report a bug with the output
+^Graphviz will be restarted...
+^Diagrams will be disabled for this run because the graphviz dot tool
+^has malfunctioned too many times. These scaladoc flags may help:
+^Please note that graphviz package
+^[*]+$
+^-diagrams-
+^$
+```
