@@ -1,4 +1,4 @@
-#!/bin/sh
+#!/usr/bin/env bash
 #
 # ivycp  by paul phillips  part of sbt-extras
 # https://github.com/paulp/sbt-extras
@@ -61,7 +61,7 @@ EOM
 }
 
 genBuildXml "$(dependencyLines "$@")" > "$build"
-ant -q -f "$build" >/dev/null
+ant -q -f "$build" >/dev/null 2>/dev/null
 code="$?"
 
 if (( code == 0 )); then
