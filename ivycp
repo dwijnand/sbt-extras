@@ -3,6 +3,8 @@
 # ivycp  by paul phillips  part of sbt-extras
 # https://github.com/paulp/sbt-extras
 
+set -o pipefail
+
 die () { echo >&2 "Error: $@" && exit 1; }
 
 ivyjar="$IVYJAR"
@@ -10,11 +12,9 @@ ivyjar="$IVYJAR"
 [[ -f "$ivyjar" ]] || ivyjar="$(brew --prefix)/Cellar/ivy/2.3.0/libexec/ivy-2.3.0.jar"
 [[ -f "$ivyjar" ]] || die "Can't find ivy.jar. Set IVYJAR to its path."
 
-dir="$(mktemp -dt ivycp)"
-build="$dir/build.xml"
 program="$(basename "$0")"
 
-[[ $# -gt 0 ]] || {
+if [[ $# -eq 0 ]]; then
   cat <<EOM
 Usage: $program [dependency dependency ...]
 
@@ -29,11 +29,15 @@ defaulting to rev=latest.release and conf=default. Examples
 using this program to create a classpath on the fly:
 
   $program org.scalaz%scalaz-core_2.11 org.jboss.netty%netty
-  java -jar $(ivycp org.eclipse.jetty%jetty-start) --list-config
+  java -jar \$($program org.eclipse.jetty%jetty-start) --list-config
 
 EOM
+
   exit 0
-}
+fi
+
+dir="$(mktemp -dt ivycp)"
+build="$dir/build.xml"
 
 dependencyLine () {
   local fmt='      <dependency org="%s" name="%s" rev="%s" conf="%s" />'"\n"
@@ -68,8 +72,7 @@ if (( code == 0 )); then
   set -- $(readlink "$dir/lib"/*)
   ( IFS=: && echo "$*" )
 else
-  echo >&2 "Dependency retrieval failed: $?"
-  # ( cd "$dir" && cat build.xml && ant )
+  echo >&2 "Dependency retrieval failed: exit code $?"
 fi
 
 exit "$code"
