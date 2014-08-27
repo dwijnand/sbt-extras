@@ -370,6 +370,9 @@ process_args ()
                  *) addResidual "$1" && shift ;;
     esac
   done
+
+  # Default to calling `sbt shell` if no sbt target specified
+  [[ -z "$residual_args" ]] && addResidual "shell"
 }
 
 # process the direct command line arguments
