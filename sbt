@@ -515,11 +515,11 @@ mainFiltered () {
   main | while read -r line; do echoLine "$line"; done
 }
 
-# Only filter if there's a filter file and we don't see "shell" in the sbt commands.
+# Only filter if there's a filter file and we don't see a known interactive command.
 # Obviously this is super ad hoc but I don't know how to improve on it. Testing whether
 # stdin is a terminal is useless because most of my use cases for this filtering are
 # exactly when I'm at a terminal, running sbt non-interactively.
-shouldFilter () { [[ -f ~/.sbtignore ]] && ! egrep -q '\bshell\b' <<<"${residual_args[@]}"; }
+shouldFilter () { [[ -f ~/.sbtignore ]] && ! egrep -q '\b(shell|console|consoleProject)\b' <<<"${residual_args[@]}"; }
 
 # run sbt
 shouldFilter && mainFiltered || main
