@@ -10,10 +10,11 @@ required versions of sbt and scala, downloading them if necessary.
 
 ## Installation
 
-Put the (self-contained) [sbt script](https://raw.githubusercontent.com/paulp/sbt-extras/master/sbt "sbt") somewhere on your path.
+Put the (self-contained) [sbt script](https://raw.githubusercontent.com/paulp/sbt-extras/master/sbt "sbt") somewhere on your path, for instance:
 
 ```bash
-curl -s https://raw.githubusercontent.com/paulp/sbt-extras/master/sbt > ~/bin/sbt && chmod 0755 ~/bin/sbt
+curl -s https://raw.githubusercontent.com/paulp/sbt-extras/master/sbt > ~/bin/sbt \
+  && chmod 0755 ~/bin/sbt
 ```
 
 ## Sample usage
@@ -22,20 +23,19 @@ sbt -v[erbosely] creating a new project built with the latest scala 2.10.x.
 
 ```
 % sbt -v -210 -sbt-create about
-Detected sbt version 0.13.0
-Using $HOME/.sbt/0.13.0 as sbt dir, -sbt-dir to override.
+Detected sbt version 0.13.5
+Detected Java version: 1.8.0_11
 # Executing command line:
-$JAVA_HOME/bin/java
--Xmx1g
+/Library/Java/JavaVirtualMachines/jdk1.8.0_11.jdk/Contents/Home/bin/java
 -jar
-$HOME/.sbt/launchers/0.13.0/sbt-launch.jar
-"++ 2.10.3-RC1"
+$HOME/.sbt/launchers/0.13.5/sbt-launch.jar
+"++ 2.10.4"
 about
 
-[info] Setting version to 2.10.3-RC1
-[info] This is sbt 0.13.0
-[info] The current project is built against Scala 2.10.3-RC1
-[info] sbt, sbt plugins, and build definitions are using Scala 2.10.2
+[info] Setting version to 2.10.4
+[info] This is sbt 0.13.5
+[info] The current project is built against Scala 2.10.4
+[info] sbt, sbt plugins, and build definitions are using Scala 2.10.4
 ```
 
 ## sbt -h
