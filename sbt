@@ -522,4 +522,4 @@ mainFiltered () {
 shouldFilter () { [[ -f ~/.sbtignore ]] && ! egrep -q '\b(shell|console|consoleProject)\b' <<<"${residual_args[@]}"; }
 
 # run sbt
-shouldFilter && mainFiltered || main
+if shouldFilter; then mainFiltered; else main; fi
