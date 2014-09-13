@@ -11,7 +11,7 @@ export sbt_07="0.7.7"
 export sbt_10="0.10.1"
 export sbt_11="0.11.3"
 export sbt_12="0.12.4"
-export sbt_13="0.13.5"
+export sbt_13="0.13.6"
 export sbt_release="$sbt_13"
 export sbt_dev="0.13.6-M2"
 
