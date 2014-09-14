@@ -1,0 +1,49 @@
+#!/usr/bin/env bash
+#
+
+set -e
+set -x
+origin="https://github.com/paulp/sbt-skeleton"
+
+die () { echo >&2 "$@" && exit 1; }
+
+unset org project path
+
+while getopts :o:p: opt; do
+  case $opt in
+    o) org="$OPTARG" ;;
+    p) project="$OPTARG" ;;
+    *) die "Unrecognized argument $OPTARG" ;;
+  esac
+done
+
+shift $((OPTIND-1))
+
+path="$1" && shift
+dir="$(dirname "$path")"
+base="$(basename "$path")"
+
+[[ -n $path ]] || die "Usage: $0 [-o organization] [-p project] <path>"
+[[ -n $project ]] || project="$base"
+[[ -n $org ]] || org="$ORGANIZATION"
+[[ -n $org ]] || die "Can't figure out organization: give -o option."
+
+org="$(echo "$org" | sed 's/\./\\\\./g')"
+
+mkdir -p "$dir"
+cd "$dir"
+
+[[ -e "$base" ]] && die "Aborting: $base already exists."
+
+git clone --quiet --no-hardlinks "$origin" "$base"
+cd "$base"
+rm -rf .git
+
+perl -i -e "s/xyzzy/$org/g" $(find . -type f)
+perl -i -e "s/plugh/$project/g" $(find . -type f)
+
+git init
+git add .
+git commit -m "Initial Import"
+
+echo >&2 "Created template project at $path"
