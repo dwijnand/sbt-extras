@@ -28,8 +28,6 @@ base="$(basename "$path")"
 [[ -n $org ]] || org="$ORGANIZATION"
 [[ -n $org ]] || die "Can't figure out organization: give -o option."
 
-org="$(echo "$org" | sed 's/\./\\\\./g')"
-
 mkdir -p "$dir"
 cd "$dir"
 
@@ -39,11 +37,16 @@ git clone --quiet --no-hardlinks "$origin" "$base"
 cd "$base"
 rm -rf .git
 
-perl -i -e "s/xyzzy/$org/g" $(find . -type f)
-perl -i -e "s/plugh/$project/g" $(find . -type f)
+git init .
+git add --all .
+git commit -m "Initial Import."
 
-git init
-git add .
-git commit -m "Initial Import"
+for file in $(find src project -type f); do
+  perl -pi -e "s/xyzzy/$org/g" "$file"
+  perl -pi -e "s/plugh/$project/g" "$file"
+done
+
+git add --all .
+git commit -m "Template substitution."
 
 echo >&2 "Created template project at $path"
