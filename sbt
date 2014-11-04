@@ -453,7 +453,7 @@ if [[ -n "$noshare" ]]; then
   done
 else
   case "$sbt_version" in
-    "0.7."* | "0.10."* | "0.11."* | "0.12."* )
+    "0.7."* | "0.10."* | "0.11."* | "0.12."* | "0.13."*)
       [[ -n "$sbt_dir" ]] || {
         sbt_dir="$HOME/.sbt/$sbt_version"
         vlog "Using $sbt_dir as sbt dir, -sbt-dir to override."
