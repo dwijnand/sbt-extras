@@ -18,6 +18,7 @@ expectedOutput () { cat <<EOM
 -Xmx1g
 -Dsome.prop="pass a # in a string"
 -Xss4m
+-Dsbt.global.base=$TEST_ROOT/.sbt/0.13.6
 -jar
 $TEST_ROOT/.sbt/launchers/0.13.6/sbt-launch.jar
 about
