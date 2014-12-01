@@ -4,6 +4,7 @@
 # Author: Paul Phillips <paulp@typesafe.com>
 
 # todo - make this dynamic
+argumentCount=$#
 declare -r sbt_release_version="0.13.7"
 declare -r sbt_unreleased_version="0.13.8-M1"
 declare -r buildProps="project/build.properties"
@@ -398,7 +399,6 @@ fi
 
 # reset "$@" to the residual args
 set -- "${residual_args[@]}"
-argumentCount=$#
 
 # set sbt version
 set_sbt_version
