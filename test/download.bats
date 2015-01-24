@@ -97,6 +97,14 @@ EOS
   echo_prop_and_fetch "sbt.version = 0.12.1" "0.12.1"
 }
 
+@test "support windows line endings (crlf) in build.properties" {
+  echo_prop_and_fetch "sbt.version=0.22.0-M1\r" "0.22.0-M1"
+}
+
+@test "support unix line endings (lf) in build.properties" {
+  echo_prop_and_fetch "sbt.version=0.13.7\n" "0.13.7"
+}
+
 @test "skips to download sbt-launch.jar if a file was given via -sbt-jar" {
   touch sbt-launch.jar
   run sbt -sbt-jar sbt-launch.jar
