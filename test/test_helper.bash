@@ -15,8 +15,8 @@ export sbt_13="0.13.7"
 export sbt_release="$sbt_13"
 export sbt_dev="0.13.8-M1"
 
-write_version_to_properties () { echo_to_properties "sbt.version=$1";  }
-echo_to_properties ()          { echo -ne "$@" > "$test_build_properties"; }
+write_version_to_properties () { write_to_properties "sbt.version=$1";  }
+write_to_properties ()         { printf "$@" > "$test_build_properties"; }
 
 sbt_version_from_test_filename () {
   case "$BATS_TEST_FILENAME" in
