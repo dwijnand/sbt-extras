@@ -105,6 +105,10 @@ EOS
   write_to_properties_and_fetch "sbt.version=0.13.7\n" "0.13.7"
 }
 
+@test "skips any irrelevant lines in build.properties" {
+  write_to_properties_and_fetch "# hand written:\n\nsbt.version=0.13.7\nsbt.something = else\n" "0.13.7"
+}
+
 @test "skips to download sbt-launch.jar if a file was given via -sbt-jar" {
   touch sbt-launch.jar
   run sbt -sbt-jar sbt-launch.jar
