@@ -19,7 +19,7 @@ vlog ()    { [[ -n "$verbose" ]] && echoerr "$@"; }
 # spaces are possible, e.g. sbt.version = 0.13.0
 build_props_sbt () {
   [[ -r "$buildProps" ]] && \
-    grep '^sbt\.version' "$buildProps" | tr '=' ' ' | awk '{ print $2; }'
+    grep '^sbt\.version' "$buildProps" | tr '=\r' ' ' | awk '{ print $2; }'
 }
 
 update_build_props_sbt () {
