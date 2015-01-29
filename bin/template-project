@@ -23,27 +23,22 @@ path="$1" && shift
 dir="$(dirname "$path")"
 base="$(basename "$path")"
 
-[[ -n $path ]] || die "Usage: $0 [-o organization] [-p project] <path>"
+[[ -n $path ]] || die "Usage: $0 [-p project] <path>"
 [[ -n $project ]] || project="$base"
-[[ -n $org ]] || org="$ORGANIZATION"
-[[ -n $org ]] || die "Can't figure out organization: give -o option."
 
-mkdir -p "$dir"
-cd "$dir"
+mkdir -p "$dir" && cd "$dir"
 
 [[ -e "$base" ]] && die "Aborting: $base already exists."
 
 git clone --quiet --no-hardlinks "$origin" "$base"
-cd "$base"
-rm -rf .git
+cd "$base" && rm -rf .git
 
 git init .
 git add --all .
 git commit -m "Initial Import."
 
 for file in $(find src project -type f); do
-  perl -pi -e "s/xyzzy/$org/g" "$file"
-  perl -pi -e "s/plugh/$project/g" "$file"
+  perl -pi -e "s/xyzzy/$project/g" "$file"
 done
 
 git add --all .
