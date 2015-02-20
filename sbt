@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 #
 # A more capable sbt runner, coincidentally also called sbt.
-# Author: Paul Phillips <paulp@typesafe.com>
+# Author: Paul Phillips <paulp@improving.org>
 
 # todo - make this dynamic
 declare -r sbt_release_version="0.13.7"
