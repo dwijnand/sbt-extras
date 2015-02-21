@@ -126,6 +126,39 @@ declare -a sbt_commands
 # args to jvm/sbt via files or environment variables
 declare -a extra_jvm_opts extra_sbt_opts
 
+addJava () {
+  vlog "[addJava] arg = '$1'"
+  java_args=( "${java_args[@]}" "$1" )
+}
+addSbt () {
+  vlog "[addSbt] arg = '$1'"
+  sbt_commands=( "${sbt_commands[@]}" "$1" )
+}
+setThisBuild () {
+  vlog "[addBuild] args = '$@'"
+  local key="$1" && shift
+  addSbt "set $key in ThisBuild := $@"
+}
+addScalac () {
+  vlog "[addScalac] arg = '$1'"
+  scalac_args=( "${scalac_args[@]}" "$1" )
+}
+addResidual () {
+  vlog "[residual] arg = '$1'"
+  residual_args=( "${residual_args[@]}" "$1" )
+}
+addResolver () {
+  addSbt "set resolvers += $1"
+}
+addDebugger () {
+  addJava "-Xdebug"
+  addJava "-Xrunjdwp:transport=dt_socket,server=y,suspend=n,address=$1"
+}
+setScalaVersion () {
+  [[ "$1" == *"-SNAPSHOT" ]] && addResolver 'Resolver.sonatypeRepo("snapshots")'
+  addSbt "++ $1"
+}
+
 # if set, use JAVA_HOME over java found in path
 [[ -e "$JAVA_HOME/bin/java" ]] && java_cmd="$JAVA_HOME/bin/java"
 
@@ -278,40 +311,6 @@ runner with the -x option.
   -sbt-opts <path> file containing sbt args (if not given, .sbtopts in project root is used if present)
   -S-X             add -X to sbt's scalacOptions (-S is stripped)
 EOM
-}
-
-addJava () {
-  vlog "[addJava] arg = '$1'"
-  java_args=( "${java_args[@]}" "$1" )
-}
-addSbt () {
-  vlog "[addSbt] arg = '$1'"
-  sbt_commands=( "${sbt_commands[@]}" "$1" )
-}
-setThisBuild () {
-  vlog "[addBuild] args = '$@'"
-  local key="$1" && shift
-  addSbt "set $key in ThisBuild := $@"
-}
-
-addScalac () {
-  vlog "[addScalac] arg = '$1'"
-  scalac_args=( "${scalac_args[@]}" "$1" )
-}
-addResidual () {
-  vlog "[residual] arg = '$1'"
-  residual_args=( "${residual_args[@]}" "$1" )
-}
-addResolver () {
-  addSbt "set resolvers += $1"
-}
-addDebugger () {
-  addJava "-Xdebug"
-  addJava "-Xrunjdwp:transport=dt_socket,server=y,suspend=n,address=$1"
-}
-setScalaVersion () {
-  [[ "$1" == *"-SNAPSHOT" ]] && addResolver 'Resolver.sonatypeRepo("snapshots")'
-  addSbt "++ $1"
 }
 
 process_args ()
