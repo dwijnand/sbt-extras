@@ -126,8 +126,52 @@ declare -a sbt_commands
 # args to jvm/sbt via files or environment variables
 declare -a extra_jvm_opts extra_sbt_opts
 
+addJava () {
+  vlog "[addJava] arg = '$1'"
+  java_args=( "${java_args[@]}" "$1" )
+}
+addSbt () {
+  vlog "[addSbt] arg = '$1'"
+  sbt_commands=( "${sbt_commands[@]}" "$1" )
+}
+setThisBuild () {
+  vlog "[addBuild] args = '$@'"
+  local key="$1" && shift
+  addSbt "set $key in ThisBuild := $@"
+}
+addScalac () {
+  vlog "[addScalac] arg = '$1'"
+  scalac_args=( "${scalac_args[@]}" "$1" )
+}
+addResidual () {
+  vlog "[residual] arg = '$1'"
+  residual_args=( "${residual_args[@]}" "$1" )
+}
+addResolver () {
+  addSbt "set resolvers += $1"
+}
+addDebugger () {
+  addJava "-Xdebug"
+  addJava "-Xrunjdwp:transport=dt_socket,server=y,suspend=n,address=$1"
+}
+setScalaVersion () {
+  [[ "$1" == *"-SNAPSHOT" ]] && addResolver 'Resolver.sonatypeRepo("snapshots")'
+  addSbt "++ $1"
+}
+setJavaHome () {
+  java_cmd="$1/bin/java"
+  # Setting javaHome explicitly helps sbt figure out where javac is.
+  # https://github.com/paulp/sbt-extras/issues/83
+  setThisBuild javaHome "Some(file(\"$1\"))"
+}
+
 # if set, use JAVA_HOME over java found in path
-[[ -e "$JAVA_HOME/bin/java" ]] && java_cmd="$JAVA_HOME/bin/java"
+if [[ -e "$JAVA_HOME/bin/java" ]]; then
+  java_cmd="$JAVA_HOME/bin/java"
+  # Setting javaHome explicitly helps sbt figure out where javac is.
+  # https://github.com/paulp/sbt-extras/issues/83
+  addSbt "; -- warn ; set javaHome in ThisBuild := Some(file(\"$JAVA_HOME\")) ; -- info"
+fi
 
 # directory to store sbt launchers
 declare sbt_launch_dir="$HOME/.sbt/launchers"
@@ -280,40 +324,6 @@ runner with the -x option.
 EOM
 }
 
-addJava () {
-  vlog "[addJava] arg = '$1'"
-  java_args=( "${java_args[@]}" "$1" )
-}
-addSbt () {
-  vlog "[addSbt] arg = '$1'"
-  sbt_commands=( "${sbt_commands[@]}" "$1" )
-}
-setThisBuild () {
-  vlog "[addBuild] args = '$@'"
-  local key="$1" && shift
-  addSbt "set $key in ThisBuild := $@"
-}
-
-addScalac () {
-  vlog "[addScalac] arg = '$1'"
-  scalac_args=( "${scalac_args[@]}" "$1" )
-}
-addResidual () {
-  vlog "[residual] arg = '$1'"
-  residual_args=( "${residual_args[@]}" "$1" )
-}
-addResolver () {
-  addSbt "set resolvers += $1"
-}
-addDebugger () {
-  addJava "-Xdebug"
-  addJava "-Xrunjdwp:transport=dt_socket,server=y,suspend=n,address=$1"
-}
-setScalaVersion () {
-  [[ "$1" == *"-SNAPSHOT" ]] && addResolver 'Resolver.sonatypeRepo("snapshots")'
-  addSbt "++ $1"
-}
-
 process_args ()
 {
   require_arg () {
@@ -355,7 +365,7 @@ process_args ()
     -scala-version) require_arg version "$1" "$2" && setScalaVersion "$2" && shift 2 ;;
    -binary-version) require_arg version "$1" "$2" && setThisBuild scalaBinaryVersion "\"$2\"" && shift 2 ;;
        -scala-home) require_arg path "$1" "$2" && setThisBuild scalaHome "Some(file(\"$2\"))" && shift 2 ;;
-        -java-home) require_arg path "$1" "$2" && java_cmd="$2/bin/java" && shift 2 ;;
+        -java-home) require_arg path "$1" "$2" && setJavaHome "$2" && shift 2 ;;
          -sbt-opts) require_arg path "$1" "$2" && sbt_opts_file="$2" && shift 2 ;;
          -jvm-opts) require_arg path "$1" "$2" && jvm_opts_file="$2" && shift 2 ;;
 
