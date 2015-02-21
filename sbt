@@ -164,7 +164,10 @@ setJavaHome () {
 }
 
 # if set, use JAVA_HOME over java found in path
-[[ -e "$JAVA_HOME/bin/java" ]] && java_cmd="$JAVA_HOME/bin/java"
+if [[ -e "$JAVA_HOME/bin/java" ]]; then
+  java_cmd="$JAVA_HOME/bin/java"
+  addSbt ";warn ;set javaHome in ThisBuild := Some(file(\"$JAVA_HOME\")) ;info"
+fi
 
 # directory to store sbt launchers
 declare sbt_launch_dir="$HOME/.sbt/launchers"
@@ -332,9 +335,9 @@ process_args ()
     case "$1" in
           -h|-help) usage; exit 1 ;;
                 -v) verbose=true && shift ;;
-                -d) addSbt "--debug" && shift ;;
-                -w) addSbt "--warn" && shift ;;
-                -q) addSbt "--error" && shift ;;
+                -d) addSbt "--debug" && addSbt debug && shift ;;
+                -w) addSbt "--warn"  && addSbt warn  && shift ;;
+                -q) addSbt "--error" && addSbt error && shift ;;
                 -x) debugUs=true && shift ;;
             -trace) require_arg integer "$1" "$2" && trace_level="$2" && shift 2 ;;
               -ivy) require_arg path "$1" "$2" && addJava "-Dsbt.ivy.home=$2" && shift 2 ;;
@@ -370,6 +373,9 @@ process_args ()
               -210) setScalaVersion "$latest_210" && shift ;;
               -211) setScalaVersion "$latest_211" && shift ;;
 
+           --debug) addSbt debug && addResidual "$1" && shift ;;
+            --warn) addSbt warn  && addResidual "$1" && shift ;;
+           --error) addSbt error && addResidual "$1" && shift ;;
                  *) addResidual "$1" && shift ;;
     esac
   done
