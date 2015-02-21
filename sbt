@@ -158,6 +158,10 @@ setScalaVersion () {
   [[ "$1" == *"-SNAPSHOT" ]] && addResolver 'Resolver.sonatypeRepo("snapshots")'
   addSbt "++ $1"
 }
+setJavaHome () {
+  java_cmd="$1/bin/java"
+  setThisBuild javaHome "Some(file(\"$1\"))"
+}
 
 # if set, use JAVA_HOME over java found in path
 [[ -e "$JAVA_HOME/bin/java" ]] && java_cmd="$JAVA_HOME/bin/java"
@@ -354,7 +358,7 @@ process_args ()
     -scala-version) require_arg version "$1" "$2" && setScalaVersion "$2" && shift 2 ;;
    -binary-version) require_arg version "$1" "$2" && setThisBuild scalaBinaryVersion "\"$2\"" && shift 2 ;;
        -scala-home) require_arg path "$1" "$2" && setThisBuild scalaHome "Some(file(\"$2\"))" && shift 2 ;;
-        -java-home) require_arg path "$1" "$2" && java_cmd="$2/bin/java" && shift 2 ;;
+        -java-home) require_arg path "$1" "$2" && setJavaHome "$2" && shift 2 ;;
          -sbt-opts) require_arg path "$1" "$2" && sbt_opts_file="$2" && shift 2 ;;
          -jvm-opts) require_arg path "$1" "$2" && jvm_opts_file="$2" && shift 2 ;;
 
