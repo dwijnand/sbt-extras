@@ -161,12 +161,19 @@ setScalaVersion () {
 setJavaHome () {
   java_cmd="$1/bin/java"
   setThisBuild javaHome "Some(file(\"$1\"))"
+  export JAVA_HOME="$1"
+  export PATH="$JAVA_HOME/bin:$PATH"
+}
+setJavaHomeQuietly () {
+  java_cmd="$1/bin/java"
+  addSbt ";warn ;set javaHome in ThisBuild := Some(file(\"$1\")) ;info"
+  export JAVA_HOME="$1"
+  export PATH="$JAVA_HOME/bin:$PATH"
 }
 
 # if set, use JAVA_HOME over java found in path
 if [[ -e "$JAVA_HOME/bin/java" ]]; then
-  java_cmd="$JAVA_HOME/bin/java"
-  addSbt ";warn ;set javaHome in ThisBuild := Some(file(\"$JAVA_HOME\")) ;info"
+  setJavaHomeQuietly "$JAVA_HOME"
 fi
 
 # directory to store sbt launchers
