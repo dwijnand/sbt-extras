@@ -5,7 +5,7 @@ export PATH="$BATS_TEST_DIRNAME/../bin:$TEST_BIN:/usr/bin:/usr/sbin:/bin:/sbin"
 
 # echo >&2 "TEST_ROOT=$TEST_ROOT $(ls -1 $TEST_ROOT/bin)"
 
-unset JAVA_HOME JVM_OPTS SBT_OPTS
+unset JAVA_HOME JDK_HOME JVM_OPTS SBT_OPTS
 
 export sbt_07="0.7.7"
 export sbt_10="0.10.1"
