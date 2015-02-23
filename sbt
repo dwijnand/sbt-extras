@@ -174,7 +174,7 @@ setJavaHomeQuietly () {
 }
 
 # if set, use JDK_HOME/JAVA_HOME over java found in path
-if [[ -e "$JDK_HOME/bin/java" ]]; then
+if [[ -e "$JDK_HOME/lib/tools.jar" ]]; then
   setJavaHomeQuietly "$JDK_HOME"
 elif [[ -e "$JAVA_HOME/bin/java" ]]; then
   setJavaHomeQuietly "$JAVA_HOME"
