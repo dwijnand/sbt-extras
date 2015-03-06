@@ -29,13 +29,13 @@ Detected Java version: 1.8.0_25
 /Library/Java/JavaVirtualMachines/jdk1.8.0_11.jdk/Contents/Home/bin/java
 -jar
 $HOME/.sbt/launchers/0.13.7/sbt-launch.jar
-"++ 2.10.4"
+"++ 2.10.5"
 about
 
-[info] Setting version to 2.10.4
+[info] Setting version to 2.10.5
 [info] This is sbt 0.13.7
-[info] The current project is built against Scala 2.10.4
-[info] sbt, sbt plugins, and build definitions are using Scala 2.10.4
+[info] The current project is built against Scala 2.10.5
+[info] sbt, sbt plugins, and build definitions are using Scala 2.10.5
 ```
 
 ## sbt -h
@@ -73,7 +73,7 @@ runner with the -x option.
   # sbt version (default: sbt.version from project/build.properties if present, otherwise 0.13.7)
   -sbt-force-latest         force the use of the latest release of sbt: 0.13.7
   -sbt-version  <version>   use the specified version of sbt (default: 0.13.7)
-  -sbt-dev                  use the latest pre-release version of sbt: 0.13.8-M1
+  -sbt-dev                  use the latest pre-release version of sbt: 0.13.8-M6
   -sbt-jar      <path>      use the specified jar as the sbt launcher
   -sbt-launch-dir <path>    directory to hold sbt launchers (default: ~/.sbt/launchers)
   -sbt-launch-repo <url>    repo url for downloading sbt launcher jar (default: http://typesafe.artifactoryonline.com/typesafe/ivy-releases)
@@ -81,7 +81,7 @@ runner with the -x option.
   # scala version (default: as chosen by sbt)
   -28                       use 2.8.2
   -29                       use 2.9.3
-  -210                      use 2.10.4
+  -210                      use 2.10.5
   -211                      use 2.11.6
   -scala-home <path>        use the scala build at the specified directory
   -scala-version <version>  use the specified version of scala
