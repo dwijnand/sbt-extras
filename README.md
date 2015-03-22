@@ -23,17 +23,17 @@ sbt -v[erbosely] creating a new project built with the latest scala 2.10.x.
 
 ```
 % sbt -v -210 -sbt-create about
-Detected sbt version 0.13.7
+Detected sbt version 0.13.8
 Detected Java version: 1.8.0_25
 # Executing command line:
 /Library/Java/JavaVirtualMachines/jdk1.8.0_11.jdk/Contents/Home/bin/java
 -jar
-$HOME/.sbt/launchers/0.13.7/sbt-launch.jar
+$HOME/.sbt/launchers/0.13.8/sbt-launch.jar
 "++ 2.10.5"
 about
 
 [info] Setting version to 2.10.5
-[info] This is sbt 0.13.7
+[info] This is sbt 0.13.8
 [info] The current project is built against Scala 2.10.5
 [info] sbt, sbt plugins, and build definitions are using Scala 2.10.5
 ```
@@ -70,9 +70,9 @@ runner with the -x option.
   -batch             Disable interactive mode
   -prompt <expr>     Set the sbt prompt; in expr, 's' is the State and 'e' is Extracted
 
-  # sbt version (default: sbt.version from project/build.properties if present, otherwise 0.13.7)
-  -sbt-force-latest         force the use of the latest release of sbt: 0.13.7
-  -sbt-version  <version>   use the specified version of sbt (default: 0.13.7)
+  # sbt version (default: sbt.version from project/build.properties if present, otherwise 0.13.8)
+  -sbt-force-latest         force the use of the latest release of sbt: 0.13.8
+  -sbt-version  <version>   use the specified version of sbt (default: 0.13.8)
   -sbt-dev                  use the latest pre-release version of sbt: 0.13.8-M6
   -sbt-jar      <path>      use the specified jar as the sbt launcher
   -sbt-launch-dir <path>    directory to hold sbt launchers (default: ~/.sbt/launchers)
