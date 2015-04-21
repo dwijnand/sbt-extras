@@ -186,7 +186,7 @@ declare sbt_launch_dir="$HOME/.sbt/launchers"
 [[ -w "$sbt_launch_dir" ]] || sbt_launch_dir="$(mktemp -d -t sbt_extras_launchers.XXXXXX)"
 
 java_version () {
-  local version=$("$java_cmd" -version 2>&1 | grep -e 'java version' | awk '{ print $3 }' | tr -d \")
+  local version=$("$java_cmd" -version 2>&1 | grep -E -e '(java|openjdk) version' | awk '{ print $3 }' | tr -d \")
   vlog "Detected Java version: $version"
   echo "${version:2:1}"
 }
