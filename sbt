@@ -128,11 +128,11 @@ declare -a extra_jvm_opts extra_sbt_opts
 
 addJava () {
   vlog "[addJava] arg = '$1'"
-  java_args=( "${java_args[@]}" "$1" )
+  java_args+=("$1")
 }
 addSbt () {
   vlog "[addSbt] arg = '$1'"
-  sbt_commands=( "${sbt_commands[@]}" "$1" )
+  sbt_commands+=("$1")
 }
 setThisBuild () {
   vlog "[addBuild] args = '$@'"
@@ -141,11 +141,11 @@ setThisBuild () {
 }
 addScalac () {
   vlog "[addScalac] arg = '$1'"
-  scalac_args=( "${scalac_args[@]}" "$1" )
+  scalac_args+=("$1")
 }
 addResidual () {
   vlog "[residual] arg = '$1'"
-  residual_args=( "${residual_args[@]}" "$1" )
+  residual_args+=("$1")
 }
 addResolver () {
   addSbt "set resolvers += $1"
