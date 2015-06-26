@@ -12,7 +12,7 @@ teardown() {
   rm -fr "$TEST_ROOT"/* "$TEST_ROOT"/.sbt
 }
 
-curl_opts='--fail --silent http://* --output * : mkdir -p "$(dirname "$5")" && touch "$5"'
+curl_opts='--fail --silent --location http://* --output * : mkdir -p "$(dirname "$6")" && touch "$6"'
 wget_opts='--quiet -O * http://* : mkdir -p "$(dirname "$3")" && touch "$3"'
 
 stub_curl() { stub curl "$curl_opts"; }
