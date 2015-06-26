@@ -21,8 +21,8 @@ stub_wget() { stub wget "$wget_opts"; }
 launcher_url () {
   case "$1" in
     0.7.*) echo "http://simple-build-tool.googlecode.com/files/sbt-launch-$1.jar" ;;
-   0.10.*) echo "http://typesafe.artifactoryonline.com/typesafe/ivy-releases/org.scala-tools.sbt/sbt-launch/$1/sbt-launch.jar" ;;
-        *) echo "http://typesafe.artifactoryonline.com/typesafe/ivy-releases/org.scala-sbt/sbt-launch/$1/sbt-launch.jar" ;;
+   0.10.*) echo "http://repo.typesafe.com/typesafe/ivy-releases/org.scala-tools.sbt/sbt-launch/$1/sbt-launch.jar" ;;
+        *) echo "http://repo.typesafe.com/typesafe/ivy-releases/org.scala-sbt/sbt-launch/$1/sbt-launch.jar" ;;
   esac
 }
 
@@ -61,7 +61,7 @@ EOS
   assert_success
   assert_output <<EOS
 Downloading sbt launcher for $sbt_13:
-  From  http://typesafe.artifactoryonline.com/typesafe/ivy-releases/org.scala-sbt/sbt-launch/$sbt_13/sbt-launch.jar
+  From  http://repo.typesafe.com/typesafe/ivy-releases/org.scala-sbt/sbt-launch/$sbt_13/sbt-launch.jar
     To  $TEST_ROOT/.sbt/launchers/$sbt_13/sbt-launch.jar
 EOS
   unstub curl
@@ -74,7 +74,7 @@ EOS
   assert_success
   assert_output <<EOS
 Downloading sbt launcher for $sbt_release:
-  From  http://typesafe.artifactoryonline.com/typesafe/ivy-releases/org.scala-sbt/sbt-launch/$sbt_release/sbt-launch.jar
+  From  http://repo.typesafe.com/typesafe/ivy-releases/org.scala-sbt/sbt-launch/$sbt_release/sbt-launch.jar
     To  $TEST_ROOT/.sbt/launchers/$sbt_release/sbt-launch.jar
 EOS
   unstub curl
@@ -87,7 +87,7 @@ EOS
   assert_success
   assert_output <<EOS
 Downloading sbt launcher for $sbt_dev:
-  From  http://typesafe.artifactoryonline.com/typesafe/ivy-releases/org.scala-sbt/sbt-launch/$sbt_dev/sbt-launch.jar
+  From  http://repo.typesafe.com/typesafe/ivy-releases/org.scala-sbt/sbt-launch/$sbt_dev/sbt-launch.jar
     To  $TEST_ROOT/.sbt/launchers/$sbt_dev/sbt-launch.jar
 EOS
   unstub curl
@@ -124,7 +124,7 @@ EOS
   assert_success
   assert_output <<EOS
 Downloading sbt launcher for $sbt_13:
-  From  http://typesafe.artifactoryonline.com/typesafe/ivy-releases/org.scala-sbt/sbt-launch/$sbt_13/sbt-launch.jar
+  From  http://repo.typesafe.com/typesafe/ivy-releases/org.scala-sbt/sbt-launch/$sbt_13/sbt-launch.jar
     To  ${sbt_project}/xsbt/$sbt_13/sbt-launch.jar
 EOS
   unstub curl
