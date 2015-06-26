@@ -73,7 +73,7 @@ runner with the -x option.
   # sbt version (default: sbt.version from project/build.properties if present, otherwise 0.13.8)
   -sbt-force-latest         force the use of the latest release of sbt: 0.13.8
   -sbt-version  <version>   use the specified version of sbt (default: 0.13.8)
-  -sbt-dev                  use the latest pre-release version of sbt: 0.13.8
+  -sbt-dev                  use the latest pre-release version of sbt: 0.13.9-M1
   -sbt-jar      <path>      use the specified jar as the sbt launcher
   -sbt-launch-dir <path>    directory to hold sbt launchers (default: ~/.sbt/launchers)
   -sbt-launch-repo <url>    repo url for downloading sbt launcher jar (default: http://repo.typesafe.com/typesafe/ivy-releases)
