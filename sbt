@@ -5,7 +5,7 @@
 
 # todo - make this dynamic
 declare -r sbt_release_version="0.13.8"
-declare -r sbt_unreleased_version="0.13.8"
+declare -r sbt_unreleased_version="0.13.9-M1"
 declare -r buildProps="project/build.properties"
 
 declare sbt_jar sbt_dir sbt_create sbt_version
@@ -115,7 +115,7 @@ declare -r script_name="${script_path##*/}"
 declare java_cmd="java"
 declare sbt_opts_file="$(init_default_option_file SBT_OPTS .sbtopts)"
 declare jvm_opts_file="$(init_default_option_file JVM_OPTS .jvmopts)"
-declare sbt_launch_repo="http://typesafe.artifactoryonline.com/typesafe/ivy-releases"
+declare sbt_launch_repo="http://repo.typesafe.com/typesafe/ivy-releases"
 
 # pull -J and -D options to give to java.
 declare -a residual_args
@@ -244,7 +244,7 @@ download_url () {
 
   mkdir -p "${jar%/*}" && {
     if which curl >/dev/null; then
-      curl --fail --silent "$url" --output "$jar"
+      curl --fail --silent --location "$url" --output "$jar"
     elif which wget >/dev/null; then
       wget --quiet -O "$jar" "$url"
     fi
