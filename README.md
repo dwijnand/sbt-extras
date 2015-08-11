@@ -23,17 +23,17 @@ sbt -v[erbosely] creating a new project built with the latest scala 2.10.x.
 
 ```
 % sbt -v -210 -sbt-create about
-Detected sbt version 0.13.8
-Detected Java version: 1.8.0_25
+Detected sbt version 0.13.9
+Detected Java version: 1.8.0_51
 # Executing command line:
-/Library/Java/JavaVirtualMachines/jdk1.8.0_11.jdk/Contents/Home/bin/java
+/Library/Java/JavaVirtualMachines/jdk1.8.0_51.jdk/Contents/Home/bin/java
 -jar
-$HOME/.sbt/launchers/0.13.8/sbt-launch.jar
+$HOME/.sbt/launchers/0.13.9/sbt-launch.jar
 "++ 2.10.5"
 about
 
 [info] Setting version to 2.10.5
-[info] This is sbt 0.13.8
+[info] This is sbt 0.13.9
 [info] The current project is built against Scala 2.10.5
 [info] sbt, sbt plugins, and build definitions are using Scala 2.10.5
 ```
@@ -70,10 +70,10 @@ runner with the -x option.
   -batch             Disable interactive mode
   -prompt <expr>     Set the sbt prompt; in expr, 's' is the State and 'e' is Extracted
 
-  # sbt version (default: sbt.version from project/build.properties if present, otherwise 0.13.8)
-  -sbt-force-latest         force the use of the latest release of sbt: 0.13.8
-  -sbt-version  <version>   use the specified version of sbt (default: 0.13.8)
-  -sbt-dev                  use the latest pre-release version of sbt: 0.13.9-M1
+  # sbt version (default: sbt.version from project/build.properties if present, otherwise 0.13.9)
+  -sbt-force-latest         force the use of the latest release of sbt: 0.13.9
+  -sbt-version  <version>   use the specified version of sbt (default: 0.13.9)
+  -sbt-dev                  use the latest pre-release version of sbt: 0.13.9
   -sbt-jar      <path>      use the specified jar as the sbt launcher
   -sbt-launch-dir <path>    directory to hold sbt launchers (default: ~/.sbt/launchers)
   -sbt-launch-repo <url>    repo url for downloading sbt launcher jar (default: http://repo.typesafe.com/typesafe/ivy-releases)
@@ -87,7 +87,7 @@ runner with the -x option.
   -scala-version <version>  use the specified version of scala
   -binary-version <version> use the specified scala version when searching for dependencies
 
-  # java version (default: java from PATH, currently java version "1.7.0_65")
+  # java version (default: java from PATH, currently java version "1.8.0_51")
   -java-home <path>         alternate JAVA_HOME
 
   # passing options to the jvm - note it does NOT use JAVA_OPTS due to pollution
