@@ -4,8 +4,8 @@
 # Author: Paul Phillips <paulp@improving.org>
 
 # todo - make this dynamic
-declare -r sbt_release_version="0.13.8"
-declare -r sbt_unreleased_version="0.13.9-M1"
+declare -r sbt_release_version="0.13.9"
+declare -r sbt_unreleased_version="0.13.10-M1"
 declare -r buildProps="project/build.properties"
 
 declare sbt_jar sbt_dir sbt_create sbt_version
@@ -107,6 +107,7 @@ declare -r latest_28="2.8.2"
 declare -r latest_29="2.9.3"
 declare -r latest_210="2.10.5"
 declare -r latest_211="2.11.7"
+declare -r latest_212="2.12.0-M2"
 
 declare -r script_path="$(get_script_path "$BASH_SOURCE")"
 declare -r script_name="${script_path##*/}"
@@ -303,6 +304,7 @@ runner with the -x option.
   -29                       use $latest_29
   -210                      use $latest_210
   -211                      use $latest_211
+  -212                      use $latest_212
   -scala-home <path>        use the scala build at the specified directory
   -scala-version <version>  use the specified version of scala
   -binary-version <version> use the specified scala version when searching for dependencies
@@ -381,6 +383,7 @@ process_args ()
                -29) setScalaVersion "$latest_29" && shift ;;
               -210) setScalaVersion "$latest_210" && shift ;;
               -211) setScalaVersion "$latest_211" && shift ;;
+              -212) setScalaVersion "$latest_212" && shift ;;
 
            --debug) addSbt debug && addResidual "$1" && shift ;;
             --warn) addSbt warn  && addResidual "$1" && shift ;;
