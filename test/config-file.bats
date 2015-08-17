@@ -7,7 +7,7 @@ configFile () { cat <<EOM
 # Comment 2, followed by blank line
 
 -Xmx1g
--Dsome.prop="pass a # in a string"
+-Dsome.prop='"pass a # in a string"'
 
 -Xss4m
 # Comment 4

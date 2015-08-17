@@ -396,7 +396,7 @@ process_args "$@"
 # skip #-styled comments and blank lines
 readConfigFile() {
   while read line; do
-    [[ $line =~ ^# ]] || [[ -z $line ]] || echo "$line"
+    [[ $line =~ ^# ]] || [[ -z $line ]] || eval "echo $line"
   done < "$1"
 }
 
