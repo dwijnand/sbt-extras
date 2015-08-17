@@ -11,9 +11,9 @@ export sbt_07="0.7.7"
 export sbt_10="0.10.1"
 export sbt_11="0.11.3"
 export sbt_12="0.12.4"
-export sbt_13="0.13.8"
+export sbt_13="0.13.9"
 export sbt_release="$sbt_13"
-export sbt_dev="0.13.9-M1"
+export sbt_dev="0.13.9"
 
 write_version_to_properties () { write_to_properties "sbt.version=$1";  }
 write_to_properties ()         { printf "$@" > "$test_build_properties"; }
@@ -149,5 +149,5 @@ stub_java() {
   stub_java_version
   stub_java_echo
 }
-stub_java_version() { stub java '-version : echo java version \\\"1.8.0_11\\\"'; }
+stub_java_version() { stub java '-version : echo java version \\\"1.8.0_51\\\"'; }
 stub_java_echo()    { stub java '* : for arg; do echo "$arg"; done'; }
