@@ -1,3 +1,4 @@
+sudo: false
 script: ./bin/run-tests --tap ./test
 language: c
 notifications:
@@ -5,6 +6,5 @@ notifications:
     on_success: never
 
 jdk:
-  - openjdk6
   - openjdk7
   - oraclejdk8
