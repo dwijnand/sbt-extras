@@ -79,7 +79,7 @@ die() {
 }
 
 make_url () {
-  version="$1"
+  local version="$1"
 
   case "$version" in
         0.7.*) echo "http://simple-build-tool.googlecode.com/files/sbt-launch-0.7.7.jar" ;;
@@ -255,7 +255,7 @@ download_url () {
 }
 
 acquire_sbt_jar () {
-  sbt_url="$(jar_url "$sbt_version")"
+  local sbt_url="$(jar_url "$sbt_version")"
   sbt_jar="$(jar_file "$sbt_version")"
 
   [[ -r "$sbt_jar" ]] || download_url "$sbt_url" "$sbt_jar"
@@ -333,8 +333,7 @@ runner with the -x option.
 EOM
 }
 
-process_args ()
-{
+process_args () {
   require_arg () {
     local type="$1"
     local opt="$2"
