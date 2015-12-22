@@ -29,12 +29,12 @@ Detected Java version: 1.8.0_51
 /Library/Java/JavaVirtualMachines/jdk1.8.0_51.jdk/Contents/Home/bin/java
 -jar
 $HOME/.sbt/launchers/0.13.9/sbt-launch.jar
-"++ 2.10.5"
+"++ 2.10.6"
 about
 
-[info] Setting version to 2.10.5
+[info] Setting version to 2.10.6
 [info] This is sbt 0.13.9
-[info] The current project is built against Scala 2.10.5
+[info] The current project is built against Scala 2.10.6
 [info] sbt, sbt plugins, and build definitions are using Scala 2.10.5
 ```
 
@@ -81,7 +81,7 @@ runner with the -x option.
   # scala version (default: as chosen by sbt)
   -28                       use 2.8.2
   -29                       use 2.9.3
-  -210                      use 2.10.5
+  -210                      use 2.10.6
   -211                      use 2.11.7
   -212                      use 2.12.0-M3
   -scala-home <path>        use the scala build at the specified directory
