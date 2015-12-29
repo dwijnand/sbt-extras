@@ -85,6 +85,8 @@ make_url () {
         0.7.*) echo "http://simple-build-tool.googlecode.com/files/sbt-launch-0.7.7.jar" ;;
       0.10.* ) echo "$sbt_launch_repo/org.scala-tools.sbt/sbt-launch/$version/sbt-launch.jar" ;;
     0.11.[12]) echo "$sbt_launch_repo/org.scala-tools.sbt/sbt-launch/$version/sbt-launch.jar" ;;
+    *-[0-9][0-9][0-9][0-9][0-9][0-9][0-9][0-9]-[0-9][0-9][0-9][0-9][0-9][0-9])
+               echo "$sbt_launch_snapshot_repo/org.scala-sbt/sbt-launch/$version/sbt-launch.jar" ;;
             *) echo "$sbt_launch_repo/org.scala-sbt/sbt-launch/$version/sbt-launch.jar" ;;
   esac
 }
@@ -110,6 +112,8 @@ declare -r latest_29="2.9.3"
 declare -r latest_210="2.10.6"
 declare -r latest_211="2.11.7"
 declare -r latest_212="2.12.0-M3"
+declare -r sbt_launch_release_repo="http://repo.typesafe.com/typesafe/ivy-releases"
+declare -r sbt_launch_snapshot_repo="https://repo.scala-sbt.org/scalasbt/ivy-snapshots"
 
 declare -r script_path="$(get_script_path "$BASH_SOURCE")"
 declare -r script_name="${script_path##*/}"
@@ -119,7 +123,7 @@ declare java_cmd="java"
 declare sbt_opts_file="$(init_default_option_file SBT_OPTS .sbtopts)"
 declare jvm_opts_file="$(init_default_option_file JVM_OPTS .jvmopts)"
 declare sbt_launch_dir="$HOME/.sbt/launchers"
-declare sbt_launch_repo="http://repo.typesafe.com/typesafe/ivy-releases"
+declare sbt_launch_repo="$sbt_launch_release_repo"
 
 # pull -J and -D options to give to java.
 declare -a residual_args
