@@ -118,6 +118,7 @@ declare -r script_name="${script_path##*/}"
 declare java_cmd="java"
 declare sbt_opts_file="$(init_default_option_file SBT_OPTS .sbtopts)"
 declare jvm_opts_file="$(init_default_option_file JVM_OPTS .jvmopts)"
+declare sbt_launch_dir="$HOME/.sbt/launchers"
 declare sbt_launch_repo="http://repo.typesafe.com/typesafe/ivy-releases"
 
 # pull -J and -D options to give to java.
@@ -182,7 +183,6 @@ elif [[ -e "$JAVA_HOME/bin/java" ]]; then
 fi
 
 # directory to store sbt launchers
-declare sbt_launch_dir="$HOME/.sbt/launchers"
 [[ -d "$sbt_launch_dir" ]] || mkdir -p "$sbt_launch_dir"
 [[ -w "$sbt_launch_dir" ]] || sbt_launch_dir="$(mktemp -d -t sbt_extras_launchers.XXXXXX)"
 
@@ -298,7 +298,7 @@ runner with the -x option.
   -sbt-version  <version>   use the specified version of sbt (default: $sbt_release_version)
   -sbt-dev                  use the latest pre-release version of sbt: $sbt_unreleased_version
   -sbt-jar      <path>      use the specified jar as the sbt launcher
-  -sbt-launch-dir <path>    directory to hold sbt launchers (default: ~/.sbt/launchers)
+  -sbt-launch-dir <path>    directory to hold sbt launchers (default: $sbt_launch_dir)
   -sbt-launch-repo <url>    repo url for downloading sbt launcher jar (default: $sbt_launch_repo)
 
   # scala version (default: as chosen by sbt)
