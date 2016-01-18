@@ -399,8 +399,10 @@ process_args "$@"
 
 # skip #-styled comments and blank lines
 readConfigFile() {
-  while read line; do
-    [[ $line =~ ^# ]] || [[ -z $line ]] || echo "$line"
+  local end=false
+  until $end; do
+    read || end=true
+    [[ $REPLY =~ ^# ]] || [[ -z $REPLY ]] || echo "$REPLY"
   done < "$1"
 }
 
