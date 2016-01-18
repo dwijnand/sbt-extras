@@ -2,7 +2,7 @@
 
 load test_helper
 
-configFile () { cat <<EOM
+configFile () { echo -n '
 # Comment 1
 # Comment 2, followed by blank line
 
@@ -11,13 +11,14 @@ configFile () { cat <<EOM
 
 -Xss4m
 # Comment 4
-EOM
+-Xms1g'
 }
 
 expectedOutput () { cat <<EOM
 -Xmx1g
 -Dsome.prop="pass a # in a string"
 -Xss4m
+-Xms1g
 -jar
 $TEST_ROOT/.sbt/launchers/0.13.9/sbt-launch.jar
 about
