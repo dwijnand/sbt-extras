@@ -3,65 +3,66 @@
 # This script installs and configures the dependencies for the sbt-extras
 # Author: Kevin Brightwell (Github: Nava2)
 
-declare OS_NAME
 
+# Find $os_name
+declare os_name
 case `uname` in 
-    Darwin)     OS_NAME="osx"    ;;
-    Linux)      OS_NAME="linux"  ;;
+    Darwin)     os_name="osx"    ;;
+    Linux)      os_name="linux"  ;;
 esac
+echo "Building on: ${os_name}"
 
-if env | grep -qE '^(?:TRAVIS|CI)='; then
-#    We're on Travis, intialize variables:
-    echo "Detected CI Build -> CI=${CI}"
-
-else
-#   We're building locally
-    echo "This script is meant to be run by Travis-CI services."
-
-    # exit 1
+# Check for CI variables
+if ! env | grep -qE '^(?:TRAVIS|CI)='; then
+    echo "WARNING: This script is meant to be run by Travis-CI services."
 fi
 
-echo "Building on: ${OS_NAME}"
+if [ -z "${JDK_VERSION}" ]; then
+    echo "Error: JDK_VERSION environment variable not found"
+    echo "    Valid options: oraclejdk7 oraclejdk8 oraclejdk9 "
+    echo "                   openjdk7 openjdk8"
+    exit 1
+fi
 
 install_os_deps() {
     # Install all of the OS specific OS dependencies
-    local JDK_VERSION_LEVEL=${JDK_VERSION:(-1)}
+    local jdk_version_level=${JDK_VERSION:(-1)}
 
     echo "Attempting to use Java: ${JDK_VERSION}"
 
-    case ${OS_NAME} in
+    case ${os_name} in
         osx)
             if [[ ${JDK_VERSION} == openjdk* ]] ; then
-                echo "OpenJDK is not supported on OSX, defaulting to oraclejdk${JDK_VERSION_LEVEL}"
-                export JDK_VERSION=oraclejdk${JDK_VERSION_LEVEL}
+                echo "OpenJDK is not supported on osx, defaulting to oraclejdk${jdk_version_level}"
+                export JDK_VERSION=oraclejdk${jdk_version_level}
             fi
-            
-            # Install the correct version of Java:
 
-            case ${JDK_VERSION_LEVEL} in
+            local cask_pkg java_pkg
+            
+            # Figure out the correct cask and package name homebrew:
+            case ${jdk_version_level} in
                 8)
-                    CASK_PKG=caskroom/cask;
-                    JAVA_PKG="java"
+                    cask_pkg="caskroom/cask"
+                    java_pkg="java"
                     ;;
+
                 7|9)
-                    CASK_PKG=caskroom/versions;
-                    JAVA_PKG="java${JDK_VERSION_LEVEL}";
-                    #echo "Invalid Java Version, ${JDK_VERSION}"
-                    # exit 1
+                    cask_pkg="caskroom/versions"
+                    java_pkg="java${jdk_version_level}"
                     ;;
             esac
 
-            echo "Installing ${JDK_VERSION} from: ${CASK_PKG}:${JAVA_PKG}"
+            echo "Installing ${JDK_VERSION} from: ${cask_pkg}:${java_pkg}"
 
-            brew tap ${CASK_PKG}
+            brew tap ${cask_pkg}
 
-            echo "brew update ..." ; brew update > /dev/null #; brew doctor; brew update
+            echo "brew update ..." ; brew update > /dev/null # The `brew update` output is useless
 
-            brew cask install ${JAVA_PKG}
+            brew cask install ${java_pkg}
         ;;
 
         linux)
-            
+            # jdk_switcher is performed by Travis
         ;;
     esac
 
