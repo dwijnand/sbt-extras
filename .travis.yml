@@ -1,10 +1,20 @@
 sudo: false
-script: ./bin/run-tests --tap ./test
 language: c
+os:
+- linux
+- osx
+
+git:
+  depth: 3
+
+script: ./bin/run-tests --tap ./test
+
 notifications:
   email:
     on_success: never
-
-jdk:
-  - openjdk7
-  - oraclejdk8
+  webhooks:
+    urls:
+      - https://webhooks.gitter.im/e/901694477147612308dd
+    on_success: change
+    on_failure: always
+    on_start: never

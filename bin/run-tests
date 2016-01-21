@@ -10,5 +10,5 @@ bats=""
 
 [[ $# -gt 0   ]] || set -- ./test
 [[ -x "$bats" ]] || bats="./bats/bin/bats"
-[[ -x "$bats" ]] || git clone https://github.com/sstephenson/bats.git bats
+[[ -x "$bats" ]] || git clone --depth=1 https://github.com/sstephenson/bats.git bats
 [[ -x "$bats" ]] && "$bats" "$@"
