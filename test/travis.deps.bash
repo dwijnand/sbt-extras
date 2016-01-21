@@ -17,13 +17,6 @@ if ! env | grep -qE '^(?:TRAVIS|CI)='; then
     echo "WARNING: This script is meant to be run by Travis-CI services."
 fi
 
-if [ -z "${JDK_VERSION}" ]; then
-    echo "Error: JDK_VERSION environment variable not found"
-    echo "    Valid options: oraclejdk7 oraclejdk8 oraclejdk9 "
-    echo "                   openjdk7 openjdk8"
-    exit 1
-fi
-
 install_os_deps() {
     # Install all of the OS specific OS dependencies
     local jdk_version_level=${JDK_VERSION:(-1)}
@@ -32,6 +25,13 @@ install_os_deps() {
 
     case ${os_name} in
         osx)
+            if [ -z "${JDK_VERSION}" ]; then
+                echo "Error: On OSX, JDK_VERSION environment must be specified."
+                echo "    Valid options: oraclejdk7 oraclejdk8 oraclejdk9 "
+                echo "                   openjdk7 openjdk8"
+                exit 1
+            fi
+            
             if [[ ${JDK_VERSION} == openjdk* ]] ; then
                 echo "OpenJDK is not supported on osx, defaulting to oraclejdk${jdk_version_level}"
                 export JDK_VERSION=oraclejdk${jdk_version_level}
