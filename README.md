@@ -2,6 +2,9 @@ sbt: the rebel cut
 ==================
 
 [![Build Status](https://travis-ci.org/paulp/sbt-extras.png)](https://travis-ci.org/paulp/sbt-extras)
+[![Join the chat at https://gitter.im/paulp/sbt-extras][]](https://gitter.im/paulp/sbt-extras)
+
+[Join the chat at https://gitter.im/paulp/sbt-extras]: https://badges.gitter.im/paulp/sbt-extras.svg
 
 An alternative script for running [sbt](https://github.com/sbt/sbt "sbt home").
 It works with sbt 0.13.0 projects and (in principle) all earlier versions.
