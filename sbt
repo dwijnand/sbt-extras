@@ -164,7 +164,7 @@ setScalaVersion () {
 }
 setJavaHome () {
   java_cmd="$1/bin/java"
-  setThisBuild javaHome "Some(file(\"$1\"))"
+  setThisBuild javaHome "scala.Some(file(\"$1\"))"
   export JAVA_HOME="$1"
   export JDK_HOME="$1"
   export PATH="$JAVA_HOME/bin:$PATH"
@@ -372,7 +372,7 @@ process_args () {
   -sbt-launch-repo) require_arg path "$1" "$2" && sbt_launch_repo="$2" && shift 2 ;;
     -scala-version) require_arg version "$1" "$2" && setScalaVersion "$2" && shift 2 ;;
    -binary-version) require_arg version "$1" "$2" && setThisBuild scalaBinaryVersion "\"$2\"" && shift 2 ;;
-       -scala-home) require_arg path "$1" "$2" && setThisBuild scalaHome "Some(file(\"$2\"))" && shift 2 ;;
+       -scala-home) require_arg path "$1" "$2" && setThisBuild scalaHome "scala.Some(file(\"$2\"))" && shift 2 ;;
         -java-home) require_arg path "$1" "$2" && setJavaHome "$2" && shift 2 ;;
          -sbt-opts) require_arg path "$1" "$2" && sbt_opts_file="$2" && shift 2 ;;
          -jvm-opts) require_arg path "$1" "$2" && jvm_opts_file="$2" && shift 2 ;;
