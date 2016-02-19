@@ -6,8 +6,8 @@
 set -o pipefail
 
 # todo - make this dynamic
-declare -r sbt_release_version="0.13.9"
-declare -r sbt_unreleased_version="0.13.9"
+declare -r sbt_release_version="0.13.10"
+declare -r sbt_unreleased_version="0.13.10"
 declare -r buildProps="project/build.properties"
 
 declare sbt_jar sbt_dir sbt_create sbt_version
