@@ -78,14 +78,29 @@ die() {
   exit 1
 }
 
-make_url () {
+url_base () {
   local version="$1"
 
   case "$version" in
-        0.7.*) echo "http://simple-build-tool.googlecode.com/files/sbt-launch-0.7.7.jar" ;;
-      0.10.* ) echo "$sbt_launch_repo/org.scala-tools.sbt/sbt-launch/$version/sbt-launch.jar" ;;
-    0.11.[12]) echo "$sbt_launch_repo/org.scala-tools.sbt/sbt-launch/$version/sbt-launch.jar" ;;
-            *) echo "$sbt_launch_repo/org.scala-sbt/sbt-launch/$version/sbt-launch.jar" ;;
+        0.7.*) echo "http://simple-build-tool.googlecode.com" ;;
+      0.10.* ) echo "$sbt_launch_release_repo" ;;
+    0.11.[12]) echo "$sbt_launch_release_repo" ;;
+    *-[0-9][0-9][0-9][0-9][0-9][0-9][0-9][0-9]-[0-9][0-9][0-9][0-9][0-9][0-9]) # ie "*-yyyymmdd-hhMMss"
+               echo "$sbt_launch_snapshot_repo" ;;
+            *) echo "$sbt_launch_release_repo" ;;
+  esac
+}
+
+make_url () {
+  local version="$1"
+
+  local base="${sbt_launch_repo:-$(url_base "$version")}"
+
+  case "$version" in
+        0.7.*) echo "$base/files/sbt-launch-0.7.7.jar" ;;
+      0.10.* ) echo "$base/org.scala-tools.sbt/sbt-launch/$version/sbt-launch.jar" ;;
+    0.11.[12]) echo "$base/org.scala-tools.sbt/sbt-launch/$version/sbt-launch.jar" ;;
+            *) echo "$base/org.scala-sbt/sbt-launch/$version/sbt-launch.jar" ;;
   esac
 }
 
@@ -110,6 +125,8 @@ declare -r latest_29="2.9.3"
 declare -r latest_210="2.10.6"
 declare -r latest_211="2.11.7"
 declare -r latest_212="2.12.0-M3"
+declare -r sbt_launch_release_repo="http://repo.typesafe.com/typesafe/ivy-releases"
+declare -r sbt_launch_snapshot_repo="https://repo.scala-sbt.org/scalasbt/ivy-snapshots"
 
 declare -r script_path="$(get_script_path "$BASH_SOURCE")"
 declare -r script_name="${script_path##*/}"
@@ -119,7 +136,8 @@ declare java_cmd="java"
 declare sbt_opts_file="$(init_default_option_file SBT_OPTS .sbtopts)"
 declare jvm_opts_file="$(init_default_option_file JVM_OPTS .jvmopts)"
 declare sbt_launch_dir="$HOME/.sbt/launchers"
-declare sbt_launch_repo="http://repo.typesafe.com/typesafe/ivy-releases"
+
+declare sbt_launch_repo
 
 # pull -J and -D options to give to java.
 declare -a residual_args
@@ -262,6 +280,7 @@ acquire_sbt_jar () {
 }
 
 usage () {
+  set_sbt_version
   cat <<EOM
 Usage: $script_name [options]
 
@@ -299,7 +318,7 @@ runner with the -x option.
   -sbt-dev                  use the latest pre-release version of sbt: $sbt_unreleased_version
   -sbt-jar      <path>      use the specified jar as the sbt launcher
   -sbt-launch-dir <path>    directory to hold sbt launchers (default: $sbt_launch_dir)
-  -sbt-launch-repo <url>    repo url for downloading sbt launcher jar (default: $sbt_launch_repo)
+  -sbt-launch-repo <url>    repo url for downloading sbt launcher jar (default: $(url_base "$sbt_version"))
 
   # scala version (default: as chosen by sbt)
   -28                       use $latest_28
