@@ -20,7 +20,7 @@ expectedOutput () { cat <<EOM
 -Xss4m
 -Xms1g
 -jar
-$TEST_ROOT/.sbt/launchers/0.13.10/sbt-launch.jar
+$TEST_ROOT/.sbt/launchers/0.13.11/sbt-launch.jar
 about
 EOM
 }
