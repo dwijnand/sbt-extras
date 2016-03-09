@@ -429,7 +429,7 @@ readConfigFile() {
 # can supply args to this runner
 if [[ -r "$sbt_opts_file" ]]; then
   vlog "Using sbt options defined in file $sbt_opts_file"
-  while read opt; do extra_sbt_opts+=("$opt"); done < <(readConfigFile "$sbt_opts_file")
+  while read opt; do for an_opt in $opt; do extra_sbt_opts+=("$an_opt"); done ; done < <(readConfigFile "$sbt_opts_file")
 elif [[ -n "$SBT_OPTS" && ! ("$SBT_OPTS" =~ ^@.*) ]]; then
   vlog "Using sbt options defined in variable \$SBT_OPTS"
   extra_sbt_opts=( $SBT_OPTS )
