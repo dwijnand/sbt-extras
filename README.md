@@ -83,6 +83,7 @@ runner with the -x option.
   -jvm-debug <port>  Turn on JVM debugging, open at the given port.
   -batch             Disable interactive mode
   -prompt <expr>     Set the sbt prompt; in expr, 's' is the State and 'e' is Extracted
+  -script <file>     Run the specified file as a scala script
 
   # sbt version (default: sbt.version from project/build.properties if present, otherwise 0.13.11)
   -sbt-force-latest         force the use of the latest release of sbt: 0.13.11

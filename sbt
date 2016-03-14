@@ -10,7 +10,7 @@ declare -r sbt_release_version="0.13.11"
 declare -r sbt_unreleased_version="0.13.11"
 declare -r buildProps="project/build.properties"
 
-declare sbt_jar sbt_dir sbt_create sbt_version
+declare sbt_jar sbt_dir sbt_create sbt_version sbt_script
 declare scala_version sbt_explicit_version
 declare verbose noshare batch trace_level log_level
 declare sbt_saved_stty debugUs
@@ -311,6 +311,7 @@ runner with the -x option.
   -jvm-debug <port>  Turn on JVM debugging, open at the given port.
   -batch             Disable interactive mode
   -prompt <expr>     Set the sbt prompt; in expr, 's' is the State and 'e' is Extracted
+  -script <file>     Run the specified file as a scala script
 
   # sbt version (default: sbt.version from $buildProps if present, otherwise $sbt_release_version)
   -sbt-force-latest         force the use of the latest release of sbt: $sbt_release_version
@@ -381,6 +382,7 @@ process_args () {
         -jvm-debug) require_arg port "$1" "$2" && addDebugger "$2" && shift 2 ;;
             -batch) batch=true && shift ;;
            -prompt) require_arg "expr" "$1" "$2" && setThisBuild shellPrompt "(s => { val e = Project.extract(s) ; $2 })" && shift 2 ;;
+           -script) require_arg file "$1" "$2" && sbt_script="$2" && addJava "-Dsbt.main.class=sbt.ScriptMain" && shift 2 ;;
 
        -sbt-create) sbt_create=true && shift ;;
           -sbt-jar) require_arg path "$1" "$2" && sbt_jar="$2" && shift 2 ;;
@@ -463,14 +465,18 @@ vlog "Detected sbt version $sbt_version"
 
 [[ -n "$scala_version" ]] && vlog "Overriding scala version to $scala_version"
 
-# no args - alert them there's stuff in here
-(( argumentCount > 0 )) || {
-  vlog "Starting $script_name: invoke with -help for other options"
-  residual_args=( shell )
-}
+if [[ -n "$sbt_script" ]]; then
+  residual_args=( $sbt_script ${residual_args[@]} )
+else
+  # no args - alert them there's stuff in here
+  (( argumentCount > 0 )) || {
+    vlog "Starting $script_name: invoke with -help for other options"
+    residual_args=( shell )
+  }
+fi
 
-# verify this is an sbt dir or -create was given
-[[ -r ./build.sbt || -d ./project || -n "$sbt_create" ]] || {
+# verify this is an sbt dir, -create was given or user attempts to run a scala script
+[[ -r ./build.sbt || -d ./project || -n "$sbt_create" || -n "$sbt_script" ]] || {
   cat <<EOM
 $(pwd) doesn't appear to be an sbt project.
 If you want to start sbt anyway, run:
