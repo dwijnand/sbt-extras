@@ -2,13 +2,14 @@
 
 load test_helper
 
-@test "-ivy       => -Dsbt.ivy.home"       { sbt_expecting "-Dsbt.ivy.home=$sbt_project/ivy" -ivy "$sbt_project/ivy";                               }
-@test "-no-colors => -Dsbt.log.noformat"   { sbt_expecting "-Dsbt.log.noformat=true" -no-colors;                                                    }
-@test "-sbt-boot  => -Dsbt.boot.directory" { sbt_expecting "-Dsbt.boot.directory=$sbt_project/sbt.boot" -sbt-boot "$sbt_project/sbt.boot";          }
-@test "-debug-inc => -Dxsbt.inc.debug"     { sbt_expecting "-Dxsbt.inc.debug=true" -debug-inc;                                                      }
-@test "-offline   => offline setting"      { sbt_expecting "set offline := true" -offline;                                                          }
-@test "-Sopt      => scalac -opt"          { sbt_expecting 'set scalacOptions in ThisBuild += "-P:continuations:enable"' -S-P:continuations:enable; }
-@test "-prompt    => shellPrompt"          { sbt_expecting "set shellPrompt in ThisBuild" -prompt 'bippy> ';                                        }
+@test "-ivy       => -Dsbt.ivy.home"                  { sbt_expecting "-Dsbt.ivy.home=$sbt_project/ivy" -ivy "$sbt_project/ivy";                               }
+@test "-no-colors => -Dsbt.log.noformat"              { sbt_expecting "-Dsbt.log.noformat=true" -no-colors;                                                    }
+@test "-sbt-boot  => -Dsbt.boot.directory"            { sbt_expecting "-Dsbt.boot.directory=$sbt_project/sbt.boot" -sbt-boot "$sbt_project/sbt.boot";          }
+@test "-debug-inc => -Dxsbt.inc.debug"                { sbt_expecting "-Dxsbt.inc.debug=true" -debug-inc;                                                      }
+@test "-offline   => offline setting"                 { sbt_expecting "set offline := true" -offline;                                                          }
+@test "-Sopt      => scalac -opt"                     { sbt_expecting 'set scalacOptions in ThisBuild += "-P:continuations:enable"' -S-P:continuations:enable; }
+@test "-prompt    => shellPrompt"                     { sbt_expecting "set shellPrompt in ThisBuild" -prompt 'bippy> ';                                        }
+@test "-script    => -Dsbt.main.class=sbt.ScriptMain" { sbt_expecting "-Dsbt.main.class=sbt.ScriptMain" -script params;                                        }
 
 @test "-jvm-debug => -Xdebug, -Xrunjdwp:transport" {
   sbt_expecting "-Xdebug" -jvm-debug 8000
