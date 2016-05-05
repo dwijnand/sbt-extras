@@ -10,7 +10,7 @@ declare -r sbt_release_version="0.13.11"
 declare -r sbt_unreleased_version="0.13.11"
 declare -r buildProps="project/build.properties"
 
-declare sbt_jar sbt_dir sbt_create sbt_version sbt_script
+declare sbt_jar sbt_dir sbt_scala sbt_create sbt_version sbt_script
 declare scala_version sbt_explicit_version
 declare verbose noshare batch trace_level log_level
 declare sbt_saved_stty debugUs
@@ -130,6 +130,7 @@ declare -r sbt_launch_snapshot_repo="https://repo.scala-sbt.org/scalasbt/ivy-sna
 
 declare -r script_path="$(get_script_path "$BASH_SOURCE")"
 declare -r script_name="${script_path##*/}"
+declare -r script_alias="${0##*/}"
 
 # some non-read-onlies set with defaults
 declare java_cmd="java"
@@ -244,6 +245,7 @@ execRunner () {
   }
 
   [[ -n "$batch" ]] && exec </dev/null
+  [[ -n "$workspace" ]] && cd $workspace && exec "$@"
   exec "$@"
 }
 
@@ -282,7 +284,7 @@ acquire_sbt_jar () {
 usage () {
   set_sbt_version
   cat <<EOM
-Usage: $script_name [options]
+Usage: $script_alias [options]
 
 Note that options which are passed along to sbt begin with -- whereas
 options to this runner use a single dash. Any sbt command can be scheduled
@@ -302,6 +304,7 @@ runner with the -x option.
   -trace <level>     display stack traces with a max of <level> frames (default: -1, traces suppressed)
   -debug-inc         enable debugging log for the incremental compiler
   -no-colors         disable ANSI color codes
+  -sbt-scala         emulate the scala command line launcher
   -sbt-create        start sbt even if current directory contains no sbt project
   -sbt-dir   <path>  path to global settings/plugins directory (default: ~/.sbt/<version>)
   -sbt-boot  <path>  path to shared boot directory (default: ~/.sbt/boot in 0.11+)
@@ -384,6 +387,7 @@ process_args () {
            -prompt) require_arg "expr" "$1" "$2" && setThisBuild shellPrompt "(s => { val e = Project.extract(s) ; $2 })" && shift 2 ;;
            -script) require_arg file "$1" "$2" && sbt_script="$2" && addJava "-Dsbt.main.class=sbt.ScriptMain" && shift 2 ;;
 
+        -sbt-scala) sbt_scala=true && shift ;;
        -sbt-create) sbt_create=true && shift ;;
           -sbt-jar) require_arg path "$1" "$2" && sbt_jar="$2" && shift 2 ;;
       -sbt-version) require_arg version "$1" "$2" && sbt_explicit_version="$2" && shift 2 ;;
@@ -465,18 +469,27 @@ vlog "Detected sbt version $sbt_version"
 
 [[ -n "$scala_version" ]] && vlog "Overriding scala version to $scala_version"
 
+if [[ "$script_alias" == "scala" ]]; then
+  sbt_scala=true
+fi
+
 if [[ -n "$sbt_script" ]]; then
   residual_args=( $sbt_script ${residual_args[@]} )
+elif [[ -n "$sbt_scala" ]]; then
+  if [[ ! " ${sbt_commands[@]} " =~ " ++ " ]]; then setScalaVersion "$latest_211"; fi
+  residual_args=( ${residual_args[@]} "-sbt-create" console )
+  workspace="$HOME/.sbt/workspace"
+  mkdir -p $workspace
 else
   # no args - alert them there's stuff in here
   (( argumentCount > 0 )) || {
-    vlog "Starting $script_name: invoke with -help for other options"
+    vlog "Starting $script_alias: invoke with -help for other options"
     residual_args=( shell )
   }
 fi
 
 # verify this is an sbt dir, -create was given or user attempts to run a scala script
-[[ -r ./build.sbt || -d ./project || -n "$sbt_create" || -n "$sbt_script" ]] || {
+[[ -r ./build.sbt || -d ./project || -n "$sbt_create" || -n "$sbt_script" || -n "$sbt_scala" ]] || {
   cat <<EOM
 $(pwd) doesn't appear to be an sbt project.
 If you want to start sbt anyway, run:
