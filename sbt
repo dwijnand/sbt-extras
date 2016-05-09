@@ -83,11 +83,14 @@ url_base () {
 
   case "$version" in
         0.7.*) echo "http://simple-build-tool.googlecode.com" ;;
-      0.10.* ) echo "$sbt_launch_release_repo" ;;
-    0.11.[12]) echo "$sbt_launch_release_repo" ;;
+      0.10.* ) echo "$sbt_launch_ivy_release_repo" ;;
+    0.11.[12]) echo "$sbt_launch_ivy_release_repo" ;;
+    0.*-[0-9][0-9][0-9][0-9][0-9][0-9][0-9][0-9]-[0-9][0-9][0-9][0-9][0-9][0-9]) # ie "*-yyyymmdd-hhMMss"
+               echo "$sbt_launch_ivy_snapshot_repo" ;;
+          0.*) echo "$sbt_launch_ivy_release_repo" ;;
     *-[0-9][0-9][0-9][0-9][0-9][0-9][0-9][0-9]-[0-9][0-9][0-9][0-9][0-9][0-9]) # ie "*-yyyymmdd-hhMMss"
-               echo "$sbt_launch_snapshot_repo" ;;
-            *) echo "$sbt_launch_release_repo" ;;
+               echo "$sbt_launch_mvn_snapshot_repo" ;;
+            *) echo "$sbt_launch_mvn_release_repo" ;;
   esac
 }
 
@@ -100,7 +103,8 @@ make_url () {
         0.7.*) echo "$base/files/sbt-launch-0.7.7.jar" ;;
       0.10.* ) echo "$base/org.scala-tools.sbt/sbt-launch/$version/sbt-launch.jar" ;;
     0.11.[12]) echo "$base/org.scala-tools.sbt/sbt-launch/$version/sbt-launch.jar" ;;
-            *) echo "$base/org.scala-sbt/sbt-launch/$version/sbt-launch.jar" ;;
+          0.*) echo "$base/org.scala-sbt/sbt-launch/$version/sbt-launch.jar" ;;
+            *) echo "$base/org/scala-sbt/sbt-launch/$version/sbt-launch.jar" ;;
   esac
 }
 
@@ -125,8 +129,10 @@ declare -r latest_29="2.9.3"
 declare -r latest_210="2.10.6"
 declare -r latest_211="2.11.8"
 declare -r latest_212="2.12.0-M4"
-declare -r sbt_launch_release_repo="http://repo.typesafe.com/typesafe/ivy-releases"
-declare -r sbt_launch_snapshot_repo="https://repo.scala-sbt.org/scalasbt/ivy-snapshots"
+declare -r sbt_launch_ivy_release_repo="http://repo.typesafe.com/typesafe/ivy-releases"
+declare -r sbt_launch_ivy_snapshot_repo="https://repo.scala-sbt.org/scalasbt/ivy-snapshots"
+declare -r sbt_launch_mvn_release_repo="http://repo.scala-sbt.org/scalasbt/maven-releases"
+declare -r sbt_launch_mvn_snapshot_repo="http://repo.scala-sbt.org/scalasbt/maven-snapshots"
 
 declare -r script_path="$(get_script_path "$BASH_SOURCE")"
 declare -r script_name="${script_path##*/}"
