@@ -9,5 +9,5 @@ load test_helper
 @test "-29 => scala 2.9"                      { sbt_expecting "++ 2.9.3" -29;                                                                       }
 @test "-210 => scala 2.10"                    { sbt_expecting "++ 2.10.6" -210;                                                                     }
 @test "-211 => scala 2.11"                    { sbt_expecting "++ 2.11.8" -211;                                                                     }
-@test "-212 => scala 2.12"                    { sbt_expecting "++ 2.12.0-M4" -212;                                                                  }
+@test "-212 => scala 2.12"                    { sbt_expecting "++ 2.12.0-M5" -212;                                                                  }
 @test "-scala-version N => version N"         { sbt_expecting "++ 2.10.2" -scala-version 2.10.2;                                                    }
