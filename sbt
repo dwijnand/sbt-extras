@@ -54,7 +54,7 @@ onSbtRunnerExit() {
   unset sbt_saved_stty
 }
 
-# save stty and trap exit, to ensure echo is reenabled if we are interrupted.
+# save stty and trap exit, to ensure echo is re-enabled if we are interrupted.
 trap onSbtRunnerExit EXIT
 sbt_saved_stty="$(stty -g 2>/dev/null)"
 vlog "Saved stty: $sbt_saved_stty"
@@ -189,7 +189,7 @@ java_version () {
   echo "${version:2:1}"
 }
 
-# MaxPermSize critical on pre-8 jvms but incurs noisy warning on 8+
+# MaxPermSize critical on pre-8 JVMs but incurs noisy warning on 8+
 default_jvm_opts () {
   local v="$(java_version)"
   if [[ $v -ge 8 ]]; then
