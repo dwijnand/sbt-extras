@@ -58,6 +58,23 @@ trap onSbtRunnerExit EXIT
 sbt_saved_stty="$(stty -g 2>/dev/null)"
 vlog "Saved stty: $sbt_saved_stty"
 
+# this seems to cover the bases on OSX, and someone will
+# have to tell me about the others.
+get_script_path () {
+  local path="$1"
+  [[ -L "$path" ]] || { echo "$path" ; return; }
+
+  local target="$(readlink "$path")"
+  if [[ "${target:0:1}" == "/" ]]; then
+    echo "$target"
+  else
+    echo "${path%/*}/$target"
+  fi
+}
+
+declare -r script_path="$(get_script_path "$BASH_SOURCE")"
+declare -r script_name="${script_path##*/}"
+
 # spaces are possible, e.g. sbt.version = 0.13.0
 build_props_sbt () {
   [[ -r "$buildProps" ]] && \
@@ -83,20 +100,6 @@ set_sbt_version () {
   sbt_version="${sbt_explicit_version:-$(build_props_sbt)}"
   [[ -n "$sbt_version" ]] || sbt_version=$sbt_release_version
   export sbt_version
-}
-
-# this seems to cover the bases on OSX, and someone will
-# have to tell me about the others.
-get_script_path () {
-  local path="$1"
-  [[ -L "$path" ]] || { echo "$path" ; return; }
-
-  local target="$(readlink "$path")"
-  if [[ "${target:0:1}" == "/" ]]; then
-    echo "$target"
-  else
-    echo "${path%/*}/$target"
-  fi
 }
 
 die() {
@@ -145,9 +148,6 @@ init_default_option_file () {
   fi
   echo "$default_file"
 }
-
-declare -r script_path="$(get_script_path "$BASH_SOURCE")"
-declare -r script_name="${script_path##*/}"
 
 declare sbt_opts_file="$(init_default_option_file SBT_OPTS .sbtopts)"
 declare jvm_opts_file="$(init_default_option_file JVM_OPTS .jvmopts)"
