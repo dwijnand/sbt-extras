@@ -10,8 +10,8 @@ declare -r sbt_unreleased_version="0.13.12"
 declare -r buildProps="project/build.properties"
 
 declare sbt_jar sbt_dir sbt_create sbt_version sbt_script
-declare scala_version sbt_explicit_version
-declare verbose noshare batch trace_level log_level
+declare sbt_explicit_version
+declare verbose noshare batch trace_level
 declare sbt_saved_stty debugUs
 
 echoerr () { echo >&2 "$@"; }
@@ -467,8 +467,6 @@ setTraceLevel() {
 # Update build.properties on disk to set explicit version - sbt gives us no choice
 [[ -n "$sbt_explicit_version" ]] && update_build_props_sbt "$sbt_explicit_version"
 vlog "Detected sbt version $sbt_version"
-
-[[ -n "$scala_version" ]] && vlog "Overriding scala version to $scala_version"
 
 if [[ -n "$sbt_script" ]]; then
   residual_args=( $sbt_script ${residual_args[@]} )
