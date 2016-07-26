@@ -43,6 +43,7 @@ declare -a extra_jvm_opts extra_sbt_opts
 
 echoerr () { echo >&2 "$@"; }
 vlog ()    { [[ -n "$verbose" ]] && echoerr "$@"; }
+die ()     { echo "Aborting: $@" ; exit 1; }
 
 # restore stty settings (echo in particular)
 onSbtRunnerExit() {
@@ -117,11 +118,6 @@ set_sbt_version () {
   export sbt_version
 }
 
-die() {
-  echo "Aborting: $@"
-  exit 1
-}
-
 url_base () {
   local version="$1"
 
@@ -152,33 +148,17 @@ make_url () {
   esac
 }
 
-addJava () {
-  vlog "[addJava] arg = '$1'"
-  java_args+=("$1")
-}
-addSbt () {
-  vlog "[addSbt] arg = '$1'"
-  sbt_commands+=("$1")
-}
+addJava ()     { vlog "[addJava] arg = '$1'"   ;     java_args+=("$1"); }
+addSbt ()      { vlog "[addSbt] arg = '$1'"    ;  sbt_commands+=("$1"); }
+addScalac ()   { vlog "[addScalac] arg = '$1'" ;   scalac_args+=("$1"); }
+addResidual () { vlog "[residual] arg = '$1'"  ; residual_args+=("$1"); }
+
+addResolver () { addSbt "set resolvers += $1"; }
+addDebugger () { addJava "-Xdebug" ; addJava "-Xrunjdwp:transport=dt_socket,server=y,suspend=n,address=$1"; }
 setThisBuild () {
   vlog "[addBuild] args = '$@'"
   local key="$1" && shift
   addSbt "set $key in ThisBuild := $@"
-}
-addScalac () {
-  vlog "[addScalac] arg = '$1'"
-  scalac_args+=("$1")
-}
-addResidual () {
-  vlog "[residual] arg = '$1'"
-  residual_args+=("$1")
-}
-addResolver () {
-  addSbt "set resolvers += $1"
-}
-addDebugger () {
-  addJava "-Xdebug"
-  addJava "-Xrunjdwp:transport=dt_socket,server=y,suspend=n,address=$1"
 }
 setScalaVersion () {
   [[ "$1" == *"-SNAPSHOT" ]] && addResolver 'Resolver.sonatypeRepo("snapshots")'
@@ -247,13 +227,8 @@ execRunner () {
   exec "$@"
 }
 
-jar_url () {
-  make_url "$1"
-}
-
-jar_file () {
-  echo "$sbt_launch_dir/$1/sbt-launch.jar"
-}
+jar_url ()  { make_url "$1"; }
+jar_file () { echo "$sbt_launch_dir/$1/sbt-launch.jar"; }
 
 download_url () {
   local url="$1"
