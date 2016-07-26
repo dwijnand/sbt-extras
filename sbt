@@ -205,10 +205,6 @@ elif [[ -n "$JAVA_HOME" && -e "$JAVA_HOME/bin/java" ]]; then
   setJavaHomeQuietly "$JAVA_HOME"
 fi
 
-# directory to store sbt launchers
-[[ -d "$sbt_launch_dir" ]] || mkdir -p "$sbt_launch_dir"
-[[ -w "$sbt_launch_dir" ]] || sbt_launch_dir="$(mktemp -d -t sbt_extras_launchers.XXXXXX)"
-
 java_version () {
   local version=$("$java_cmd" -version 2>&1 | grep -E -e '(java|openjdk) version' | awk '{ print $3 }' | tr -d \")
   vlog "Detected Java version: $version"
@@ -491,6 +487,10 @@ EOM
 
 # pick up completion if present; todo
 [[ -r .sbt_completion.sh ]] && source .sbt_completion.sh
+
+# directory to store sbt launchers
+[[ -d "$sbt_launch_dir" ]] || mkdir -p "$sbt_launch_dir"
+[[ -w "$sbt_launch_dir" ]] || sbt_launch_dir="$(mktemp -d -t sbt_extras_launchers.XXXXXX)"
 
 # no jar? download it.
 [[ -r "$sbt_jar" ]] || acquire_sbt_jar || {
