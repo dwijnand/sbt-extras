@@ -5,7 +5,6 @@
 
 set -o pipefail
 
-# todo - make this dynamic
 declare -r sbt_release_version="0.13.12"
 declare -r sbt_unreleased_version="0.13.12"
 declare -r buildProps="project/build.properties"
