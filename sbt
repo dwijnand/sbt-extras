@@ -75,6 +75,21 @@ get_script_path () {
 declare -r script_path="$(get_script_path "$BASH_SOURCE")"
 declare -r script_name="${script_path##*/}"
 
+init_default_option_file () {
+  local overriding_var="${!1}"
+  local default_file="$2"
+  if [[ ! -r "$default_file" && "$overriding_var" =~ ^@(.*)$ ]]; then
+    local envvar_file="${BASH_REMATCH[1]}"
+    if [[ -r "$envvar_file" ]]; then
+      default_file="$envvar_file"
+    fi
+  fi
+  echo "$default_file"
+}
+
+declare sbt_opts_file="$(init_default_option_file SBT_OPTS .sbtopts)"
+declare jvm_opts_file="$(init_default_option_file JVM_OPTS .jvmopts)"
+
 # spaces are possible, e.g. sbt.version = 0.13.0
 build_props_sbt () {
   [[ -r "$buildProps" ]] && \
@@ -136,21 +151,6 @@ make_url () {
             *) echo "$base/org/scala-sbt/sbt-launch/$version/sbt-launch.jar" ;;
   esac
 }
-
-init_default_option_file () {
-  local overriding_var="${!1}"
-  local default_file="$2"
-  if [[ ! -r "$default_file" && "$overriding_var" =~ ^@(.*)$ ]]; then
-    local envvar_file="${BASH_REMATCH[1]}"
-    if [[ -r "$envvar_file" ]]; then
-      default_file="$envvar_file"
-    fi
-  fi
-  echo "$default_file"
-}
-
-declare sbt_opts_file="$(init_default_option_file SBT_OPTS .sbtopts)"
-declare jvm_opts_file="$(init_default_option_file JVM_OPTS .jvmopts)"
 
 addJava () {
   vlog "[addJava] arg = '$1'"
