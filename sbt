@@ -7,12 +7,39 @@ set -o pipefail
 
 declare -r sbt_release_version="0.13.12"
 declare -r sbt_unreleased_version="0.13.12"
+
+declare -r latest_212="2.12.0-M5"
+declare -r latest_211="2.11.8"
+declare -r latest_210="2.10.6"
+declare -r latest_29="2.9.3"
+declare -r latest_28="2.8.2"
+
 declare -r buildProps="project/build.properties"
+
+declare -r sbt_launch_ivy_release_repo="http://repo.typesafe.com/typesafe/ivy-releases"
+declare -r sbt_launch_ivy_snapshot_repo="https://repo.scala-sbt.org/scalasbt/ivy-snapshots"
+declare -r sbt_launch_mvn_release_repo="http://repo.scala-sbt.org/scalasbt/maven-releases"
+declare -r sbt_launch_mvn_snapshot_repo="http://repo.scala-sbt.org/scalasbt/maven-snapshots"
+
+declare -r cms_opts="-XX:+CMSClassUnloadingEnabled -XX:+UseConcMarkSweepGC"
+declare -r jit_opts="-XX:ReservedCodeCacheSize=256m"
+declare -r default_jvm_opts_common="-Xms512m -Xmx1536m -Xss2m $jit_opts $cms_opts"
+declare -r noshare_opts="-Dsbt.global.base=project/.sbtboot -Dsbt.boot.directory=project/.boot -Dsbt.ivy.home=project/.ivy"
 
 declare sbt_jar sbt_dir sbt_create sbt_version sbt_script
 declare sbt_explicit_version
 declare verbose noshare batch trace_level
 declare sbt_saved_stty debugUs
+
+declare java_cmd="java"
+declare sbt_launch_dir="$HOME/.sbt/launchers"
+declare sbt_launch_repo
+
+# pull -J and -D options to give to java.
+declare -a java_args scalac_args sbt_commands residual_args
+
+# args to jvm/sbt via files or environment variables
+declare -a extra_jvm_opts extra_sbt_opts
 
 echoerr () { echo >&2 "$@"; }
 vlog ()    { [[ -n "$verbose" ]] && echoerr "$@"; }
@@ -119,39 +146,11 @@ init_default_option_file () {
   echo "$default_file"
 }
 
-declare -r cms_opts="-XX:+CMSClassUnloadingEnabled -XX:+UseConcMarkSweepGC"
-declare -r jit_opts="-XX:ReservedCodeCacheSize=256m"
-declare -r default_jvm_opts_common="-Xms512m -Xmx1536m -Xss2m $jit_opts $cms_opts"
-declare -r noshare_opts="-Dsbt.global.base=project/.sbtboot -Dsbt.boot.directory=project/.boot -Dsbt.ivy.home=project/.ivy"
-declare -r latest_28="2.8.2"
-declare -r latest_29="2.9.3"
-declare -r latest_210="2.10.6"
-declare -r latest_211="2.11.8"
-declare -r latest_212="2.12.0-M5"
-declare -r sbt_launch_ivy_release_repo="http://repo.typesafe.com/typesafe/ivy-releases"
-declare -r sbt_launch_ivy_snapshot_repo="https://repo.scala-sbt.org/scalasbt/ivy-snapshots"
-declare -r sbt_launch_mvn_release_repo="http://repo.scala-sbt.org/scalasbt/maven-releases"
-declare -r sbt_launch_mvn_snapshot_repo="http://repo.scala-sbt.org/scalasbt/maven-snapshots"
-
 declare -r script_path="$(get_script_path "$BASH_SOURCE")"
 declare -r script_name="${script_path##*/}"
 
-# some non-read-onlies set with defaults
-declare java_cmd="java"
 declare sbt_opts_file="$(init_default_option_file SBT_OPTS .sbtopts)"
 declare jvm_opts_file="$(init_default_option_file JVM_OPTS .jvmopts)"
-declare sbt_launch_dir="$HOME/.sbt/launchers"
-
-declare sbt_launch_repo
-
-# pull -J and -D options to give to java.
-declare -a residual_args
-declare -a java_args
-declare -a scalac_args
-declare -a sbt_commands
-
-# args to jvm/sbt via files or environment variables
-declare -a extra_jvm_opts extra_sbt_opts
 
 addJava () {
   vlog "[addJava] arg = '$1'"
