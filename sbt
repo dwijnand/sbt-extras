@@ -91,7 +91,6 @@ init_default_option_file () {
 declare sbt_opts_file="$(init_default_option_file SBT_OPTS .sbtopts)"
 declare jvm_opts_file="$(init_default_option_file JVM_OPTS .jvmopts)"
 
-# spaces are possible, e.g. sbt.version = 0.13.0
 build_props_sbt () {
   [[ -r "$buildProps" ]] && \
     grep '^sbt\.version' "$buildProps" | tr '=\r' ' ' | awk '{ print $2; }'
