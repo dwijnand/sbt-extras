@@ -44,6 +44,20 @@ declare -a extra_jvm_opts extra_sbt_opts
 echoerr () { echo >&2 "$@"; }
 vlog ()    { [[ -n "$verbose" ]] && echoerr "$@"; }
 
+# restore stty settings (echo in particular)
+onSbtRunnerExit() {
+  [[ -n "$sbt_saved_stty" ]] || return
+  vlog ""
+  vlog "restoring stty: $sbt_saved_stty"
+  stty "$sbt_saved_stty"
+  unset sbt_saved_stty
+}
+
+# save stty and trap exit, to ensure echo is reenabled if we are interrupted.
+trap onSbtRunnerExit EXIT
+sbt_saved_stty="$(stty -g 2>/dev/null)"
+vlog "Saved stty: $sbt_saved_stty"
+
 # spaces are possible, e.g. sbt.version = 0.13.0
 build_props_sbt () {
   [[ -r "$buildProps" ]] && \
@@ -70,20 +84,6 @@ set_sbt_version () {
   [[ -n "$sbt_version" ]] || sbt_version=$sbt_release_version
   export sbt_version
 }
-
-# restore stty settings (echo in particular)
-onSbtRunnerExit() {
-  [[ -n "$sbt_saved_stty" ]] || return
-  vlog ""
-  vlog "restoring stty: $sbt_saved_stty"
-  stty "$sbt_saved_stty"
-  unset sbt_saved_stty
-}
-
-# save stty and trap exit, to ensure echo is reenabled if we are interrupted.
-trap onSbtRunnerExit EXIT
-sbt_saved_stty="$(stty -g 2>/dev/null)"
-vlog "Saved stty: $sbt_saved_stty"
 
 # this seems to cover the bases on OSX, and someone will
 # have to tell me about the others.
