@@ -5,20 +5,92 @@
 
 set -o pipefail
 
-# todo - make this dynamic
 declare -r sbt_release_version="0.13.12"
 declare -r sbt_unreleased_version="0.13.12"
+
+declare -r latest_212="2.12.0-M5"
+declare -r latest_211="2.11.8"
+declare -r latest_210="2.10.6"
+declare -r latest_29="2.9.3"
+declare -r latest_28="2.8.2"
+
 declare -r buildProps="project/build.properties"
 
+declare -r sbt_launch_ivy_release_repo="http://repo.typesafe.com/typesafe/ivy-releases"
+declare -r sbt_launch_ivy_snapshot_repo="https://repo.scala-sbt.org/scalasbt/ivy-snapshots"
+declare -r sbt_launch_mvn_release_repo="http://repo.scala-sbt.org/scalasbt/maven-releases"
+declare -r sbt_launch_mvn_snapshot_repo="http://repo.scala-sbt.org/scalasbt/maven-snapshots"
+
+declare -r cms_opts="-XX:+CMSClassUnloadingEnabled -XX:+UseConcMarkSweepGC"
+declare -r jit_opts="-XX:ReservedCodeCacheSize=256m"
+declare -r default_jvm_opts_common="-Xms512m -Xmx1536m -Xss2m $jit_opts $cms_opts"
+declare -r noshare_opts="-Dsbt.global.base=project/.sbtboot -Dsbt.boot.directory=project/.boot -Dsbt.ivy.home=project/.ivy"
+
 declare sbt_jar sbt_dir sbt_create sbt_version sbt_script
-declare scala_version sbt_explicit_version
-declare verbose noshare batch trace_level log_level
+declare sbt_explicit_version
+declare verbose noshare batch trace_level
 declare sbt_saved_stty debugUs
+
+declare java_cmd="java"
+declare sbt_launch_dir="$HOME/.sbt/launchers"
+declare sbt_launch_repo
+
+# pull -J and -D options to give to java.
+declare -a java_args scalac_args sbt_commands residual_args
+
+# args to jvm/sbt via files or environment variables
+declare -a extra_jvm_opts extra_sbt_opts
 
 echoerr () { echo >&2 "$@"; }
 vlog ()    { [[ -n "$verbose" ]] && echoerr "$@"; }
+die ()     { echo "Aborting: $@" ; exit 1; }
 
-# spaces are possible, e.g. sbt.version = 0.13.0
+# restore stty settings (echo in particular)
+onSbtRunnerExit() {
+  [[ -n "$sbt_saved_stty" ]] || return
+  vlog ""
+  vlog "restoring stty: $sbt_saved_stty"
+  stty "$sbt_saved_stty"
+  unset sbt_saved_stty
+}
+
+# save stty and trap exit, to ensure echo is re-enabled if we are interrupted.
+trap onSbtRunnerExit EXIT
+sbt_saved_stty="$(stty -g 2>/dev/null)"
+vlog "Saved stty: $sbt_saved_stty"
+
+# this seems to cover the bases on OSX, and someone will
+# have to tell me about the others.
+get_script_path () {
+  local path="$1"
+  [[ -L "$path" ]] || { echo "$path" ; return; }
+
+  local target="$(readlink "$path")"
+  if [[ "${target:0:1}" == "/" ]]; then
+    echo "$target"
+  else
+    echo "${path%/*}/$target"
+  fi
+}
+
+declare -r script_path="$(get_script_path "$BASH_SOURCE")"
+declare -r script_name="${script_path##*/}"
+
+init_default_option_file () {
+  local overriding_var="${!1}"
+  local default_file="$2"
+  if [[ ! -r "$default_file" && "$overriding_var" =~ ^@(.*)$ ]]; then
+    local envvar_file="${BASH_REMATCH[1]}"
+    if [[ -r "$envvar_file" ]]; then
+      default_file="$envvar_file"
+    fi
+  fi
+  echo "$default_file"
+}
+
+declare sbt_opts_file="$(init_default_option_file SBT_OPTS .sbtopts)"
+declare jvm_opts_file="$(init_default_option_file JVM_OPTS .jvmopts)"
+
 build_props_sbt () {
   [[ -r "$buildProps" ]] && \
     grep '^sbt\.version' "$buildProps" | tr '=\r' ' ' | awk '{ print $2; }'
@@ -43,39 +115,6 @@ set_sbt_version () {
   sbt_version="${sbt_explicit_version:-$(build_props_sbt)}"
   [[ -n "$sbt_version" ]] || sbt_version=$sbt_release_version
   export sbt_version
-}
-
-# restore stty settings (echo in particular)
-onSbtRunnerExit() {
-  [[ -n "$sbt_saved_stty" ]] || return
-  vlog ""
-  vlog "restoring stty: $sbt_saved_stty"
-  stty "$sbt_saved_stty"
-  unset sbt_saved_stty
-}
-
-# save stty and trap exit, to ensure echo is reenabled if we are interrupted.
-trap onSbtRunnerExit EXIT
-sbt_saved_stty="$(stty -g 2>/dev/null)"
-vlog "Saved stty: $sbt_saved_stty"
-
-# this seems to cover the bases on OSX, and someone will
-# have to tell me about the others.
-get_script_path () {
-  local path="$1"
-  [[ -L "$path" ]] || { echo "$path" ; return; }
-
-  local target="$(readlink "$path")"
-  if [[ "${target:0:1}" == "/" ]]; then
-    echo "$target"
-  else
-    echo "${path%/*}/$target"
-  fi
-}
-
-die() {
-  echo "Aborting: $@"
-  exit 1
 }
 
 url_base () {
@@ -108,79 +147,17 @@ make_url () {
   esac
 }
 
-init_default_option_file () {
-  local overriding_var="${!1}"
-  local default_file="$2"
-  if [[ ! -r "$default_file" && "$overriding_var" =~ ^@(.*)$ ]]; then
-    local envvar_file="${BASH_REMATCH[1]}"
-    if [[ -r "$envvar_file" ]]; then
-      default_file="$envvar_file"
-    fi
-  fi
-  echo "$default_file"
-}
+addJava ()     { vlog "[addJava] arg = '$1'"   ;     java_args+=("$1"); }
+addSbt ()      { vlog "[addSbt] arg = '$1'"    ;  sbt_commands+=("$1"); }
+addScalac ()   { vlog "[addScalac] arg = '$1'" ;   scalac_args+=("$1"); }
+addResidual () { vlog "[residual] arg = '$1'"  ; residual_args+=("$1"); }
 
-declare -r cms_opts="-XX:+CMSClassUnloadingEnabled -XX:+UseConcMarkSweepGC"
-declare -r jit_opts="-XX:ReservedCodeCacheSize=256m"
-declare -r default_jvm_opts_common="-Xms512m -Xmx1536m -Xss2m $jit_opts $cms_opts"
-declare -r noshare_opts="-Dsbt.global.base=project/.sbtboot -Dsbt.boot.directory=project/.boot -Dsbt.ivy.home=project/.ivy"
-declare -r latest_28="2.8.2"
-declare -r latest_29="2.9.3"
-declare -r latest_210="2.10.6"
-declare -r latest_211="2.11.8"
-declare -r latest_212="2.12.0-M5"
-declare -r sbt_launch_ivy_release_repo="http://repo.typesafe.com/typesafe/ivy-releases"
-declare -r sbt_launch_ivy_snapshot_repo="https://repo.scala-sbt.org/scalasbt/ivy-snapshots"
-declare -r sbt_launch_mvn_release_repo="http://repo.scala-sbt.org/scalasbt/maven-releases"
-declare -r sbt_launch_mvn_snapshot_repo="http://repo.scala-sbt.org/scalasbt/maven-snapshots"
-
-declare -r script_path="$(get_script_path "$BASH_SOURCE")"
-declare -r script_name="${script_path##*/}"
-
-# some non-read-onlies set with defaults
-declare java_cmd="java"
-declare sbt_opts_file="$(init_default_option_file SBT_OPTS .sbtopts)"
-declare jvm_opts_file="$(init_default_option_file JVM_OPTS .jvmopts)"
-declare sbt_launch_dir="$HOME/.sbt/launchers"
-
-declare sbt_launch_repo
-
-# pull -J and -D options to give to java.
-declare -a residual_args
-declare -a java_args
-declare -a scalac_args
-declare -a sbt_commands
-
-# args to jvm/sbt via files or environment variables
-declare -a extra_jvm_opts extra_sbt_opts
-
-addJava () {
-  vlog "[addJava] arg = '$1'"
-  java_args+=("$1")
-}
-addSbt () {
-  vlog "[addSbt] arg = '$1'"
-  sbt_commands+=("$1")
-}
+addResolver () { addSbt "set resolvers += $1"; }
+addDebugger () { addJava "-Xdebug" ; addJava "-Xrunjdwp:transport=dt_socket,server=y,suspend=n,address=$1"; }
 setThisBuild () {
   vlog "[addBuild] args = '$@'"
   local key="$1" && shift
   addSbt "set $key in ThisBuild := $@"
-}
-addScalac () {
-  vlog "[addScalac] arg = '$1'"
-  scalac_args+=("$1")
-}
-addResidual () {
-  vlog "[residual] arg = '$1'"
-  residual_args+=("$1")
-}
-addResolver () {
-  addSbt "set resolvers += $1"
-}
-addDebugger () {
-  addJava "-Xdebug"
-  addJava "-Xrunjdwp:transport=dt_socket,server=y,suspend=n,address=$1"
 }
 setScalaVersion () {
   [[ "$1" == *"-SNAPSHOT" ]] && addResolver 'Resolver.sonatypeRepo("snapshots")'
@@ -206,17 +183,13 @@ elif [[ -n "$JAVA_HOME" && -e "$JAVA_HOME/bin/java" ]]; then
   setJavaHomeQuietly "$JAVA_HOME"
 fi
 
-# directory to store sbt launchers
-[[ -d "$sbt_launch_dir" ]] || mkdir -p "$sbt_launch_dir"
-[[ -w "$sbt_launch_dir" ]] || sbt_launch_dir="$(mktemp -d -t sbt_extras_launchers.XXXXXX)"
-
 java_version () {
   local version=$("$java_cmd" -version 2>&1 | grep -E -e '(java|openjdk) version' | awk '{ print $3 }' | tr -d \")
   vlog "Detected Java version: $version"
   echo "${version:2:1}"
 }
 
-# MaxPermSize critical on pre-8 jvms but incurs noisy warning on 8+
+# MaxPermSize critical on pre-8 JVMs but incurs noisy warning on 8+
 default_jvm_opts () {
   local v="$(java_version)"
   if [[ $v -ge 8 ]]; then
@@ -253,13 +226,8 @@ execRunner () {
   exec "$@"
 }
 
-jar_url () {
-  make_url "$1"
-}
-
-jar_file () {
-  echo "$sbt_launch_dir/$1/sbt-launch.jar"
-}
+jar_url ()  { make_url "$1"; }
+jar_file () { echo "$sbt_launch_dir/$1/sbt-launch.jar"; }
 
 download_url () {
   local url="$1"
@@ -469,8 +437,6 @@ setTraceLevel() {
 [[ -n "$sbt_explicit_version" ]] && update_build_props_sbt "$sbt_explicit_version"
 vlog "Detected sbt version $sbt_version"
 
-[[ -n "$scala_version" ]] && vlog "Overriding scala version to $scala_version"
-
 if [[ -n "$sbt_script" ]]; then
   residual_args=( $sbt_script ${residual_args[@]} )
 else
@@ -494,6 +460,10 @@ EOM
 
 # pick up completion if present; todo
 [[ -r .sbt_completion.sh ]] && source .sbt_completion.sh
+
+# directory to store sbt launchers
+[[ -d "$sbt_launch_dir" ]] || mkdir -p "$sbt_launch_dir"
+[[ -w "$sbt_launch_dir" ]] || sbt_launch_dir="$(mktemp -d -t sbt_extras_launchers.XXXXXX)"
 
 # no jar? download it.
 [[ -r "$sbt_jar" ]] || acquire_sbt_jar || {
