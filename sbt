@@ -168,21 +168,29 @@ setJavaHome () {
   export JDK_HOME="$1"
   export PATH="$JAVA_HOME/bin:$PATH"
 }
-setJavaHomeQuietly () {
-  addSbt warn
-  setJavaHome "$1"
-  addSbt info
+
+getJavaVersion() { "$1" -version 2>&1 | grep -E -e '(java|openjdk) version' | awk '{ print $3 }' | tr -d \"; }
+
+checkJava() {
+  # Warn if there is a Java version mismatch between PATH and JAVA_HOME/JDK_HOME
+
+  [[ -n "$JAVA_HOME" && -e "$JAVA_HOME/bin/java"     ]] && java="$JAVA_HOME/bin/java"
+  [[ -n "$JDK_HOME"  && -e "$JDK_HOME/lib/tools.jar" ]] && java="$JDK_HOME/bin/java"
+
+  if [[ -n "$java" ]]; then
+    pathJavaVersion=$(getJavaVersion java)
+    homeJavaVersion=$(getJavaVersion "$java")
+    if [[ "$pathJavaVersion" != "$homeJavaVersion" ]]; then
+      echoerr "Warning: Java version mismatch between PATH and JAVA_HOME/JDK_HOME, sbt will use the one in PATH"
+      echoerr "  Either: fix your PATH, remove JAVA_HOME/JDK_HOME or use -java-home"
+      echoerr "  java version from PATH:               $pathJavaVersion"
+      echoerr "  java version from JAVA_HOME/JDK_HOME: $homeJavaVersion"
+    fi
+  fi
 }
 
-# if set, use JDK_HOME/JAVA_HOME over java found in path
-if [[ -n "$JDK_HOME" && -e "$JDK_HOME/lib/tools.jar" ]]; then
-  setJavaHomeQuietly "$JDK_HOME"
-elif [[ -n "$JAVA_HOME" && -e "$JAVA_HOME/bin/java" ]]; then
-  setJavaHomeQuietly "$JAVA_HOME"
-fi
-
 java_version () {
-  local version=$("$java_cmd" -version 2>&1 | grep -E -e '(java|openjdk) version' | awk '{ print $3 }' | tr -d \")
+  local version=$(getJavaVersion "$java_cmd")
   vlog "Detected Java version: $version"
   echo "${version:2:1}"
 }
@@ -339,9 +347,9 @@ process_args () {
     case "$1" in
           -h|-help) usage; exit 1 ;;
                 -v) verbose=true && shift ;;
-                -d) addSbt "--debug" && addSbt debug && shift ;;
-                -w) addSbt "--warn"  && addSbt warn  && shift ;;
-                -q) addSbt "--error" && addSbt error && shift ;;
+                -d) addSbt "--debug" && shift ;;
+                -w) addSbt "--warn"  && shift ;;
+                -q) addSbt "--error" && shift ;;
                 -x) debugUs=true && shift ;;
             -trace) require_arg integer "$1" "$2" && trace_level="$2" && shift 2 ;;
               -ivy) require_arg path "$1" "$2" && addJava "-Dsbt.ivy.home=$2" && shift 2 ;;
@@ -379,9 +387,6 @@ process_args () {
               -211) setScalaVersion "$latest_211" && shift ;;
               -212) setScalaVersion "$latest_212" && shift ;;
 
-           --debug) addSbt debug && addResidual "$1" && shift ;;
-            --warn) addSbt warn  && addResidual "$1" && shift ;;
-           --error) addSbt error && addResidual "$1" && shift ;;
                  *) addResidual "$1" && shift ;;
     esac
   done
@@ -419,6 +424,8 @@ argumentCount=$#
 
 # set sbt version
 set_sbt_version
+
+checkJava
 
 # only exists in 0.12+
 setTraceLevel() {
