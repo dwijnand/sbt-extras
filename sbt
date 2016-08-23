@@ -6,7 +6,7 @@
 set -o pipefail
 
 declare -r sbt_release_version="0.13.12"
-declare -r sbt_unreleased_version="0.13.12"
+declare -r sbt_unreleased_version="0.13.13-M1"
 
 declare -r latest_212="2.12.0-M5"
 declare -r latest_211="2.11.8"
@@ -24,7 +24,7 @@ declare -r sbt_launch_mvn_snapshot_repo="http://repo.scala-sbt.org/scalasbt/mave
 declare -r default_jvm_opts_common="-Xms512m -Xmx1536m -Xss2m"
 declare -r noshare_opts="-Dsbt.global.base=project/.sbtboot -Dsbt.boot.directory=project/.boot -Dsbt.ivy.home=project/.ivy"
 
-declare sbt_jar sbt_dir sbt_create sbt_version sbt_script
+declare sbt_jar sbt_dir sbt_create sbt_version sbt_script sbt_new
 declare sbt_explicit_version
 declare verbose noshare batch trace_level
 declare sbt_saved_stty debugUs
@@ -387,6 +387,8 @@ process_args () {
               -211) setScalaVersion "$latest_211" && shift ;;
               -212) setScalaVersion "$latest_212" && shift ;;
 
+                    # TODO: Switch the below to sbt_release_version after 0.13.13 (and "new) is out
+               new) sbt_new=true && sbt_explicit_version="$sbt_unreleased_version"  && addResidual "$1" && shift ;;
                  *) addResidual "$1" && shift ;;
     esac
   done
@@ -439,7 +441,7 @@ setTraceLevel() {
 [[ ${#scalac_args[@]} -eq 0 ]] || addSbt "set scalacOptions in ThisBuild += \"${scalac_args[@]}\""
 
 # Update build.properties on disk to set explicit version - sbt gives us no choice
-[[ -n "$sbt_explicit_version" ]] && update_build_props_sbt "$sbt_explicit_version"
+[[ -n "$sbt_explicit_version" && -z "$sbt_new" ]] && update_build_props_sbt "$sbt_explicit_version"
 vlog "Detected sbt version $sbt_version"
 
 if [[ -n "$sbt_script" ]]; then
@@ -453,7 +455,7 @@ else
 fi
 
 # verify this is an sbt dir, -create was given or user attempts to run a scala script
-[[ -r ./build.sbt || -d ./project || -n "$sbt_create" || -n "$sbt_script" ]] || {
+[[ -r ./build.sbt || -d ./project || -n "$sbt_create" || -n "$sbt_script" || -n "$sbt_new" ]] || {
   cat <<EOM
 $(pwd) doesn't appear to be an sbt project.
 If you want to start sbt anyway, run:

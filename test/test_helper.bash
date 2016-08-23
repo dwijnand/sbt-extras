@@ -13,7 +13,7 @@ export sbt_11="0.11.3"
 export sbt_12="0.12.4"
 export sbt_13="0.13.12"
 export sbt_release="$sbt_13"
-export sbt_dev="0.13.12"
+export sbt_dev="0.13.13-M1"
 
 write_version_to_properties () { write_to_properties "sbt.version=$1";  }
 write_to_properties ()         { printf "$@" > "$test_build_properties"; }
