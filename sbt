@@ -253,10 +253,16 @@ download_url () {
 }
 
 acquire_sbt_jar () {
-  local sbt_url="$(jar_url "$sbt_version")"
-  sbt_jar="$(jar_file "$sbt_version")"
-
-  [[ -r "$sbt_jar" ]] || download_url "$sbt_url" "$sbt_jar"
+  {
+    sbt_jar="$(jar_file "$sbt_version")"
+    [[ -r "$sbt_jar" ]]
+  } || {
+    sbt_jar="$HOME/.ivy2/local/org.scala-sbt/sbt-launch/$sbt_version/jars/sbt-launch.jar"
+    [[ -r "$sbt_jar" ]]
+  } || {
+    sbt_jar="$(jar_file "$sbt_version")"
+    download_url "$(make_url "$sbt_version")" "$sbt_jar"
+  }
 }
 
 usage () {
