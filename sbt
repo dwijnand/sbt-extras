@@ -6,7 +6,7 @@
 set -o pipefail
 
 declare -r sbt_release_version="0.13.12"
-declare -r sbt_unreleased_version="0.13.13-M1"
+declare -r sbt_unreleased_version="0.13.13-RC1"
 
 declare -r latest_212="2.12.0-RC1"
 declare -r latest_211="2.11.8"
@@ -393,7 +393,7 @@ process_args () {
               -211) setScalaVersion "$latest_211" && shift ;;
               -212) setScalaVersion "$latest_212" && shift ;;
 
-                    # TODO: Switch the below to sbt_release_version after 0.13.13 (and "new) is out
+                    # TODO: Switch the below to sbt_release_version after 0.13.13 (and "new") is out
                new) sbt_new=true && sbt_explicit_version="$sbt_unreleased_version"  && addResidual "$1" && shift ;;
                  *) addResidual "$1" && shift ;;
     esac
