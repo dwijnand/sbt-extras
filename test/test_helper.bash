@@ -137,7 +137,6 @@ normalize_paths_cygwin () {
     sed 's/\\/\//g' | \
     sed "s:$TEST_ROOT:\$ROOT:g" | \
     sed "s:$HOME:\$ROOT:g"
-    tr -d '\r'
 }
 
 normalize_paths_linux () {
@@ -152,7 +151,11 @@ mkdircd () { mkdir -p "$1" && cd "$1"; }
 assert_no_properties () { assert [ ! -f "$test_build_properties" ]; }
 assert()        { "$@" || flunk "failed: $@"; }
 flunk()         { normalize_paths "$@" ; return 1; }
-assert_equal()  { [ "$1" == "$2" ] || printf "\nexpected:\n%s\n\nactual:\n%s\n\n" "$1" "$2" | flunk; }
+assert_equal()  {
+  local expected=$(normalize_paths "$1")
+  local actual=$(normalize_paths "$2")
+  [ "$expected" == "$actual" ] || printf "\nexpected:\n%s\n\nactual:\n%s\n\n" "$1" "$2" | flunk;
+}
 assert_output() { assert_equal "${1:-$(cat -)}" "$output"; }
 flunk_message() { printf "expected: %s\nactual:   %s\n" "$1" "$2"; return 1; }
 
