@@ -234,20 +234,12 @@ execRunner () {
 
 jar_url ()  { make_url "$1"; }
 
-is_cygwin () {
-  local os=$(uname -a)
-  case "$os" in
-    CYGWIN*) echo "yes" ;;
-    *) echo "no" ;;
-  esac
-}
+is_cygwin () [[ "$(uname -a)" == "CYGWIN"* ]]
 
 jar_file () {
-  if [[ "$(is_cygwin)" == "yes" ]]; then
-    echo "$(cygpath '$sbt_launch_dir/$1/sbt-launch.jar')"
-  else
-    echo "$sbt_launch_dir/$1/sbt-launch.jar"
-  fi
+  [[ is_cygwin ]] \
+  && echo "$(cygpath -w $sbt_launch_dir/"$1"/sbt-launch.jar)" \
+  || echo "$sbt_launch_dir/$1/sbt-launch.jar"
 }
 
 download_url () {
