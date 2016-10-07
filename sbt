@@ -237,7 +237,7 @@ jar_url ()  { make_url "$1"; }
 is_cygwin () [[ "$(uname -a)" == "CYGWIN"* ]]
 
 jar_file () {
-  [[ is_cygwin ]] \
+  is_cygwin \
   && echo "$(cygpath -w $sbt_launch_dir/"$1"/sbt-launch.jar)" \
   || echo "$sbt_launch_dir/$1/sbt-launch.jar"
 }
