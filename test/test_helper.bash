@@ -123,7 +123,23 @@ assert_failure() {
 }
 
 stdin_or_args () { if [[ $# -eq 0 ]]; then cat - ; else echo "$@"; fi; }
+
+is_cygwin () [[ "$(uname -a)" == "CYGWIN"* ]]
+
 normalize_paths () {
+  is_cygwin && normalize_paths_cygwin $@ || normalize_paths_linux $@
+}
+
+normalize_paths_cygwin () {
+  stdin_or_args "$@" | \
+    sed "s:$(cygpath -w "$TEST_ROOT" | sed 's/\\/\\\\/g' | sed 's/:/\\:/g'):\$ROOT:g" | \
+    sed "s:$(cygpath -w "$HOME" | sed 's/\\/\\\\/g' | sed 's/:/\\:/g'):\$ROOT:g" | \
+    sed 's/\\/\//g' | \
+    sed "s:$TEST_ROOT:\$ROOT:g" | \
+    sed "s:$HOME:\$ROOT:g"
+}
+
+normalize_paths_linux () {
   stdin_or_args "$@" | \
     sed "s:$TEST_ROOT:\$ROOT:g" | \
     sed "s:$HOME:\$ROOT:g"
@@ -135,7 +151,11 @@ mkdircd () { mkdir -p "$1" && cd "$1"; }
 assert_no_properties () { assert [ ! -f "$test_build_properties" ]; }
 assert()        { "$@" || flunk "failed: $@"; }
 flunk()         { normalize_paths "$@" ; return 1; }
-assert_equal()  { [ "$1" == "$2" ] || printf "\nexpected:\n%s\n\nactual:\n%s\n\n" "$1" "$2" | flunk; }
+assert_equal()  {
+  local expected=$(normalize_paths "$1")
+  local actual=$(normalize_paths "$2")
+  [ "$expected" == "$actual" ] || printf "\nexpected:\n%s\n\nactual:\n%s\n\n" "$1" "$2" | flunk;
+}
 assert_output() { assert_equal "${1:-$(cat -)}" "$output"; }
 flunk_message() { printf "expected: %s\nactual:   %s\n" "$1" "$2"; return 1; }
 
