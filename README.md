@@ -1,10 +1,9 @@
 sbt: the rebel cut
 ==================
 
-[![Build Status](https://travis-ci.org/paulp/sbt-extras.png)](https://travis-ci.org/paulp/sbt-extras)
-[![Join the chat at https://gitter.im/paulp/sbt-extras][]](https://gitter.im/paulp/sbt-extras)
-
-[Join the chat at https://gitter.im/paulp/sbt-extras]: https://badges.gitter.im/paulp/sbt-extras.svg
+[![Unix Build Status](https://travis-ci.org/paulp/sbt-extras.png)](https://travis-ci.org/paulp/sbt-extras)
+[![Windows Build Status](https://ci.appveyor.com/api/projects/status/32r7s2skrgm9ubva?svg=true)](https://ci.appveyor.com/project/paulp/sbt-extras)
+[![Join the chat on gitter](https://badges.gitter.im/paulp/sbt-extras.svg)](https://gitter.im/paulp/sbt-extras)
 
 An alternative script for running [sbt](https://github.com/sbt/sbt "sbt home").
 It works with sbt 0.13.0 projects and (in principle) all earlier versions.
@@ -88,7 +87,7 @@ runner with the -x option.
   # sbt version (default: sbt.version from project/build.properties if present, otherwise 0.13.12)
   -sbt-force-latest         force the use of the latest release of sbt: 0.13.12
   -sbt-version  <version>   use the specified version of sbt (default: 0.13.12)
-  -sbt-dev                  use the latest pre-release version of sbt: 0.13.12
+  -sbt-dev                  use the latest pre-release version of sbt: 0.13.13-RC2
   -sbt-jar      <path>      use the specified jar as the sbt launcher
   -sbt-launch-dir <path>    directory to hold sbt launchers (default: ~/.sbt/launchers)
   -sbt-launch-repo <url>    repo url for downloading sbt launcher jar (default: http://repo.typesafe.com/typesafe/ivy-releases)
@@ -98,17 +97,17 @@ runner with the -x option.
   -29                       use 2.9.3
   -210                      use 2.10.6
   -211                      use 2.11.8
-  -212                      use 2.12.0-M5
+  -212                      use 2.12.0-RC1
   -scala-home <path>        use the scala build at the specified directory
   -scala-version <version>  use the specified version of scala
   -binary-version <version> use the specified scala version when searching for dependencies
 
-  # java version (default: java from PATH, currently java version "1.8.0_72")
+  # java version (default: java from PATH, currently java version "1.8.0_102")
   -java-home <path>         alternate JAVA_HOME
 
   # passing options to the jvm - note it does NOT use JAVA_OPTS due to pollution
   # The default set is used if JVM_OPTS is unset and no -jvm-opts file is found
-  <default>        -Xms512m -Xmx1536m -Xss2m -XX:ReservedCodeCacheSize=256m -XX:+TieredCompilation -XX:+CMSClassUnloadingEnabled -XX:+UseConcMarkSweepGC
+  <default>        -Xms512m -Xmx1536m -Xss2m
   JVM_OPTS         environment variable holding either the jvm args directly, or
                    the reference to a file containing jvm args if given path is prepended by '@' (e.g. '@/etc/jvmopts')
                    Note: "@"-file is overridden by local '.jvmopts' or '-jvm-opts' argument.
@@ -122,34 +121,4 @@ runner with the -x option.
                    Note: "@"-file is overridden by local '.sbtopts' or '-sbt-opts' argument.
   -sbt-opts <path> file containing sbt args (if not given, .sbtopts in project root is used if present)
   -S-X             add -X to sbt's scalacOptions (-S is stripped)
-```
-
-## My ~/.sbtignore - fairly aggressive.
-
-```
-# sbt ignore regexps
-Starting sbt with output filtering enabled
-^\[info\][ ]+(Resolving|Loading|Done|Attempting|Formatting|Updating)[ ]
-^\[info\] Main Scala API documentation
-^\[info\].*published[ ]+.*(sources\.jar|javadoc\.jar|\.pom)$
-^\[info\].*published ivy to
-^\[warn\] Credentials file
-^\[info\] Wrote.*[.]pom
-This usage is deprecated
-Attempting to overwrite
-delivering ivy file to
-warnings? found$
-re[-]run with [-](unchecked|deprecation|feature) for details
-model contains[ ]
-[ ]delivering[ ]
-^Graphviz dot encountered an error when generating the diagram for:
-^These are usually spurious errors, but if you notice a persistant error on
-^a diagram, please use the -diagrams-debug flag and report a bug with the output
-^Graphviz will be restarted...
-^Diagrams will be disabled for this run because the graphviz dot tool
-^has malfunctioned too many times. These scaladoc flags may help:
-^Please note that graphviz package
-^[*]+$
-^-diagrams-
-^$
 ```
