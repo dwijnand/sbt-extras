@@ -102,11 +102,11 @@ EOS
 }
 
 @test "supports unix line endings (lf) in build.properties" {
-  write_to_properties_and_fetch "sbt.version=0.13.12\n" "0.13.12"
+  write_to_properties_and_fetch "sbt.version=0.13.13\n" "0.13.13"
 }
 
 @test "skips any irrelevant lines in build.properties" {
-  write_to_properties_and_fetch "# hand written:\n\nsbt.version=0.13.12\nsbt.something = else\n" "0.13.12"
+  write_to_properties_and_fetch "# hand written:\n\nsbt.version=0.13.13\nsbt.something = else\n" "0.13.13"
 }
 
 @test "skips to download sbt-launch.jar if a file was given via -sbt-jar" {
