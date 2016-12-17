@@ -93,7 +93,7 @@ runner with the -x option.
   -29                       use 2.9.3
   -210                      use 2.10.6
   -211                      use 2.11.8
-  -212                      use 2.12.0
+  -212                      use 2.12.1
   -scala-home <path>        use the scala build at the specified directory
   -scala-version <version>  use the specified version of scala
   -binary-version <version> use the specified scala version when searching for dependencies
