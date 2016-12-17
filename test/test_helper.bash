@@ -169,5 +169,5 @@ stub_java() {
   stub_java_version
   stub_java_echo
 }
-stub_java_version() { stub java '-version : echo java version \\\"1.8.0_51\\\"'; }
+stub_java_version() { stub java '-version : echo java version \"1.8.0_51\"'; }
 stub_java_echo()    { stub java '* : for arg; do echo "$arg"; done'; }
