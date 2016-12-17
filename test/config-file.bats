@@ -15,12 +15,13 @@ configFile () { echo -n '
 }
 
 expectedOutput () { cat <<EOM
+java
 -Xmx1g
 -Dsome.prop="pass a # in a string"
 -Xss4m
 -Xms1g
 -jar
-$TEST_ROOT/.sbt/launchers/0.13.13/sbt-launch.jar
+$TEST_ROOT/.sbt/launchers/$sbt_release/sbt-launch.jar
 about
 EOM
 }
