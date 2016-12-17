@@ -15,6 +15,7 @@ configFile () { echo -n '
 }
 
 expectedOutput () { cat <<EOM
+java
 -Xmx1g
 -Dsome.prop="pass a # in a string"
 -Xss4m
