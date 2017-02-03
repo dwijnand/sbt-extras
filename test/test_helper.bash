@@ -32,7 +32,7 @@ sbt_version_from_test_filename () {
 setup () { sbt_test_setup; }
 sbt_test_setup () {
   export sbt_test_version="$(sbt_version_from_test_filename)"
-  create_project "$sbt_test_version"
+  create_project
   create_launcher "$sbt_test_version"
   write_version_to_properties "$sbt_test_version"
 }
