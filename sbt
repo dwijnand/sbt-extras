@@ -371,7 +371,7 @@ process_args () {
          -sbt-boot) require_arg path "$1" "$2" && addJava "-Dsbt.boot.directory=$2" && shift 2 ;;
           -sbt-dir) require_arg path "$1" "$2" && sbt_dir="$2" && shift 2 ;;
         -debug-inc) addJava "-Dxsbt.inc.debug=true" && shift ;;
-          -offline) addSbt "set offline := true" && shift ;;
+          -offline) addSbt "set offline in Global := true" && shift ;;
         -jvm-debug) require_arg port "$1" "$2" && addDebugger "$2" && shift 2 ;;
             -batch) batch=true && shift ;;
            -prompt) require_arg "expr" "$1" "$2" && setThisBuild shellPrompt "(s => { val e = Project.extract(s) ; $2 })" && shift 2 ;;
