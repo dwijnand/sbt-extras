@@ -86,7 +86,7 @@ runner with the -x option.
   -sbt-dev                  use the latest pre-release version of sbt: 0.13.13
   -sbt-jar      <path>      use the specified jar as the sbt launcher
   -sbt-launch-dir <path>    directory to hold sbt launchers (default: ~/.sbt/launchers)
-  -sbt-launch-repo <url>    repo url for downloading sbt launcher jar (default: http://repo.typesafe.com/typesafe/ivy-releases)
+  -sbt-launch-repo <url>    repo url for downloading sbt launcher jar (default: https://repo.typesafe.com/typesafe/ivy-releases)
 
   # scala version (default: as chosen by sbt)
   -28                       use 2.8.2
