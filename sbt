@@ -358,7 +358,7 @@ process_args () {
   }
   while [[ $# -gt 0 ]]; do
     case "$1" in
-          -h|-help) usage; exit 1 ;;
+          -h|-help) usage; exit 0 ;;
                 -v) verbose=true && shift ;;
                 -d) addSbt "--debug" && shift ;;
                 -w) addSbt "--warn"  && shift ;;
