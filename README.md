@@ -2,7 +2,7 @@ sbt: the rebel cut
 ==================
 
 [![Unix Build Status](https://travis-ci.org/paulp/sbt-extras.png)](https://travis-ci.org/paulp/sbt-extras)
-[![Windows Build Status](https://ci.appveyor.com/api/projects/status/32r7s2skrgm9ubva?svg=true)](https://ci.appveyor.com/project/paulp/sbt-extras)
+[![Windows Build Status](https://ci.appveyor.com/api/projects/status/w1tqbwr7d4doak7v?svg=true)](https://ci.appveyor.com/project/paulp/sbt-extras)
 [![Join the chat on gitter](https://badges.gitter.im/paulp/sbt-extras.svg)](https://gitter.im/paulp/sbt-extras)
 
 An alternative script for running [sbt](https://github.com/sbt/sbt "sbt home").
