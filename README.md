@@ -28,7 +28,7 @@ sbt -v[erbosely] creating a new project built with the latest scala 2.10.x.
 [addSbt] arg = '++ 2.10.6'
 [residual] arg = 'about'
 No extra sbt options have been defined
-Detected sbt version 0.13.14
+Detected sbt version 0.13.15
 Using default jvm options
 Detected Java version: 1.8.0_121
 # Executing command line:
@@ -37,12 +37,12 @@ java
 -Xmx1536m
 -Xss2m
 -jar
-$HOME/.sbt/launchers/0.13.14/sbt-launch.jar
+$HOME/.sbt/launchers/0.13.15/sbt-launch.jar
 "++ 2.10.6"
 about
 
 [info] Setting version to 2.10.6
-[info] This is sbt 0.13.14
+[info] This is sbt 0.13.15
 [info] The current project is built against Scala 2.10.6
 [info] sbt, sbt plugins, and build definitions are using Scala 2.10.6
 ```
@@ -80,10 +80,10 @@ runner with the -x option.
   -prompt <expr>     Set the sbt prompt; in expr, 's' is the State and 'e' is Extracted
   -script <file>     Run the specified file as a scala script
 
-  # sbt version (default: sbt.version from project/build.properties if present, otherwise 0.13.14)
-  -sbt-force-latest         force the use of the latest release of sbt: 0.13.14
-  -sbt-version  <version>   use the specified version of sbt (default: 0.13.14)
-  -sbt-dev                  use the latest pre-release version of sbt: 0.13.14
+  # sbt version (default: sbt.version from project/build.properties if present, otherwise 0.13.15)
+  -sbt-force-latest         force the use of the latest release of sbt: 0.13.15
+  -sbt-version  <version>   use the specified version of sbt (default: 0.13.15)
+  -sbt-dev                  use the latest pre-release version of sbt: 0.13.15
   -sbt-jar      <path>      use the specified jar as the sbt launcher
   -sbt-launch-dir <path>    directory to hold sbt launchers (default: ~/.sbt/launchers)
   -sbt-launch-repo <url>    repo url for downloading sbt launcher jar (default: http://repo.typesafe.com/typesafe/ivy-releases)
