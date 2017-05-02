@@ -399,7 +399,7 @@ process_args () {
               -210) setScalaVersion "$latest_210" && shift ;;
               -211) setScalaVersion "$latest_211" && shift ;;
               -212) setScalaVersion "$latest_212" && shift ;;
-               new) sbt_new=true && sbt_explicit_version="$sbt_release_version"  && addResidual "$1" && shift ;;
+               new) sbt_new=true && : ${sbt_explicit_version:=$sbt_release_version} && addResidual "$1" && shift ;;
                  *) addResidual "$1" && shift ;;
     esac
   done
