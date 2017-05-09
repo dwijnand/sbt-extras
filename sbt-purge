@@ -1,0 +1,64 @@
+#!/usr/bin/env bash
+
+set -o pipefail
+
+declare version dryrun verbose force
+declare -a paths
+
+echoerr() { echo >&2 "$@"; }
+vlog()    { [[ -n "$verbose" ]] && echoerr "$@"; }
+
+usage() {
+  cat <<EOM
+Usage: sbt-purge [options] <sbt version>
+
+Purges sbt of the given version from your system.
+
+  -h | --help     print this message
+  -v | --verbose  verbose mode
+  -n | --dry-run  don't remove, just print
+  -f | --force    don't ask, just remove
+EOM
+}
+
+process_args() {
+  while [[ $# -gt 0 ]]; do
+    case "$1" in
+         -h|--help) usage; exit 0 ;;
+      -v|--verbose) verbose=true && shift ;;
+      -n|--dry-run) dryrun=true && shift ;;
+        -f|--force) force=true && shift ;;
+                 *) version="$1" && shift ;;
+    esac
+  done
+}
+
+process_args "$@"
+if [[ -z "$version" ]]; then usage; exit 0; fi
+
+add_path() { vlog "[add_path] arg = '$1'"; paths+=("$1"); }
+add_ivy_repo() {
+  add_path "$1/org.scala-sbt/*$version*/"
+  add_path "$1/org.scala-sbt/*/ivy-$version.xml"
+  add_path "$1/org.scala-sbt/*/ivy-$version.xml.original"
+  add_path "$1/org.scala-sbt/*/ivydata-$version.properties"
+  add_path "$1/org.scala-sbt/*/jars/*-$version.jar"
+  add_path "$1/org.scala-sbt/*/srcs/*-$version.jar"
+  add_path "$1/org.scala-sbt/*/docs/*-$version.jar"
+}
+
+add_ivy_repo "$HOME/.ivy2/cache"
+add_ivy_repo "$HOME/.ivy2/local"
+add_ivy_repo "$HOME/.sbt/preloaded"
+add_path "$HOME/.ivy2/sbt-alternative/org.scala-sbt/*/$version/"
+
+for path in "${paths[@]}"; do
+  vlog "[rm_path] arg = '$path'"
+  if [[ -n "$force" ]]; then
+    rm -r $path
+  elif [[ -n "$dryrun" ]]; then
+    echo "rm -r \"$path\""
+  else
+    rm -ir $path
+  fi
+done
