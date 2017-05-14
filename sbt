@@ -524,6 +524,9 @@ fi
 [[ -n "$trace_level" ]] && setTraceLevel
 
 main () {
+  if test 0 -eq ${#sbt_commands} ; then
+    sbt_commands=( "shell" )
+  fi
   execRunner "$java_cmd" \
     "${extra_jvm_opts[@]}" \
     "${java_args[@]}" \
