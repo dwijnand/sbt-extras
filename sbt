@@ -5,10 +5,11 @@
 
 set -o pipefail
 
-declare -r sbt_release_version="0.13.15"
-declare -r sbt_unreleased_version="0.13.15"
+declare -r sbt_release_version="0.13.16"
+declare -r sbt_unreleased_version="0.13.16"
 
-declare -r latest_212="2.12.1"
+declare -r latest_213="2.13.0-M2"
+declare -r latest_212="2.12.3"
 declare -r latest_211="2.11.11"
 declare -r latest_210="2.10.6"
 declare -r latest_29="2.9.3"
@@ -320,6 +321,7 @@ runner with the -x option.
   -210                      use $latest_210
   -211                      use $latest_211
   -212                      use $latest_212
+  -213                      use $latest_213
   -scala-home <path>        use the scala build at the specified directory
   -scala-version <version>  use the specified version of scala
   -binary-version <version> use the specified scala version when searching for dependencies
@@ -399,6 +401,7 @@ process_args () {
               -210) setScalaVersion "$latest_210" && shift ;;
               -211) setScalaVersion "$latest_211" && shift ;;
               -212) setScalaVersion "$latest_212" && shift ;;
+              -213) setScalaVersion "$latest_213" && shift ;;
                new) sbt_new=true && : ${sbt_explicit_version:=$sbt_release_version} && addResidual "$1" && shift ;;
                  *) addResidual "$1" && shift ;;
     esac
