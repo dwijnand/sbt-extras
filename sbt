@@ -25,7 +25,7 @@ declare -r sbt_launch_mvn_snapshot_repo="http://repo.scala-sbt.org/scalasbt/mave
 declare -r default_jvm_opts_common="-Xms512m -Xmx1536m -Xss2m"
 declare -r noshare_opts="-Dsbt.global.base=project/.sbtboot -Dsbt.boot.directory=project/.boot -Dsbt.ivy.home=project/.ivy"
 
-declare sbt_jar sbt_dir sbt_create sbt_version sbt_script sbt_new
+declare sbt_jar sbt_jar_jvm sbt_dir sbt_create sbt_version sbt_script sbt_new
 declare sbt_explicit_version
 declare verbose noshare batch trace_level
 declare debugUs
@@ -245,6 +245,10 @@ jar_url ()  { make_url "$1"; }
 is_cygwin () [[ "$(uname -a)" == "CYGWIN"* ]]
 
 jar_file () {
+  echo "$sbt_launch_dir/$1/sbt-launch.jar"
+}
+
+jar_file_jvm () {
   is_cygwin \
   && echo "$(cygpath -w $sbt_launch_dir/"$1"/sbt-launch.jar)" \
   || echo "$sbt_launch_dir/$1/sbt-launch.jar"
@@ -270,12 +274,15 @@ download_url () {
 acquire_sbt_jar () {
   {
     sbt_jar="$(jar_file "$sbt_version")"
+    sbt_jar_jvm="$(jar_file_w "$sbt_version")"
     [[ -r "$sbt_jar" ]]
   } || {
     sbt_jar="$HOME/.ivy2/local/org.scala-sbt/sbt-launch/$sbt_version/jars/sbt-launch.jar"
+    sbt_jar_jvm="$sbt_jar"
     [[ -r "$sbt_jar" ]]
   } || {
     sbt_jar="$(jar_file "$sbt_version")"
+    sbt_jar_jvm="$(jar_file_w "$sbt_version")"
     download_url "$(make_url "$sbt_version")" "$sbt_jar"
   }
 }
@@ -537,7 +544,7 @@ main () {
   execRunner "$java_cmd" \
     "${extra_jvm_opts[@]}" \
     "${java_args[@]}" \
-    -jar "$sbt_jar" \
+    -jar "$sbt_jar_jvm" \
     "${sbt_commands[@]}" \
     "${residual_args[@]}"
 }
