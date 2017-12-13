@@ -24,7 +24,7 @@ sbt -v[erbosely] creating a new project built with the latest scala 2.10.x.
 
 ```
 % sbt -v -210 -sbt-create about
-[addSbt] arg = '++ 2.10.6'
+[addSbt] arg = '++ 2.10.7'
 [residual] arg = 'about'
 No extra sbt options have been defined
 Detected sbt version 0.13.16
@@ -37,13 +37,13 @@ java
 -Xss2m
 -jar
 $HOME/.sbt/launchers/0.13.16/sbt-launch.jar
-"++ 2.10.6"
+"++ 2.10.7"
 about
 
-[info] Setting version to 2.10.6
+[info] Setting version to 2.10.7
 [info] This is sbt 0.13.16
-[info] The current project is built against Scala 2.10.6
-[info] sbt, sbt plugins, and build definitions are using Scala 2.10.6
+[info] The current project is built against Scala 2.10.7
+[info] sbt, sbt plugins, and build definitions are using Scala 2.10.7
 ```
 
 ## sbt -h
@@ -90,8 +90,8 @@ runner with the -x option.
   # scala version (default: as chosen by sbt)
   -28                       use 2.8.2
   -29                       use 2.9.3
-  -210                      use 2.10.6
-  -211                      use 2.11.11
+  -210                      use 2.10.7
+  -211                      use 2.11.12
   -212                      use 2.12.4
   -213                      use 2.13.0-M2
   -scala-home <path>        use the scala build at the specified directory
