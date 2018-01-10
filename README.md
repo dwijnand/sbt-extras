@@ -6,7 +6,7 @@ sbt: the rebel cut
 [![Join the chat on gitter](https://badges.gitter.im/paulp/sbt-extras.svg)](https://gitter.im/paulp/sbt-extras)
 
 An alternative script for running [sbt](https://github.com/sbt/sbt "sbt home").
-It works with sbt 0.13.0 projects and (in principle) all earlier versions.
+It works with sbt 1.1.0 projects and (in principle) all earlier versions.
 If you're in an sbt project directory, the system will figure out the
 required versions of sbt and scala, downloading them if necessary.
 
@@ -27,23 +27,33 @@ sbt -v[erbosely] creating a new project built with the latest scala 2.10.x.
 [addSbt] arg = '++ 2.10.7'
 [residual] arg = 'about'
 No extra sbt options have been defined
-Detected sbt version 0.13.16
+Detected sbt version 1.1.0
 Using default jvm options
-Detected Java version: 1.8.0_121
+Detected Java version: 1.8.0_152
 # Executing command line:
 java
 -Xms512m
 -Xmx1536m
 -Xss2m
 -jar
-$HOME/.sbt/launchers/0.13.16/sbt-launch.jar
+$HOME/.sbt/launchers/1.1.0/sbt-launch.jar
 "++ 2.10.7"
 about
 
-[info] Setting version to 2.10.7
-[info] This is sbt 0.13.16
-[info] The current project is built against Scala 2.10.7
-[info] sbt, sbt plugins, and build definitions are using Scala 2.10.7
+saving stty: 6506:5:bf:8a3b:3:1c:7f:15:4:0:1:0:11:13:1a:0:12:f:17:16:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0
+[warn] No sbt.version set in project/build.properties, base directory: $HOME/dev/sbt-extras
+[info] Set current project to sbt-extras (in build file:$HOME/dev/sbt-extras/)
+[info] Setting Scala version to 2.10.7 on 0 projects.
+[info] Excluded 1 projects, run ++ 2.10.7 -v for more details.
+[info] Reapplying settings...
+[info] Set current project to sbt-extras (in build file:$HOME/dev/sbt-extras/)
+[info] This is sbt 1.1.0
+[info] The current project is ProjectRef(uri("file:$HOME/dev/sbt-extras/"), "sbt-extras") 0.1.0-SNAPSHOT
+[info] The current project is built against Scala 2.12.4
+[info] Available Plugins: sbt.plugins.IvyPlugin, sbt.plugins.JvmPlugin, sbt.plugins.CorePlugin, sbt.plugins.JUnitXmlReportPlugin, sbt.plugins.Giter8TemplatePlugin
+[info] sbt, sbt plugins, and build definitions are using Scala 2.12.4
+
+restoring stty: 6506:5:bf:8a3b:3:1c:7f:15:4:0:1:0:11:13:1a:0:12:f:17:16:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0
 ```
 
 ## sbt -h
@@ -79,13 +89,13 @@ runner with the -x option.
   -prompt <expr>     Set the sbt prompt; in expr, 's' is the State and 'e' is Extracted
   -script <file>     Run the specified file as a scala script
 
-  # sbt version (default: sbt.version from project/build.properties if present, otherwise 0.13.16)
-  -sbt-force-latest         force the use of the latest release of sbt: 0.13.16
-  -sbt-version  <version>   use the specified version of sbt (default: 0.13.16)
-  -sbt-dev                  use the latest pre-release version of sbt: 0.13.16
+  # sbt version (default: sbt.version from project/build.properties if present, otherwise 1.1.0)
+  -sbt-force-latest         force the use of the latest release of sbt: 1.1.0
+  -sbt-version  <version>   use the specified version of sbt (default: 1.1.0)
+  -sbt-dev                  use the latest pre-release version of sbt: 1.1.0
   -sbt-jar      <path>      use the specified jar as the sbt launcher
-  -sbt-launch-dir <path>    directory to hold sbt launchers (default: ~/.sbt/launchers)
-  -sbt-launch-repo <url>    repo url for downloading sbt launcher jar (default: http://repo.typesafe.com/typesafe/ivy-releases)
+  -sbt-launch-dir <path>    directory to hold sbt launchers (default: $HOME/.sbt/launchers)
+  -sbt-launch-repo <url>    repo url for downloading sbt launcher jar (default: http://repo.scala-sbt.org/scalasbt/maven-releases)
 
   # scala version (default: as chosen by sbt)
   -28                       use 2.8.2
@@ -98,7 +108,7 @@ runner with the -x option.
   -scala-version <version>  use the specified version of scala
   -binary-version <version> use the specified scala version when searching for dependencies
 
-  # java version (default: java from PATH, currently java version "1.8.0_121")
+  # java version (default: java from PATH, currently openjdk version "1.8.0_152")
   -java-home <path>         alternate JAVA_HOME
 
   # passing options to the jvm - note it does NOT use JAVA_OPTS due to pollution
