@@ -260,9 +260,9 @@ download_url () {
   echoerr "    To  $jar"
 
   mkdir -p "${jar%/*}" && {
-    if which curl >/dev/null; then
+    if command -v curl > /dev/null 2>&1; then
       curl --fail --silent --location "$url" --output "$jar"
-    elif which wget >/dev/null; then
+    elif command -v wget > /dev/null 2>&1; then
       wget -q -O "$jar" "$url"
     fi
   } && [[ -r "$jar" ]]
