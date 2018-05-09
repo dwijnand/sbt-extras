@@ -173,7 +173,19 @@ setJavaHome () {
   export PATH="$JAVA_HOME/bin:$PATH"
 }
 
-getJavaVersion() { "$1" -version 2>&1 | grep -E -e '(java|openjdk) version' | awk '{ print $3 }' | tr -d \"; }
+getJavaVersion() {
+  local str=$("$1" -version 2>&1 | grep -E -e '(java|openjdk) version' | awk '{ print $3 }' | tr -d '"')
+
+  # java -version on java8 says 1.8.x
+  # but on 9 and 10 it's 9.x.y and 10.x.y.
+  if [[ "$str" =~ ^1\.([0-9]+)\..*$ ]]; then
+    echo "${BASH_REMATCH[1]}"
+  elif [[ "$str" =~ ^([0-9]+)\..*$ ]]; then
+    echo "${BASH_REMATCH[1]}"
+  elif [[ -n "$str" ]]; then
+    echoerr "Can't parse java version from: $str"
+  fi
+}
 
 checkJava() {
   # Warn if there is a Java version mismatch between PATH and JAVA_HOME/JDK_HOME
@@ -196,7 +208,7 @@ checkJava() {
 java_version () {
   local version=$(getJavaVersion "$java_cmd")
   vlog "Detected Java version: $version"
-  echo "${version:2:1}"
+  echo "$version"
 }
 
 # MaxPermSize critical on pre-8 JVMs but incurs noisy warning on 8+
