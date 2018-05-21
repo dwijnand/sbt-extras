@@ -22,6 +22,7 @@ launcher_url () {
   case "$1" in
     0.7.*) echo "http://simple-build-tool.googlecode.com/files/sbt-launch-$1.jar" ;;
    0.10.*) echo "http://repo.typesafe.com/typesafe/ivy-releases/org.scala-tools.sbt/sbt-launch/$1/sbt-launch.jar" ;;
+      1.*) echo "http://repo.scala-sbt.org/scalasbt/maven-releases/org/scala-sbt/sbt-launch/$1/sbt-launch.jar" ;;
         *) echo "http://repo.typesafe.com/typesafe/ivy-releases/org.scala-sbt/sbt-launch/$1/sbt-launch.jar" ;;
   esac
 }
@@ -48,6 +49,7 @@ EOS
 @test "downloads sbt 0.11.x" { write_version_to_properties_and_fetch "$sbt_11"; }
 @test "downloads sbt 0.12.x" { write_version_to_properties_and_fetch "$sbt_12"; }
 @test "downloads sbt 0.13.x" { write_version_to_properties_and_fetch "$sbt_13"; }
+@test "downloads sbt 1.1.x" { write_version_to_properties_and_fetch "$sbt_1_1"; }
 
 @test "downloads release version if build.properties is missing"    { no_properties_and_fetch "$sbt_release"; }
 @test "downloads specified version when -sbt-version was given"     { no_properties_and_fetch 0.12.2 -sbt-version 0.12.2; }
@@ -74,7 +76,7 @@ EOS
   assert_success
   assert_output <<EOS
 Downloading sbt launcher for $sbt_release:
-  From  http://repo.typesafe.com/typesafe/ivy-releases/org.scala-sbt/sbt-launch/$sbt_release/sbt-launch.jar
+  From  $(launcher_url $sbt_release)
     To  $TEST_ROOT/.sbt/launchers/$sbt_release/sbt-launch.jar
 EOS
   unstub curl
@@ -87,7 +89,7 @@ EOS
   assert_success
   assert_output <<EOS
 Downloading sbt launcher for $sbt_dev:
-  From  http://repo.typesafe.com/typesafe/ivy-releases/org.scala-sbt/sbt-launch/$sbt_dev/sbt-launch.jar
+  From  $(launcher_url $sbt_dev)
     To  $TEST_ROOT/.sbt/launchers/$sbt_dev/sbt-launch.jar
 EOS
   unstub curl
@@ -118,27 +120,27 @@ EOS
 }
 
 @test "uses special launcher directory if -sbt-launch-dir was given" {
-  write_to_properties "stub.version=$sbt_13"
+  write_to_properties "stub.version=$sbt_1_1"
   stub_curl
   run sbt -sbt-launch-dir "${sbt_project}/xsbt"
   assert_success
   assert_output <<EOS
-Downloading sbt launcher for $sbt_13:
-  From  http://repo.typesafe.com/typesafe/ivy-releases/org.scala-sbt/sbt-launch/$sbt_13/sbt-launch.jar
-    To  ${sbt_project}/xsbt/$sbt_13/sbt-launch.jar
+Downloading sbt launcher for $sbt_1_1:
+  From  $(launcher_url $sbt_1_1)
+    To  ${sbt_project}/xsbt/$sbt_1_1/sbt-launch.jar
 EOS
   unstub curl
 }
 
 @test "uses special launcher repository if -sbt-launch-repo was given" {
-  write_to_properties "stub.version=$sbt_13"
+  write_to_properties "stub.version=$sbt_1_1"
   stub_curl
   run sbt -sbt-launch-repo "http://127.0.0.1:8080/ivy-releases"
   assert_success
   assert_output <<EOS
-Downloading sbt launcher for $sbt_13:
-  From  http://127.0.0.1:8080/ivy-releases/org.scala-sbt/sbt-launch/$sbt_13/sbt-launch.jar
-    To  $TEST_ROOT/.sbt/launchers/$sbt_13/sbt-launch.jar
+Downloading sbt launcher for $sbt_1_1:
+  From  http://127.0.0.1:8080/ivy-releases/org/scala-sbt/sbt-launch/$sbt_1_1/sbt-launch.jar
+    To  $TEST_ROOT/.sbt/launchers/$sbt_1_1/sbt-launch.jar
 EOS
   unstub curl
 }
