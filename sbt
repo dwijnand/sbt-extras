@@ -258,9 +258,12 @@ jar_url ()  { make_url "$1"; }
 is_cygwin () [[ "$(uname -a)" == "CYGWIN"* ]]
 
 jar_file () {
+  echo "$sbt_launch_dir/$1/sbt-launch.jar"
+}
+jar_file_jvm () {
   is_cygwin \
-  && echo "$(cygpath -w $sbt_launch_dir/"$1"/sbt-launch.jar)" \
-  || echo "$sbt_launch_dir/$1/sbt-launch.jar"
+  && echo "$(cygpath -w "$sbt_jar")" \
+  || echo "$sbt_jar"
 }
 
 download_url () {
@@ -550,7 +553,7 @@ main () {
   execRunner "$java_cmd" \
     "${extra_jvm_opts[@]}" \
     "${java_args[@]}" \
-    -jar "$sbt_jar" \
+    -jar "$(jar_file_jvm)" \
     "${sbt_commands[@]}" \
     "${residual_args[@]}"
 }
