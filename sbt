@@ -98,21 +98,6 @@ build_props_sbt () {
     grep '^sbt\.version' "$buildProps" | tr '=\r' ' ' | awk '{ print $2; }'
 }
 
-update_build_props_sbt () {
-  local ver="$1"
-  local old="$(build_props_sbt)"
-
-  [[ -r "$buildProps" ]] && [[ "$ver" != "$old" ]] && {
-    perl -pi -e "s/^sbt\.version\b.*\$/sbt.version=${ver}/" "$buildProps"
-    grep -q '^sbt.version[ =]' "$buildProps" || printf "\nsbt.version=%s\n" "$ver" >> "$buildProps"
-
-    vlog "!!!"
-    vlog "!!! Updated file $buildProps setting sbt.version to: $ver"
-    vlog "!!! Previous value was: $old"
-    vlog "!!!"
-  }
-}
-
 set_sbt_version () {
   sbt_version="${sbt_explicit_version:-$(build_props_sbt)}"
   [[ -n "$sbt_version" ]] || sbt_version=$sbt_release_version
@@ -474,8 +459,7 @@ setTraceLevel() {
 # set scalacOptions if we were given any -S opts
 [[ ${#scalac_args[@]} -eq 0 ]] || addSbt "set scalacOptions in ThisBuild += \"${scalac_args[@]}\""
 
-# Update build.properties on disk to set explicit version - sbt gives us no choice
-[[ -n "$sbt_explicit_version" && -z "$sbt_new" ]] && update_build_props_sbt "$sbt_explicit_version"
+[[ -n "$sbt_explicit_version" && -z "$sbt_new" ]] && addJava "-Dsbt.version=$sbt_explicit_version"
 vlog "Detected sbt version $sbt_version"
 
 if [[ -n "$sbt_script" ]]; then
