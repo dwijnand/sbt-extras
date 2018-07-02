@@ -9,7 +9,6 @@ load test_helper
   assert_output <<EOS
 java
 -Xms512m
--Xmx1536m
 -Xss2m
 -jar
 \$ROOT/.sbt/launchers/$sbt_release/sbt-launch.jar
