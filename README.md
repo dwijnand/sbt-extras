@@ -31,26 +31,25 @@ brew install --HEAD paulp/extras/sbtx
 sbt -v[erbosely] creating a new project built with the latest scala 2.10.x.
 
 ```
-% sbt -v -210 -sbt-create about
-[addSbt] arg = '++ 2.10.7'
+% sbt -v -212 -sbt-create about
+[addSbt] arg = '++ 2.12.8'
 [residual] arg = 'about'
 No extra sbt options have been defined
 Detected sbt version 0.13.18
 Using default jvm options
-Detected Java version: 1.8.0_121
+Detected Java version: 8
 # Executing command line:
 java
 -Xms512m
--Xmx1536m
 -Xss2m
 -jar
 $HOME/.sbt/launchers/0.13.18/sbt-launch.jar
-"++ 2.10.7"
+"++ 2.12.8"
 about
 
-[info] Setting version to 2.10.7
+[info] Setting version to 2.12.8
 [info] This is sbt 0.13.18
-[info] The current project is built against Scala 2.10.7
+[info] The current project is built against Scala 2.12.8
 [info] sbt, sbt plugins, and build definitions are using Scala 2.10.7
 ```
 
