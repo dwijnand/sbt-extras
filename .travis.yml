@@ -1,5 +1,5 @@
 sudo: false
-language: c
+language: minimal
 
 git:
   depth: 3
