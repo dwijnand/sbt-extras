@@ -28,7 +28,7 @@ brew install --HEAD paulp/extras/sbtx
 
 ## Sample usage
 
-sbt -v[erbosely] creating a new project built with the latest scala 2.10.x.
+sbt -v[erbosely] creating a new project built with the latest scala 2.12.x.
 
 ```
 % sbt -v -212 -sbt-create about
