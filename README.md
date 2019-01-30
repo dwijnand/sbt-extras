@@ -6,7 +6,7 @@ sbt: the rebel cut
 [![Join the chat on gitter](https://badges.gitter.im/paulp/sbt-extras.svg)](https://gitter.im/paulp/sbt-extras)
 
 An alternative script for running [sbt](https://github.com/sbt/sbt "sbt home").
-It works with sbt 1.1.0 projects and (in principle) all earlier versions.
+It works with sbt 1 projects and (in principle) all earlier versions.
 If you're in an sbt project directory, the system will figure out the
 required versions of sbt and scala, downloading them if necessary.
 

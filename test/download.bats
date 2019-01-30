@@ -49,7 +49,7 @@ EOS
 @test "downloads sbt 0.11.x" { write_version_to_properties_and_fetch "$sbt_11"; }
 @test "downloads sbt 0.12.x" { write_version_to_properties_and_fetch "$sbt_12"; }
 @test "downloads sbt 0.13.x" { write_version_to_properties_and_fetch "$sbt_13"; }
-@test "downloads sbt 1.1.x" { write_version_to_properties_and_fetch "$sbt_1_1"; }
+@test "downloads sbt 1.x"    { write_version_to_properties_and_fetch "$sbt_1"; }
 
 @test "downloads release version if build.properties is missing"    { no_properties_and_fetch "$sbt_release"; }
 @test "downloads specified version when -sbt-version was given"     { no_properties_and_fetch 0.12.2 -sbt-version 0.12.2; }
@@ -120,27 +120,27 @@ EOS
 }
 
 @test "uses special launcher directory if -sbt-launch-dir was given" {
-  write_to_properties "stub.version=$sbt_1_1"
+  write_to_properties "stub.version=$sbt_1"
   stub_curl
   run sbt -sbt-launch-dir "${sbt_project}/xsbt"
   assert_success
   assert_output <<EOS
-Downloading sbt launcher for $sbt_1_1:
-  From  $(launcher_url $sbt_1_1)
-    To  ${sbt_project}/xsbt/$sbt_1_1/sbt-launch.jar
+Downloading sbt launcher for $sbt_1:
+  From  $(launcher_url $sbt_1)
+    To  ${sbt_project}/xsbt/$sbt_1/sbt-launch.jar
 EOS
   unstub curl
 }
 
 @test "uses special launcher repository if -sbt-launch-repo was given" {
-  write_to_properties "stub.version=$sbt_1_1"
+  write_to_properties "stub.version=$sbt_1"
   stub_curl
   run sbt -sbt-launch-repo "http://127.0.0.1:8080/ivy-releases"
   assert_success
   assert_output <<EOS
-Downloading sbt launcher for $sbt_1_1:
-  From  http://127.0.0.1:8080/ivy-releases/org/scala-sbt/sbt-launch/$sbt_1_1/sbt-launch.jar
-    To  $TEST_ROOT/.sbt/launchers/$sbt_1_1/sbt-launch.jar
+Downloading sbt launcher for $sbt_1:
+  From  http://127.0.0.1:8080/ivy-releases/org/scala-sbt/sbt-launch/$sbt_1/sbt-launch.jar
+    To  $TEST_ROOT/.sbt/launchers/$sbt_1/sbt-launch.jar
 EOS
   unstub curl
 }
