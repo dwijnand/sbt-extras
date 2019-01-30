@@ -47,10 +47,23 @@ $HOME/.sbt/launchers/1.2.8/sbt-launch.jar
 "++ 2.12.8"
 about
 
+saving stty: [..]
+[warn] No sbt.version set in project/build.properties, base directory: [..]
 [info] Setting version to 2.12.8
+[info] Loading settings for project global-plugins from [..] ...
+[info] Loading global plugins from $HOME/.dotfiles/.sbt/1.0/plugins
+[info] Set current project to [..] (in build file:[..])
+[info] Setting Scala version to 2.12.8 on 1 projects.
+[info] Reapplying settings...
+[info] Set current project to [..] (in build file:[..])
 [info] This is sbt 1.2.8
+[info] The current project is ProjectRef(uri("file:[..]"), "[..]") [..]
 [info] The current project is built against Scala 2.12.8
-[info] sbt, sbt plugins, and build definitions are using Scala 2.10.7
+[info] Available Plugins
+[..]
+[info] sbt, sbt plugins, and build definitions are using Scala 2.12.7
+
+restoring stty: [..]
 ```
 
 ## sbt -h
@@ -105,12 +118,12 @@ runner with the -x option.
   -scala-version <version>  use the specified version of scala
   -binary-version <version> use the specified scala version when searching for dependencies
 
-  # java version (default: java from PATH, currently openjdk version "1.8.0_152")
+  # java version (default: java from PATH, currently java version "1.8.0_202-ea")
   -java-home <path>         alternate JAVA_HOME
 
   # passing options to the jvm - note it does NOT use JAVA_OPTS due to pollution
   # The default set is used if JVM_OPTS is unset and no -jvm-opts file is found
-  <default>        -Xms512m -Xmx1536m -Xss2m
+  <default>        -Xms512m -Xss2m
   JVM_OPTS         environment variable holding either the jvm args directly, or
                    the reference to a file containing jvm args if given path is prepended by '@' (e.g. '@/etc/jvmopts')
                    Note: "@"-file is overridden by local '.jvmopts' or '-jvm-opts' argument.
