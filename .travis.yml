@@ -1,5 +1,8 @@
 sudo: false
 language: minimal
+os:
+- linux
+- windows
 
 git:
   depth: 3
