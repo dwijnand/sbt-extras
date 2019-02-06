@@ -247,7 +247,7 @@ is_cygwin () { [[ "$(uname -a)" == "CYGWIN"* ]]; }
 
 jar_file () {
   is_cygwin \
-  && echo "$(cygpath -w $sbt_launch_dir/"$1"/sbt-launch.jar)" \
+  && echo "$(cygpath -w "$sbt_launch_dir/$1/sbt-launch.jar")" \
   || echo "$sbt_launch_dir/$1/sbt-launch.jar"
 }
 
@@ -455,7 +455,7 @@ checkJava
 setTraceLevel() {
   case "$sbt_version" in
     "0.7."* | "0.10."* | "0.11."* ) echoerr "Cannot set trace level in sbt version $sbt_version" ;;
-                                 *) setThisBuild traceLevel $trace_level ;;
+                                 *) setThisBuild traceLevel "$trace_level" ;;
   esac
 }
 
