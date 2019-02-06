@@ -240,7 +240,7 @@ execRunner () {
 
 jar_url ()  { make_url "$1"; }
 
-is_cygwin () [[ "$(uname -a)" == "CYGWIN"* ]]
+is_cygwin () { [[ "$(uname -a)" == "CYGWIN"* ]]; }
 
 jar_file () {
   is_cygwin \
