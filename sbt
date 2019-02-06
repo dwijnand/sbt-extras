@@ -554,8 +554,8 @@ mainFiltered () {
 
   echoLine () {
     local -r line="$1"
-    local -r line1="$(echo "$line" | sed 's/\r\x1BM\x1B\[2K//g')"       # This strips the OverwriteLine code.
-    local -r line2="$(echo "$line1" | sed 's/\x1B\[[0-9;]*[JKmsu]//g')" # This strips all codes - we test regexes against this.
+    local -r line1="${line//\r\x1BM\x1B\[2K//g}"       # This strips the OverwriteLine code.
+    local -r line2="${line1//\x1B\[[0-9;]*[JKmsu]//g}" # This strips all codes - we test regexes against this.
 
     if [[ $line2 =~ $excludeRegex ]]; then
       [[ -n $debugUs ]] && echo "[X] $line1"
