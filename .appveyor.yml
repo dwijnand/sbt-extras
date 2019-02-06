@@ -1,7 +1,0 @@
-os: Windows Server 2012 R2
-build: off
-clone_folder: c:\sbt-extras
-install:
-  - set PATH=C:\cygwin64\bin;%PATH%
-test_script:
-  - bash.exe -l -c "cd /cygdrive/c/sbt-extras/ && ./bin/run-tests --tap ./test"
