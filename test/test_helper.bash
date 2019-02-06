@@ -41,29 +41,14 @@ sbt_test_setup () {
 
 teardown () { [[ -d "$TEST_ROOT" ]] && rm -rf -- "$TEST_ROOT"; }
 
-# Usage: f <string which should be in output> [args to sbt]
-sbt_expecting () {
-  stub_java
-  sbt_anticipating expect "$@"
-  unstub java
-}
-# Usage: f <string which must not be in output> [args to sbt]
-sbt_rejecting () {
-  stub_java
-  sbt_anticipating reject "$@"
-  unstub java
-}
+# Usage: sbt_expecting <string exists in output> [args to sbt]
+# Usage: sbt_rejecting <string absent in output> [args to sbt]
+sbt_expecting () { stub_java; sbt_anticipating expect "$@"; unstub java; }
+sbt_rejecting () { stub_java; sbt_anticipating reject "$@"; unstub java; }
 
-sbt_expecting_echo () {
-  stub_java_echo
-  sbt_anticipating expect "$@"
-  unstub java
-}
-sbt_rejecting_echo () {
-  stub_java_echo
-  sbt_anticipating reject "$@"
-  unstub java
-}
+# Like above, but without the stub for java -version
+sbt_expecting_echo () { stub_java_echo; sbt_anticipating expect "$@"; unstub java; }
+sbt_rejecting_echo () { stub_java_echo; sbt_anticipating reject "$@"; unstub java; }
 
 sbt_anticipating () {
   case "$1" in
@@ -152,9 +137,6 @@ assert_grep() {
   grep "$@" -- "$expected" <<<"$output" >/dev/null || flunk_message "$expected" "$output"
 }
 
-stub_java() {
-  stub_java_version
-  stub_java_echo
-}
+stub_java() { stub_java_version; stub_java_echo; }
 stub_java_version() { stub java '-version : echo java version \"1.8.0_51\"'; }
 stub_java_echo()    { stub java '* : echo java; for arg; do echo "$arg"; done'; }
