@@ -76,7 +76,7 @@ get_script_path () {
   fi
 }
 
-script_path="$(get_script_path "$BASH_SOURCE")"
+script_path="$(get_script_path "${BASH_SOURCE[0]}")"
 declare -r script_path
 script_name="${script_path##*/}"
 declare -r script_name
