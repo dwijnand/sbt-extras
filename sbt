@@ -487,6 +487,7 @@ EOM
 }
 
 # pick up completion if present; todo
+# shellcheck disable=SC1091
 [[ -r .sbt_completion.sh ]] && source .sbt_completion.sh
 
 # directory to store sbt launchers
