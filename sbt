@@ -550,7 +550,7 @@ main () {
 # we're not going to print those lines anyway. We strip that bit of
 # line noise, but leave the other codes to preserve color.
 mainFiltered () {
-  local -r excludeRegex=$(egrep -v '^#|^$' ~/.sbtignore | paste -sd'|' -)
+  local -r excludeRegex=$(grep -E -v '^#|^$' ~/.sbtignore | paste -sd'|' -)
 
   echoLine () {
     local -r line="$1"
@@ -572,7 +572,7 @@ mainFiltered () {
 # Obviously this is super ad hoc but I don't know how to improve on it. Testing whether
 # stdin is a terminal is useless because most of my use cases for this filtering are
 # exactly when I'm at a terminal, running sbt non-interactively.
-shouldFilter () { [[ -f ~/.sbtignore ]] && ! egrep -q '\b(shell|console|consoleProject)\b' <<<"${residual_args[@]}"; }
+shouldFilter () { [[ -f ~/.sbtignore ]] && ! grep -E -q '\b(shell|console|consoleProject)\b' <<<"${residual_args[@]}"; }
 
 # run sbt
 if shouldFilter; then mainFiltered; else main; fi
