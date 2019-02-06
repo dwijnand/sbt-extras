@@ -43,7 +43,7 @@ declare -a extra_jvm_opts extra_sbt_opts
 
 echoerr () { echo >&2 "$@"; }
 vlog ()    { [[ -n "$verbose" ]] && echoerr "$@"; }
-die ()     { echo "Aborting: $@" ; exit 1; }
+die ()     { echo "Aborting: $*" ; exit 1; }
 
 setTrapExit () {
   # save stty and trap exit, to ensure echo is re-enabled if we are interrupted.
@@ -142,9 +142,9 @@ addResidual () { vlog "[residual] arg = '$1'"  ; residual_args+=("$1"); }
 addResolver () { addSbt "set resolvers += $1"; }
 addDebugger () { addJava "-Xdebug" ; addJava "-Xrunjdwp:transport=dt_socket,server=y,suspend=n,address=$1"; }
 setThisBuild () {
-  vlog "[addBuild] args = '$@'"
+  vlog "[addBuild] args = '$*'"
   local key="$1" && shift
-  addSbt "set $key in ThisBuild := $@"
+  addSbt "set $key in ThisBuild := $*"
 }
 setScalaVersion () {
   [[ "$1" == *"-SNAPSHOT" ]] && addResolver 'Resolver.sonatypeRepo("snapshots")'
@@ -457,7 +457,7 @@ setTraceLevel() {
 }
 
 # set scalacOptions if we were given any -S opts
-[[ ${#scalac_args[@]} -eq 0 ]] || addSbt "set scalacOptions in ThisBuild += \"${scalac_args[@]}\""
+[[ ${#scalac_args[@]} -eq 0 ]] || addSbt "set scalacOptions in ThisBuild += \"${scalac_args[*]}\""
 
 [[ -n "$sbt_explicit_version" && -z "$sbt_new" ]] && addJava "-Dsbt.version=$sbt_explicit_version"
 vlog "Detected sbt version $sbt_version"
