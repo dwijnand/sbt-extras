@@ -41,9 +41,24 @@ declare -a java_args scalac_args sbt_commands residual_args
 # args to jvm/sbt via files or environment variables
 declare -a extra_jvm_opts extra_sbt_opts
 
+declare -a verbose_messages
+
 echoerr () { echo >&2 "$@"; }
-vlog ()    { [[ -n "$verbose" ]] && echoerr "$@"; }
 die ()     { echo "Aborting: $*" ; exit 1; }
+
+vlog () {
+  if [[ -n "$verbose" ]]; then
+    echoerr "$@"
+  else
+    verbose_messages+=("$*")
+  fi
+}
+enable_verbose () {
+  verbose=true
+  for msg in "${verbose_messages[@]}"; do
+    echoerr "$msg"
+  done
+}
 
 setTrapExit () {
   # save stty and trap exit, to ensure echo is re-enabled if we are interrupted.
@@ -369,7 +384,7 @@ process_args () {
   while [[ $# -gt 0 ]]; do
     case "$1" in
           -h|-help) usage; exit 0 ;;
-                -v) verbose=true && shift ;;
+                -v) enable_verbose && shift ;;
                 -d) addSbt "--debug" && shift ;;
                 -w) addSbt "--warn"  && shift ;;
                 -q) addSbt "--error" && shift ;;
@@ -416,9 +431,6 @@ process_args () {
   done
 }
 
-# process the direct command line arguments
-process_args "$@"
-
 # skip #-styled comments and blank lines
 readConfigFile() {
   local end=false
@@ -428,7 +440,7 @@ readConfigFile() {
   done < "$1"
 }
 
-# if there are file/environment sbt_opts, process again so we
+# if there are file/environment sbt_opts, process so we
 # can supply args to this runner
 if [[ -r "$sbt_opts_file" ]]; then
   vlog "Using sbt options defined in file $sbt_opts_file"
@@ -441,6 +453,9 @@ else
 fi
 
 [[ -n "${extra_sbt_opts[*]}" ]] && process_args "${extra_sbt_opts[@]}"
+
+# process the direct command line arguments
+process_args "$@"
 
 # reset "$@" to the residual args
 set -- "${residual_args[@]}"
