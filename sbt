@@ -435,7 +435,7 @@ if [[ -r "$sbt_opts_file" ]]; then
   while read opt; do extra_sbt_opts+=("$opt"); done < <(readConfigFile "$sbt_opts_file")
 elif [[ -n "$SBT_OPTS" && ! ("$SBT_OPTS" =~ ^@.*) ]]; then
   vlog "Using sbt options defined in variable \$SBT_OPTS"
-  extra_sbt_opts=( $SBT_OPTS )
+  IFS=" " read -r -a extra_sbt_opts <<< "$SBT_OPTS"
 else
   vlog "No extra sbt options have been defined"
 fi
@@ -466,7 +466,7 @@ setTraceLevel() {
 vlog "Detected sbt version $sbt_version"
 
 if [[ -n "$sbt_script" ]]; then
-  residual_args=( $sbt_script ${residual_args[@]} )
+  residual_args=( "$sbt_script" "${residual_args[@]}" )
 else
   # no args - alert them there's stuff in here
   (( argumentCount > 0 )) || {
@@ -524,10 +524,10 @@ if [[ -r "$jvm_opts_file" ]]; then
   while read opt; do extra_jvm_opts+=("$opt"); done < <(readConfigFile "$jvm_opts_file")
 elif [[ -n "$JVM_OPTS" && ! ("$JVM_OPTS" =~ ^@.*) ]]; then
   vlog "Using jvm options defined in \$JVM_OPTS variable"
-  extra_jvm_opts=( $JVM_OPTS )
+  IFS=" " read -r -a extra_jvm_opts <<< "$JVM_OPTS"
 else
   vlog "Using default jvm options"
-  extra_jvm_opts=( $(default_jvm_opts) )
+  IFS=" " read -r -a extra_jvm_opts <<< "$(default_jvm_opts)"
 fi
 
 # traceLevel is 0.12+
