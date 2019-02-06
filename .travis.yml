@@ -4,7 +4,9 @@ language: minimal
 git:
   depth: 3
 
-script: ./bin/run-tests --tap ./test
+script:
+  - shellcheck sbt || travis_terminate 1
+  - ./bin/run-tests --tap ./test
 
 notifications:
   email:
