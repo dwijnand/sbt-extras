@@ -47,7 +47,8 @@ die ()     { echo "Aborting: $*" ; exit 1; }
 
 setTrapExit () {
   # save stty and trap exit, to ensure echo is re-enabled if we are interrupted.
-  export SBT_STTY="$(stty -g 2>/dev/null)"
+  SBT_STTY="$(stty -g 2>/dev/null)"
+  export SBT_STTY
 
   # restore stty settings (echo in particular)
   onSbtRunnerExit() {
@@ -67,7 +68,7 @@ get_script_path () {
   local path="$1"
   [[ -L "$path" ]] || { echo "$path" ; return; }
 
-  local target="$(readlink "$path")"
+  local -r target="$(readlink "$path")"
   if [[ "${target:0:1}" == "/" ]]; then
     echo "$target"
   else
@@ -75,8 +76,10 @@ get_script_path () {
   fi
 }
 
-declare -r script_path="$(get_script_path "$BASH_SOURCE")"
-declare -r script_name="${script_path##*/}"
+script_path="$(get_script_path "$BASH_SOURCE")"
+declare -r script_path
+script_name="${script_path##*/}"
+declare -r script_name
 
 init_default_option_file () {
   local overriding_var="${!1}"
@@ -90,8 +93,8 @@ init_default_option_file () {
   echo "$default_file"
 }
 
-declare sbt_opts_file="$(init_default_option_file SBT_OPTS .sbtopts)"
-declare jvm_opts_file="$(init_default_option_file JVM_OPTS .jvmopts)"
+sbt_opts_file="$(init_default_option_file SBT_OPTS .sbtopts)"
+jvm_opts_file="$(init_default_option_file JVM_OPTS .jvmopts)"
 
 build_props_sbt () {
   [[ -r "$buildProps" ]] && \
@@ -159,7 +162,7 @@ setJavaHome () {
 }
 
 getJavaVersion() {
-  local str=$("$1" -version 2>&1 | grep -E -e '(java|openjdk) version' | awk '{ print $3 }' | tr -d '"')
+  local -r str=$("$1" -version 2>&1 | grep -E -e '(java|openjdk) version' | awk '{ print $3 }' | tr -d '"')
 
   # java -version on java8 says 1.8.x
   # but on 9 and 10 it's 9.x.y and 10.x.y.
@@ -191,14 +194,14 @@ checkJava() {
 }
 
 java_version () {
-  local version=$(getJavaVersion "$java_cmd")
+  local -r version=$(getJavaVersion "$java_cmd")
   vlog "Detected Java version: $version"
   echo "$version"
 }
 
 # MaxPermSize critical on pre-8 JVMs but incurs noisy warning on 8+
 default_jvm_opts () {
-  local v="$(java_version)"
+  local -r v="$(java_version)"
   if [[ $v -ge 8 ]]; then
     echo "$default_jvm_opts_common"
   else
@@ -546,13 +549,12 @@ main () {
 # we're not going to print those lines anyway. We strip that bit of
 # line noise, but leave the other codes to preserve color.
 mainFiltered () {
-  local ansiOverwrite='\r\x1BM\x1B[2K'
-  local excludeRegex=$(egrep -v '^#|^$' ~/.sbtignore | paste -sd'|' -)
+  local -r excludeRegex=$(egrep -v '^#|^$' ~/.sbtignore | paste -sd'|' -)
 
   echoLine () {
-    local line="$1"
-    local line1="$(echo "$line" | sed 's/\r\x1BM\x1B\[2K//g')"       # This strips the OverwriteLine code.
-    local line2="$(echo "$line1" | sed 's/\x1B\[[0-9;]*[JKmsu]//g')" # This strips all codes - we test regexes against this.
+    local -r line="$1"
+    local -r line1="$(echo "$line" | sed 's/\r\x1BM\x1B\[2K//g')"       # This strips the OverwriteLine code.
+    local -r line2="$(echo "$line1" | sed 's/\x1B\[[0-9;]*[JKmsu]//g')" # This strips all codes - we test regexes against this.
 
     if [[ $line2 =~ $excludeRegex ]]; then
       [[ -n $debugUs ]] && echo "[X] $line1"
