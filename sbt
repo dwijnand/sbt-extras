@@ -423,7 +423,7 @@ process_args "$@"
 readConfigFile() {
   local end=false
   until $end; do
-    read || end=true
+    read -r || end=true
     [[ $REPLY =~ ^# ]] || [[ -z $REPLY ]] || echo "$REPLY"
   done < "$1"
 }
@@ -432,7 +432,7 @@ readConfigFile() {
 # can supply args to this runner
 if [[ -r "$sbt_opts_file" ]]; then
   vlog "Using sbt options defined in file $sbt_opts_file"
-  while read opt; do extra_sbt_opts+=("$opt"); done < <(readConfigFile "$sbt_opts_file")
+  while read -r opt; do extra_sbt_opts+=("$opt"); done < <(readConfigFile "$sbt_opts_file")
 elif [[ -n "$SBT_OPTS" && ! ("$SBT_OPTS" =~ ^@.*) ]]; then
   vlog "Using sbt options defined in variable \$SBT_OPTS"
   IFS=" " read -r -a extra_sbt_opts <<< "$SBT_OPTS"
@@ -521,7 +521,7 @@ fi
 
 if [[ -r "$jvm_opts_file" ]]; then
   vlog "Using jvm options defined in file $jvm_opts_file"
-  while read opt; do extra_jvm_opts+=("$opt"); done < <(readConfigFile "$jvm_opts_file")
+  while read -r opt; do extra_jvm_opts+=("$opt"); done < <(readConfigFile "$jvm_opts_file")
 elif [[ -n "$JVM_OPTS" && ! ("$JVM_OPTS" =~ ^@.*) ]]; then
   vlog "Using jvm options defined in \$JVM_OPTS variable"
   IFS=" " read -r -a extra_jvm_opts <<< "$JVM_OPTS"
