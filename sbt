@@ -26,6 +26,9 @@ declare -r sbt_launch_mvn_snapshot_repo="http://repo.scala-sbt.org/scalasbt/mave
 declare -r default_jvm_opts_common="-Xms512m -Xss2m"
 declare -r noshare_opts="-Dsbt.global.base=project/.sbtboot -Dsbt.boot.directory=project/.boot -Dsbt.ivy.home=project/.ivy"
 
+declare coursier_launcher_version
+declare -r default_coursier_launcher_version="1.2.2"
+
 declare sbt_jar sbt_dir sbt_create sbt_version sbt_script sbt_new
 declare sbt_explicit_version
 declare verbose noshare batch trace_level
@@ -135,6 +138,18 @@ make_url () {
           0.*) echo "$base/org.scala-sbt/sbt-launch/$version/sbt-launch.jar" ;;
             *) echo "$base/org/scala-sbt/sbt-launch/$version/sbt-launch.jar" ;;
   esac
+}
+
+make_coursier_url () {
+  local version="$1"
+
+  echo "https://github.com/coursier/sbt-launcher/releases/download/v$version/csbt"
+}
+
+enable_coursier () {
+  if [[ -z "$coursier_launcher_version" ]]; then
+    coursier_launcher_version="$default_coursier_launcher_version"
+  fi
 }
 
 addJava ()     { vlog "[addJava] arg = '$1'"   ;     java_args+=("$1"); }
@@ -270,14 +285,24 @@ download_url () {
 
 acquire_sbt_jar () {
   {
-    sbt_jar="$(jar_file "$sbt_version")"
+    if [[ -z "$coursier_launcher_version" ]]; then
+      sbt_jar="$(jar_file "$sbt_version")"
+    else
+      sbt_jar="$(jar_file "coursier_$coursier_launcher_version")"
+    fi
+
     [[ -r "$sbt_jar" ]]
   } || {
     sbt_jar="$HOME/.ivy2/local/org.scala-sbt/sbt-launch/$sbt_version/jars/sbt-launch.jar"
-    [[ -r "$sbt_jar" ]]
+    [[ -z "$coursier_launcher_version" && -r "$sbt_jar" ]]
   } || {
-    sbt_jar="$(jar_file "$sbt_version")"
-    download_url "$(make_url "$sbt_version")" "$sbt_jar"
+    if [[ -z "$coursier_launcher_version" ]]; then
+      sbt_jar="$(jar_file "$sbt_version")"
+      download_url "$(make_url "$sbt_version")" "$sbt_jar"
+    else
+      sbt_jar="$(jar_file "coursier_$coursier_launcher_version")"
+      download_url "$(make_coursier_url "$coursier_launcher_version")" "$sbt_jar"
+    fi
   }
 }
 
@@ -314,6 +339,7 @@ runner with the -x option.
   -batch             Disable interactive mode
   -prompt <expr>     Set the sbt prompt; in expr, 's' is the State and 'e' is Extracted
   -script <file>     Run the specified file as a scala script
+  -coursier          use a coursier-based launcher rather than an official sbt launcher
 
   # sbt version (default: sbt.version from $buildProps if present, otherwise $sbt_release_version)
   -sbt-force-latest         force the use of the latest release of sbt: $sbt_release_version
@@ -394,6 +420,8 @@ process_args () {
           -sbt-dev) sbt_explicit_version="$sbt_unreleased_version" && shift ;;
    -sbt-launch-dir) require_arg path "$1" "$2" && sbt_launch_dir="$2" && shift 2 ;;
   -sbt-launch-repo) require_arg path "$1" "$2" && sbt_launch_repo="$2" && shift 2 ;;
+         -coursier) enable_coursier && shift ;;
+ -coursier-version) require_arg version "$1" "$2" && coursier_launcher_version="$2" && shift 2 ;;
     -scala-version) require_arg version "$1" "$2" && setScalaVersion "$2" && shift 2 ;;
    -binary-version) require_arg version "$1" "$2" && setThisBuild scalaBinaryVersion "\"$2\"" && shift 2 ;;
        -scala-home) require_arg path "$1" "$2" && setThisBuild scalaHome "_root_.scala.Some(file(\"$2\"))" && shift 2 ;;
