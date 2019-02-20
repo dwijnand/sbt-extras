@@ -5,6 +5,7 @@ git:
   depth: 3
 
 script:
+  - shellcheck --version
   - shellcheck sbt || travis_terminate 1
   - ./bin/run-tests --tap ./test
 
