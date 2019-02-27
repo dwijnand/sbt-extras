@@ -269,8 +269,9 @@ jar_file () {
 download_url () {
   local url="$1"
   local jar="$2"
+  local message="$3"
 
-  echoerr "Downloading sbt launcher for $sbt_version:"
+  echoerr "$message"
   echoerr "  From  $url"
   echoerr "    To  $jar"
 
@@ -298,10 +299,12 @@ acquire_sbt_jar () {
   } || {
     if [[ -z "$coursier_launcher_version" ]]; then
       sbt_jar="$(jar_file "$sbt_version")"
-      download_url "$(make_url "$sbt_version")" "$sbt_jar"
+      download_url "$(make_url "$sbt_version")" "$sbt_jar" \
+        "Downloading sbt launcher for $sbt_version:"
     else
       sbt_jar="$(jar_file "coursier_$coursier_launcher_version")"
-      download_url "$(make_coursier_url "$coursier_launcher_version")" "$sbt_jar"
+      download_url "$(make_coursier_url "$coursier_launcher_version")" "$sbt_jar" \
+        "Downloading coursier sbt launcher $coursier_launcher_version:"
     fi
   }
 }
