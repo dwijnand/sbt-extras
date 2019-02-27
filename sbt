@@ -39,7 +39,7 @@ declare sbt_launch_dir="$HOME/.sbt/launchers"
 declare sbt_launch_repo
 
 # pull -J and -D options to give to java.
-declare -a java_args scalac_args sbt_commands residual_args
+declare -a java_args coursier_args scalac_args sbt_commands residual_args
 
 # args to jvm/sbt via files or environment variables
 declare -a extra_jvm_opts extra_sbt_opts
@@ -152,10 +152,11 @@ enable_coursier () {
   fi
 }
 
-addJava ()     { vlog "[addJava] arg = '$1'"   ;     java_args+=("$1"); }
-addSbt ()      { vlog "[addSbt] arg = '$1'"    ;  sbt_commands+=("$1"); }
-addScalac ()   { vlog "[addScalac] arg = '$1'" ;   scalac_args+=("$1"); }
-addResidual () { vlog "[residual] arg = '$1'"  ; residual_args+=("$1"); }
+addJava ()     { vlog "[addJava] arg = '$1'"    ;     java_args+=("$1"); }
+addCoursier () { vlog "[addCoursier] arg = '$1'"; coursier_args+=("$1"); }
+addSbt ()      { vlog "[addSbt] arg = '$1'"     ;  sbt_commands+=("$1"); }
+addScalac ()   { vlog "[addScalac] arg = '$1'"  ;   scalac_args+=("$1"); }
+addResidual () { vlog "[residual] arg = '$1'"   ; residual_args+=("$1"); }
 
 addResolver () { addSbt "set resolvers += $1"; }
 addDebugger () { addJava "-Xdebug" ; addJava "-Xrunjdwp:transport=dt_socket,server=y,suspend=n,address=$1"; }
@@ -435,6 +436,7 @@ process_args () {
                -D*) addJava "$1" && shift ;;
                -J*) addJava "${1:2}" && shift ;;
                -S*) addScalac "${1:2}" && shift ;;
+               -C*) addCoursier "${1:2}" && shift ;;
                -28) setScalaVersion "$latest_28" && shift ;;
                -29) setScalaVersion "$latest_29" && shift ;;
               -210) setScalaVersion "$latest_210" && shift ;;
@@ -565,11 +567,16 @@ fi
 # traceLevel is 0.12+
 [[ -n "$trace_level" ]] && setTraceLevel
 
+# options before a -- may be interpreted as options for itself by the
+# coursier-based launcher
+[[ -z "$coursier_launcher_version" ]] || addCoursier "--"
+
 main () {
   execRunner "$java_cmd" \
     "${extra_jvm_opts[@]}" \
     "${java_args[@]}" \
     -jar "$sbt_jar" \
+    "${coursier_args[@]}" \
     "${sbt_commands[@]}" \
     "${residual_args[@]}"
 }
