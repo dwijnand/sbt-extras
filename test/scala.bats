@@ -10,5 +10,5 @@ load test_helper
 @test "-210 => scala 2.10"                    { sbt_expecting "++ 2.10.7" -210;                                                                     }
 @test "-211 => scala 2.11"                    { sbt_expecting "++ 2.11.12" -211;                                                                    }
 @test "-212 => scala 2.12"                    { sbt_expecting "++ 2.12.8" -212;                                                                     }
-@test "-213 => scala 2.13"                    { sbt_expecting "++ 2.13.0-RC2" -213;                                                                 }
+@test "-213 => scala 2.13"                    { sbt_expecting "++ 2.13.0-RC3" -213;                                                                 }
 @test "-scala-version N => version N"         { sbt_expecting "++ 2.10.2" -scala-version 2.10.2;                                                    }
