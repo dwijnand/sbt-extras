@@ -26,6 +26,9 @@ declare -r sbt_launch_mvn_snapshot_repo="http://repo.scala-sbt.org/scalasbt/mave
 declare -r default_jvm_opts_common="-Xms512m -Xss2m"
 declare -r noshare_opts="-Dsbt.global.base=project/.sbtboot -Dsbt.boot.directory=project/.boot -Dsbt.ivy.home=project/.ivy"
 
+declare -r default_coursier_launcher_version="1.2.14"
+declare coursier_launcher_version
+
 declare sbt_jar sbt_dir sbt_create sbt_version sbt_script sbt_new
 declare sbt_explicit_version
 declare verbose noshare batch trace_level
@@ -36,10 +39,16 @@ declare sbt_launch_dir="$HOME/.sbt/launchers"
 declare sbt_launch_repo
 
 # pull -J and -D options to give to java.
-declare -a java_args scalac_args sbt_commands residual_args
+declare -a java_args coursier_args scalac_args sbt_commands residual_args
 
 # args to jvm/sbt via files or environment variables
 declare -a extra_jvm_opts extra_sbt_opts
+
+if [[ "$SBTX_COURSIER" == true ]]; then
+  coursier_launcher_version="default"
+else
+  coursier_launcher_version=""
+fi
 
 echoerr () { echo >&2 "$@"; }
 vlog ()    { [[ -n "$verbose" ]] && echoerr "$@"; }
@@ -137,10 +146,17 @@ make_url () {
   esac
 }
 
-addJava ()     { vlog "[addJava] arg = '$1'"   ;     java_args+=("$1"); }
-addSbt ()      { vlog "[addSbt] arg = '$1'"    ;  sbt_commands+=("$1"); }
-addScalac ()   { vlog "[addScalac] arg = '$1'" ;   scalac_args+=("$1"); }
-addResidual () { vlog "[residual] arg = '$1'"  ; residual_args+=("$1"); }
+make_coursier_url () {
+  local version="$1"
+
+  echo "https://github.com/coursier/sbt-launcher/releases/download/v$version/csbt"
+}
+
+addJava ()     { vlog "[addJava] arg = '$1'"    ;     java_args+=("$1"); }
+addCoursier () { vlog "[addCoursier] arg = '$1'"; coursier_args+=("$1"); }
+addSbt ()      { vlog "[addSbt] arg = '$1'"     ;  sbt_commands+=("$1"); }
+addScalac ()   { vlog "[addScalac] arg = '$1'"  ;   scalac_args+=("$1"); }
+addResidual () { vlog "[residual] arg = '$1'"   ; residual_args+=("$1"); }
 
 addResolver () { addSbt "set resolvers += $1"; }
 addDebugger () { addJava "-Xdebug" ; addJava "-Xrunjdwp:transport=dt_socket,server=y,suspend=n,address=$1"; }
@@ -254,8 +270,9 @@ jar_file () {
 download_url () {
   local url="$1"
   local jar="$2"
+  local message="$3"
 
-  echoerr "Downloading sbt launcher for $sbt_version:"
+  echoerr "$message"
   echoerr "  From  $url"
   echoerr "    To  $jar"
 
@@ -269,15 +286,37 @@ download_url () {
 }
 
 acquire_sbt_jar () {
+
+  # if none of the options touched coursier_launcher_version, use the coursier
+  # launcher with sbt >= 0.13.8
+  if [[ "$coursier_launcher_version" = "default" ]]; then
+    case "$sbt_version" in
+        0.13.[89] | 0.13.1[0-9] | 1.* ) coursier_launcher_version="$default_coursier_launcher_version" ;;
+        * ) coursier_launcher_version="" ;;
+    esac
+  fi
+
   {
-    sbt_jar="$(jar_file "$sbt_version")"
+    if [[ -z "$coursier_launcher_version" ]]; then
+      sbt_jar="$(jar_file "$sbt_version")"
+    else
+      sbt_jar="$(jar_file "coursier_$coursier_launcher_version")"
+    fi
+
     [[ -r "$sbt_jar" ]]
   } || {
     sbt_jar="$HOME/.ivy2/local/org.scala-sbt/sbt-launch/$sbt_version/jars/sbt-launch.jar"
-    [[ -r "$sbt_jar" ]]
+    [[ -z "$coursier_launcher_version" && -r "$sbt_jar" ]]
   } || {
-    sbt_jar="$(jar_file "$sbt_version")"
-    download_url "$(make_url "$sbt_version")" "$sbt_jar"
+    if [[ -z "$coursier_launcher_version" ]]; then
+      sbt_jar="$(jar_file "$sbt_version")"
+      download_url "$(make_url "$sbt_version")" "$sbt_jar" \
+        "Downloading sbt launcher for $sbt_version:"
+    else
+      sbt_jar="$(jar_file "coursier_$coursier_launcher_version")"
+      download_url "$(make_coursier_url "$coursier_launcher_version")" "$sbt_jar" \
+        "Downloading coursier sbt launcher $coursier_launcher_version:"
+    fi
   }
 }
 
@@ -404,6 +443,7 @@ process_args () {
                -D*) addJava "$1" && shift ;;
                -J*) addJava "${1:2}" && shift ;;
                -S*) addScalac "${1:2}" && shift ;;
+               -C*) addCoursier "${1:2}" && shift ;;
                -28) setScalaVersion "$latest_28" && shift ;;
                -29) setScalaVersion "$latest_29" && shift ;;
               -210) setScalaVersion "$latest_210" && shift ;;
@@ -505,6 +545,9 @@ if [[ -n "$noshare" ]]; then
   for opt in ${noshare_opts}; do
     addJava "$opt"
   done
+  if [[ -z "$COURSIER_CACHE" ]]; then
+    export COURSIER_CACHE="$(pwd)/project/.coursier-cache"
+  fi
 else
   case "$sbt_version" in
     "0.7."* | "0.10."* | "0.11."* | "0.12."* )
@@ -534,11 +577,19 @@ fi
 # traceLevel is 0.12+
 [[ -n "$trace_level" ]] && setTraceLevel
 
+# options before a -- may be interpreted as options for itself by the
+# coursier-based launcher
+[[ -z "$coursier_launcher_version" ]] || [[ ${#coursier_args[@]} -eq 0 ]] || {
+  addJava "-Dcoursier.sbt-launcher.parse-args=true"
+  addCoursier "--"
+}
+
 main () {
   execRunner "$java_cmd" \
     "${extra_jvm_opts[@]}" \
     "${java_args[@]}" \
     -jar "$sbt_jar" \
+    "${coursier_args[@]}" \
     "${sbt_commands[@]}" \
     "${residual_args[@]}"
 }
