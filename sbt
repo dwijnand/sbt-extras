@@ -575,7 +575,6 @@ fi
 # traceLevel is 0.12+
 [[ -n "$trace_level" ]] && setTraceLevel
 
-# coursier-based launcher
 [[ -z "$coursier_launcher_version" ]] || {
   addJava "-Dcoursier.sbt-launcher.parse-args=true"
   addCoursier "--"
