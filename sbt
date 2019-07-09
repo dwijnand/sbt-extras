@@ -575,7 +575,6 @@ fi
 # traceLevel is 0.12+
 [[ -n "$trace_level" ]] && setTraceLevel
 
-# options before a -- may be interpreted as options for itself by the
 # coursier-based launcher
 [[ -z "$coursier_launcher_version" ]] || {
   addJava "-Dcoursier.sbt-launcher.parse-args=true"
