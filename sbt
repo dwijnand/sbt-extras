@@ -8,6 +8,7 @@ set -o pipefail
 
 declare -r sbt_release_version="1.2.8"
 declare -r sbt_unreleased_version="1.3.0-RC1"
+declare -r default_coursier_launcher_version="1.2.14"
 
 declare -r latest_213="2.13.0"
 declare -r latest_212="2.12.8"
@@ -26,8 +27,7 @@ declare -r sbt_launch_mvn_snapshot_repo="http://repo.scala-sbt.org/scalasbt/mave
 declare -r default_jvm_opts_common="-Xms512m -Xss2m"
 declare -r noshare_opts="-Dsbt.global.base=project/.sbtboot -Dsbt.boot.directory=project/.boot -Dsbt.ivy.home=project/.ivy"
 
-declare -r default_coursier_launcher_version="1.2.14"
-declare coursier_launcher_version
+declare coursier_launcher_version=""
 
 declare sbt_jar sbt_dir sbt_create sbt_version sbt_script sbt_new
 declare sbt_explicit_version
@@ -46,8 +46,6 @@ declare -a extra_jvm_opts extra_sbt_opts
 
 if [[ "$SBTX_COURSIER" == true ]]; then
   coursier_launcher_version="default"
-else
-  coursier_launcher_version=""
 fi
 
 echoerr () { echo >&2 "$@"; }
@@ -546,7 +544,7 @@ if [[ -n "$noshare" ]]; then
     addJava "$opt"
   done
   if [[ -z "$COURSIER_CACHE" ]]; then
-    export COURSIER_CACHE="$(pwd)/project/.coursier-cache"
+    export COURSIER_CACHE="project/.coursier-cache"
   fi
 else
   case "$sbt_version" in
@@ -579,7 +577,7 @@ fi
 
 # options before a -- may be interpreted as options for itself by the
 # coursier-based launcher
-[[ -z "$coursier_launcher_version" ]] || [[ ${#coursier_args[@]} -eq 0 ]] || {
+[[ -z "$coursier_launcher_version" ]] || {
   addJava "-Dcoursier.sbt-launcher.parse-args=true"
   addCoursier "--"
 }
