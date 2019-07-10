@@ -8,7 +8,7 @@ set -o pipefail
 
 declare -r sbt_release_version="1.2.8"
 declare -r sbt_unreleased_version="1.3.0-RC1"
-declare -r default_coursier_launcher_version="1.2.14"
+declare -r default_coursier_launcher_version="1.2.15"
 
 declare -r latest_213="2.13.0"
 declare -r latest_212="2.12.8"
@@ -151,7 +151,6 @@ make_coursier_url () {
 }
 
 addJava ()     { vlog "[addJava] arg = '$1'"    ;     java_args+=("$1"); }
-addCoursier () { vlog "[addCoursier] arg = '$1'"; coursier_args+=("$1"); }
 addSbt ()      { vlog "[addSbt] arg = '$1'"     ;  sbt_commands+=("$1"); }
 addScalac ()   { vlog "[addScalac] arg = '$1'"  ;   scalac_args+=("$1"); }
 addResidual () { vlog "[residual] arg = '$1'"   ; residual_args+=("$1"); }
@@ -441,7 +440,6 @@ process_args () {
                -D*) addJava "$1" && shift ;;
                -J*) addJava "${1:2}" && shift ;;
                -S*) addScalac "${1:2}" && shift ;;
-               -C*) addCoursier "${1:2}" && shift ;;
                -28) setScalaVersion "$latest_28" && shift ;;
                -29) setScalaVersion "$latest_29" && shift ;;
               -210) setScalaVersion "$latest_210" && shift ;;
@@ -574,11 +572,6 @@ fi
 
 # traceLevel is 0.12+
 [[ -n "$trace_level" ]] && setTraceLevel
-
-[[ -z "$coursier_launcher_version" ]] || {
-  addJava "-Dcoursier.sbt-launcher.parse-args=true"
-  addCoursier "--"
-}
 
 main () {
   execRunner "$java_cmd" \
