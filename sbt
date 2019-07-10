@@ -150,10 +150,10 @@ make_coursier_url () {
   echo "https://github.com/coursier/sbt-launcher/releases/download/v$version/csbt"
 }
 
-addJava ()     { vlog "[addJava] arg = '$1'"    ;     java_args+=("$1"); }
-addSbt ()      { vlog "[addSbt] arg = '$1'"     ;  sbt_commands+=("$1"); }
-addScalac ()   { vlog "[addScalac] arg = '$1'"  ;   scalac_args+=("$1"); }
-addResidual () { vlog "[residual] arg = '$1'"   ; residual_args+=("$1"); }
+addJava ()     { vlog "[addJava] arg = '$1'"   ;     java_args+=("$1"); }
+addSbt ()      { vlog "[addSbt] arg = '$1'"    ;  sbt_commands+=("$1"); }
+addScalac ()   { vlog "[addScalac] arg = '$1'" ;   scalac_args+=("$1"); }
+addResidual () { vlog "[residual] arg = '$1'"  ; residual_args+=("$1"); }
 
 addResolver () { addSbt "set resolvers += $1"; }
 addDebugger () { addJava "-Xdebug" ; addJava "-Xrunjdwp:transport=dt_socket,server=y,suspend=n,address=$1"; }
