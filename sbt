@@ -578,7 +578,6 @@ main () {
     "${extra_jvm_opts[@]}" \
     "${java_args[@]}" \
     -jar "$sbt_jar" \
-    "${coursier_args[@]}" \
     "${sbt_commands[@]}" \
     "${residual_args[@]}"
 }
