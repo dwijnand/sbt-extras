@@ -39,7 +39,7 @@ declare sbt_launch_dir="$HOME/.sbt/launchers"
 declare sbt_launch_repo
 
 # pull -J and -D options to give to java.
-declare -a java_args coursier_args scalac_args sbt_commands residual_args
+declare -a java_args scalac_args sbt_commands residual_args
 
 # args to jvm/sbt via files or environment variables
 declare -a extra_jvm_opts extra_sbt_opts
