@@ -133,7 +133,7 @@ make_url () {
       0.10.* ) echo "$base/org.scala-tools.sbt/sbt-launch/$version/sbt-launch.jar" ;;
     0.11.[12]) echo "$base/org.scala-tools.sbt/sbt-launch/$version/sbt-launch.jar" ;;
           0.*) echo "$base/org.scala-sbt/sbt-launch/$version/sbt-launch.jar" ;;
-            *) echo "$base/org/scala-sbt/sbt-launch/$version/sbt-launch.jar" ;;
+            *) echo "$base/org/scala-sbt/sbt-launch/$version/sbt-launch-${version}.jar" ;;
   esac
 }
 
@@ -255,9 +255,11 @@ download_url () {
   local url="$1"
   local jar="$2"
 
-  echoerr "Downloading sbt launcher for $sbt_version:"
-  echoerr "  From  $url"
-  echoerr "    To  $jar"
+  if [ -z "$3" ]; then
+    echoerr "Downloading sbt launcher for $sbt_version:"
+    echoerr "  From  $url"
+    echoerr "    To  $jar"
+  fi
 
   mkdir -p "${jar%/*}" && {
     if command -v curl > /dev/null 2>&1; then
@@ -278,7 +280,26 @@ acquire_sbt_jar () {
   } || {
     sbt_jar="$(jar_file "$sbt_version")"
     download_url "$(make_url "$sbt_version")" "$sbt_jar"
+
+    case "${sbt_version}" in
+      0.*) vlog "SBT versions < 1.0 do not have published MD5 checksums, skipping check"; echo "" ;;
+        *) verify_sbt_jar "${sbt_jar}" ;;
+    esac
   }
+}
+
+verify_sbt_jar() {
+  local jar="${1}"
+  local md5="${jar}.md5"
+
+  download_url "$(make_url "${sbt_version}").md5" "${md5}" true > /dev/null 2>&1
+  if echo "$(cat "${md5}")  ${jar}" | md5sum -c -; then
+    rm -f "${md5}"
+    return 0
+  else
+    echoerr "Checksum does not match"
+    return 1
+  fi
 }
 
 usage () {
