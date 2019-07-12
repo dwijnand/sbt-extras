@@ -1,16 +1,8 @@
-sudo: false
 language: minimal
 
-git:
-  depth: 3
-
 script:
-  - shellcheck --version
-  - shellcheck sbt || travis_terminate 1
+  - shellcheck --version && shellcheck sbt || travis_terminate 1
   - ./bin/run-tests --tap ./test
 
 notifications:
-  email:
-    on_success: never
-  webhooks:
-    urls: https://webhooks.gitter.im/e/45b53a6d489dbced3f7e
+  email: dale.wijnand@gmail.com
