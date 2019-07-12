@@ -8,7 +8,7 @@ set -o pipefail
 
 declare -r sbt_release_version="1.2.8"
 declare -r sbt_unreleased_version="1.3.0-RC1"
-declare -r default_coursier_launcher_version="1.2.15"
+declare -r coursier_launcher_version="1.2.15"
 
 declare -r latest_213="2.13.0"
 declare -r latest_212="2.12.8"
@@ -27,7 +27,7 @@ declare -r sbt_launch_mvn_snapshot_repo="http://repo.scala-sbt.org/scalasbt/mave
 declare -r default_jvm_opts_common="-Xms512m -Xss2m"
 declare -r noshare_opts="-Dsbt.global.base=project/.sbtboot -Dsbt.boot.directory=project/.boot -Dsbt.ivy.home=project/.ivy"
 
-declare coursier_launcher_version=""
+declare use_coursier_launcher="false"
 
 declare sbt_jar sbt_dir sbt_create sbt_version sbt_script sbt_new
 declare sbt_explicit_version
@@ -45,7 +45,7 @@ declare -a java_args scalac_args sbt_commands residual_args
 declare -a extra_jvm_opts extra_sbt_opts
 
 if [[ "$SBTX_COURSIER" == true ]]; then
-  coursier_launcher_version="default"
+  use_coursier_launcher="true"
 fi
 
 echoerr () { echo >&2 "$@"; }
@@ -284,35 +284,31 @@ download_url () {
 
 acquire_sbt_jar () {
 
-  # if none of the options touched coursier_launcher_version, use the coursier
-  # launcher with sbt >= 0.13.8
-  if [[ "$coursier_launcher_version" = "default" ]]; then
-    case "$sbt_version" in
-        0.13.[89] | 0.13.1[0-9] | 1.* ) coursier_launcher_version="$default_coursier_launcher_version" ;;
-        * ) coursier_launcher_version="" ;;
-    esac
+  # only enable coursier sbt launcher for the sbt versions it supports
+  if [[ "$use_coursier_launcher" == "true" && "$sbt_version" != 0.13.[89] && "$sbt_version" != 0.13.1[0-9] && "$sbt_version" != 1.* ]]; then
+    use_coursier_launcher="false"
   fi
 
   {
-    if [[ -z "$coursier_launcher_version" ]]; then
-      sbt_jar="$(jar_file "$sbt_version")"
-    else
+    if [[ "$use_coursier_launcher" == "true" ]]; then
       sbt_jar="$(jar_file "coursier_$coursier_launcher_version")"
+    else
+      sbt_jar="$(jar_file "$sbt_version")"
     fi
 
     [[ -r "$sbt_jar" ]]
   } || {
     sbt_jar="$HOME/.ivy2/local/org.scala-sbt/sbt-launch/$sbt_version/jars/sbt-launch.jar"
-    [[ -z "$coursier_launcher_version" && -r "$sbt_jar" ]]
+    [[ "$use_coursier_launcher" != "true" && -r "$sbt_jar" ]]
   } || {
-    if [[ -z "$coursier_launcher_version" ]]; then
-      sbt_jar="$(jar_file "$sbt_version")"
-      download_url "$(make_url "$sbt_version")" "$sbt_jar" \
-        "Downloading sbt launcher for $sbt_version:"
-    else
+    if [[ "$use_coursier_launcher" == true ]]; then
       sbt_jar="$(jar_file "coursier_$coursier_launcher_version")"
       download_url "$(make_coursier_url "$coursier_launcher_version")" "$sbt_jar" \
         "Downloading coursier sbt launcher $coursier_launcher_version:"
+    else
+      sbt_jar="$(jar_file "$sbt_version")"
+      download_url "$(make_url "$sbt_version")" "$sbt_jar" \
+        "Downloading sbt launcher for $sbt_version:"
     fi
   }
 }
