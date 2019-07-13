@@ -255,12 +255,6 @@ download_url () {
   local url="$1"
   local jar="$2"
 
-  if [ -z "$3" ]; then
-    echoerr "Downloading sbt launcher for $sbt_version:"
-    echoerr "  From  $url"
-    echoerr "    To  $jar"
-  fi
-
   mkdir -p "${jar%/*}" && {
     if command -v curl > /dev/null 2>&1; then
       curl --fail --silent --location "$url" --output "$jar"
@@ -279,7 +273,13 @@ acquire_sbt_jar () {
     [[ -r "$sbt_jar" ]]
   } || {
     sbt_jar="$(jar_file "$sbt_version")"
-    download_url "$(make_url "$sbt_version")" "$sbt_jar"
+    jar_url="$(make_url "$sbt_version")"
+
+    echoerr "Downloading sbt launcher for ${sbt_version}:"
+    echoerr "  From  ${jar_url}"
+    echoerr "    To  ${sbt_jar}"
+
+    download_url "${jar_url}" "${sbt_jar}"
 
     case "${sbt_version}" in
       0.*) vlog "SBT versions < 1.0 do not have published MD5 checksums, skipping check"; echo "" ;;
@@ -292,7 +292,7 @@ verify_sbt_jar() {
   local jar="${1}"
   local md5="${jar}.md5"
 
-  download_url "$(make_url "${sbt_version}").md5" "${md5}" true > /dev/null 2>&1
+  download_url "$(make_url "${sbt_version}").md5" "${md5}" > /dev/null 2>&1
   if echo "$(cat "${md5}")  ${jar}" | md5sum -c -; then
     rm -f "${md5}"
     return 0
@@ -518,7 +518,7 @@ EOM
 # no jar? download it.
 [[ -r "$sbt_jar" ]] || acquire_sbt_jar || {
   # still no jar? uh-oh.
-  echo "Download failed. Obtain the jar manually and place it at $sbt_jar"
+  echo "Could not download and verify the launcher. Obtain the jar manually and place it at $sbt_jar"
   exit 1
 }
 
