@@ -15,7 +15,13 @@ teardown() {
 curl_opts='--fail --silent --location https://* --output * : mkdir -p "$(dirname "$6")" && touch "$6"'
 wget_opts='--quiet -O * https://* : mkdir -p "$(dirname "$3")" && touch "$3"'
 
-stub_curl() { stub curl "$curl_opts"; }
+stub_curl() {
+  stub curl "$curl_opts";
+  case "$1" in
+    0.*) ;; # sbt <1 has no MD5 files to curl and verify
+      *) stub curl "$curl_opts" && stub md5sum 'true' ;;
+  esac
+}
 stub_wget() { stub wget "$wget_opts"; }
 stub_md5sum() { stub md5sum 'true'; }
 
@@ -41,9 +47,7 @@ no_properties_and_fetch ()               { assert_no_properties && fetch_launche
 
 fetch_launcher () {
   local version="$1" && shift
-  stub_curl
-  stub_curl
-  stub_md5sum
+  stub_curl "${version}"
   run sbt "$@"
   assert_success
   assert_output <<EOS
@@ -51,6 +55,7 @@ Downloading sbt launcher for $version:
   From  $(launcher_url $version)
     To  $TEST_ROOT/.sbt/launchers/$version/sbt-launch.jar
 EOS
+  unstub curl
 }
 
 @test "downloads sbt 0.7.x"  { write_version_to_properties_and_fetch "$sbt_07"; }
@@ -67,9 +72,7 @@ EOS
 
 @test "downloads specified version when -sbt-version was given, even if there is build.properties" {
   write_version_to_properties $sbt_12
-  stub_curl
-  stub_curl
-  stub_md5sum
+  stub_curl "${sbt_12}"
   run sbt -sbt-version $sbt_13
   assert_success
   assert_output <<EOS
@@ -77,13 +80,12 @@ Downloading sbt launcher for $sbt_13:
   From  https://repo.typesafe.com/typesafe/ivy-releases/org.scala-sbt/sbt-launch/$sbt_13/sbt-launch.jar
     To  $TEST_ROOT/.sbt/launchers/$sbt_13/sbt-launch.jar
 EOS
+  unstub curl
 }
 
 @test "downloads released version when -sbt-force-latest was given, even if there is build.properties" {
   write_version_to_properties $sbt_12
-  stub_curl
-  stub_curl
-  stub_md5sum
+  stub_curl "${sbt_release}"
   run sbt -sbt-force-latest
   assert_success
   assert_output <<EOS
@@ -91,13 +93,12 @@ Downloading sbt launcher for $sbt_release:
   From  $(launcher_url $sbt_release)
     To  $TEST_ROOT/.sbt/launchers/$sbt_release/sbt-launch.jar
 EOS
+  unstub curl
 }
 
 @test "downloads unreleased version when -sbt-dev was given, even if there is build.properties" {
   write_version_to_properties $sbt_13
-  stub_curl
-  stub_curl
-  stub_md5sum
+  stub_curl "${sbt_dev}"
   run sbt -sbt-dev
   assert_success
   assert_output <<EOS
@@ -105,6 +106,7 @@ Downloading sbt launcher for $sbt_dev:
   From  $(launcher_url $sbt_dev)
     To  $TEST_ROOT/.sbt/launchers/$sbt_dev/sbt-launch.jar
 EOS
+  unstub curl
 }
 
 @test "allows surrounding white spaces around '=' in build.properties" {
@@ -133,9 +135,7 @@ EOS
 
 @test "uses special launcher directory if -sbt-launch-dir was given" {
   write_to_properties "stub.version=$sbt_1"
-  stub_curl
-  stub_curl
-  stub_md5sum
+  stub_curl "${sbt_1}"
   run sbt -sbt-launch-dir "${sbt_project}/xsbt"
   assert_success
   assert_output <<EOS
@@ -143,13 +143,12 @@ Downloading sbt launcher for $sbt_1:
   From  $(launcher_url $sbt_1)
     To  ${sbt_project}/xsbt/$sbt_1/sbt-launch.jar
 EOS
+  unstub curl
 }
 
 @test "uses special launcher repository if -sbt-launch-repo was given" {
   write_to_properties "stub.version=$sbt_1"
-  stub_curl
-  stub_curl
-  stub_md5sum
+  stub_curl "${sbt_1}"
   run sbt -sbt-launch-repo "https://127.0.0.1:8080/ivy-releases"
   assert_success
   assert_output <<EOS
@@ -157,4 +156,5 @@ Downloading sbt launcher for $sbt_1:
   From  https://127.0.0.1:8080/ivy-releases/org/scala-sbt/sbt-launch/$sbt_1/sbt-launch-$sbt_1.jar
     To  $TEST_ROOT/.sbt/launchers/$sbt_1/sbt-launch.jar
 EOS
+  unstub curl
 }
