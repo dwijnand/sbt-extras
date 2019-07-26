@@ -292,8 +292,17 @@ verify_sbt_jar() {
   local jar="${1}"
   local md5="${jar}.md5"
 
+  if command -v md5sum > /dev/null 2>&1; then
+    md5_cmd="md5sum"
+  elif command -v md5 > /dev/null 2>&1; then
+    md5_cmd="md5"
+  else
+    echoerr "Could not find an MD5 command"
+    return 1
+  fi
+
   download_url "$(make_url "${sbt_version}").md5" "${md5}" > /dev/null 2>&1
-  if echo "$(cat "${md5}")  ${jar}" | md5sum -c -; then
+  if echo "$(cat "${md5}")  ${jar}" | "${md5_cmd}" -c -; then
     rm -f "${md5}"
     return 0
   else
