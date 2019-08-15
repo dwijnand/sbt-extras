@@ -18,10 +18,10 @@ declare -r latest_28="2.8.2"
 
 declare -r buildProps="project/build.properties"
 
-declare -r sbt_launch_ivy_release_repo="http://repo.typesafe.com/typesafe/ivy-releases"
+declare -r sbt_launch_ivy_release_repo="https://repo.typesafe.com/typesafe/ivy-releases"
 declare -r sbt_launch_ivy_snapshot_repo="https://repo.scala-sbt.org/scalasbt/ivy-snapshots"
-declare -r sbt_launch_mvn_release_repo="http://repo.scala-sbt.org/scalasbt/maven-releases"
-declare -r sbt_launch_mvn_snapshot_repo="http://repo.scala-sbt.org/scalasbt/maven-snapshots"
+declare -r sbt_launch_mvn_release_repo="https://repo.scala-sbt.org/scalasbt/maven-releases"
+declare -r sbt_launch_mvn_snapshot_repo="https://repo.scala-sbt.org/scalasbt/maven-snapshots"
 
 declare -r default_jvm_opts_common="-Xms512m -Xss2m"
 declare -r noshare_opts="-Dsbt.global.base=project/.sbtboot -Dsbt.boot.directory=project/.boot -Dsbt.ivy.home=project/.ivy"
@@ -111,7 +111,7 @@ url_base () {
   local version="$1"
 
   case "$version" in
-        0.7.*) echo "http://simple-build-tool.googlecode.com" ;;
+        0.7.*) echo "https://simple-build-tool.googlecode.com" ;;
       0.10.* ) echo "$sbt_launch_ivy_release_repo" ;;
     0.11.[12]) echo "$sbt_launch_ivy_release_repo" ;;
     0.*-[0-9][0-9][0-9][0-9][0-9][0-9][0-9][0-9]-[0-9][0-9][0-9][0-9][0-9][0-9]) # ie "*-yyyymmdd-hhMMss"
@@ -133,7 +133,7 @@ make_url () {
       0.10.* ) echo "$base/org.scala-tools.sbt/sbt-launch/$version/sbt-launch.jar" ;;
     0.11.[12]) echo "$base/org.scala-tools.sbt/sbt-launch/$version/sbt-launch.jar" ;;
           0.*) echo "$base/org.scala-sbt/sbt-launch/$version/sbt-launch.jar" ;;
-            *) echo "$base/org/scala-sbt/sbt-launch/$version/sbt-launch.jar" ;;
+            *) echo "$base/org/scala-sbt/sbt-launch/$version/sbt-launch-${version}.jar" ;;
   esac
 }
 
@@ -255,10 +255,6 @@ download_url () {
   local url="$1"
   local jar="$2"
 
-  echoerr "Downloading sbt launcher for $sbt_version:"
-  echoerr "  From  $url"
-  echoerr "    To  $jar"
-
   mkdir -p "${jar%/*}" && {
     if command -v curl > /dev/null 2>&1; then
       curl --fail --silent --location "$url" --output "$jar"
@@ -277,8 +273,55 @@ acquire_sbt_jar () {
     [[ -r "$sbt_jar" ]]
   } || {
     sbt_jar="$(jar_file "$sbt_version")"
-    download_url "$(make_url "$sbt_version")" "$sbt_jar"
+    jar_url="$(make_url "$sbt_version")"
+
+    echoerr "Downloading sbt launcher for ${sbt_version}:"
+    echoerr "  From  ${jar_url}"
+    echoerr "    To  ${sbt_jar}"
+
+    download_url "${jar_url}" "${sbt_jar}"
+
+    case "${sbt_version}" in
+      0.*) vlog "SBT versions < 1.0 do not have published MD5 checksums, skipping check"; echo "" ;;
+        *) verify_sbt_jar "${sbt_jar}" ;;
+    esac
   }
+}
+
+verify_sbt_jar() {
+  local jar="${1}"
+  local md5="${jar}.md5"
+
+  download_url "$(make_url "${sbt_version}").md5" "${md5}" > /dev/null 2>&1
+
+  if command -v md5sum > /dev/null 2>&1; then
+    if echo "$(cat "${md5}")  ${jar}" | md5sum -c -; then
+      rm -rf "${md5}"
+      return 0
+    else
+      echoerr "Checksum does not match"
+      return 1
+    fi
+  elif command -v md5 > /dev/null 2>&1; then
+    if [ "$(md5 -q "${jar}")" == "$(cat "${md5}")" ]; then
+      rm -rf "${md5}"
+      return 0
+    else
+      echoerr "Checksum does not match"
+      return 1
+    fi
+  elif command -v openssl > /dev/null 2>&1; then
+    if [ "$(openssl md5 -r "${jar}" | awk '{print $1}')" == "$(cat "${md5}")" ]; then
+      rm -rf "${md5}"
+      return 0
+    else
+      echoerr "Checksum does not match"
+      return 1
+    fi
+  else
+    echoerr "Could not find an MD5 command"
+    return 1
+  fi
 }
 
 usage () {
@@ -497,7 +540,7 @@ EOM
 # no jar? download it.
 [[ -r "$sbt_jar" ]] || acquire_sbt_jar || {
   # still no jar? uh-oh.
-  echo "Download failed. Obtain the jar manually and place it at $sbt_jar"
+  echo "Could not download and verify the launcher. Obtain the jar manually and place it at $sbt_jar"
   exit 1
 }
 
