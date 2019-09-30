@@ -117,7 +117,7 @@ url_base () {
     0.*-[0-9][0-9][0-9][0-9][0-9][0-9][0-9][0-9]-[0-9][0-9][0-9][0-9][0-9][0-9]) # ie "*-yyyymmdd-hhMMss"
                echo "$sbt_launch_ivy_snapshot_repo" ;;
           0.*) echo "$sbt_launch_ivy_release_repo" ;;
-    *-[0-9][0-9][0-9][0-9][0-9][0-9][0-9][0-9]-[0-9][0-9][0-9][0-9][0-9][0-9]) # ie "*-yyyymmdd-hhMMss"
+    *-[0-9][0-9][0-9][0-9][0-9][0-9][0-9][0-9]T[0-9][0-9][0-9][0-9][0-9][0-9]) # ie "*-yyyymmddThhMMss"
                echo "$sbt_launch_mvn_snapshot_repo" ;;
             *) echo "$sbt_launch_mvn_release_repo" ;;
   esac
