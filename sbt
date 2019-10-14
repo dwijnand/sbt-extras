@@ -111,7 +111,7 @@ url_base () {
   local version="$1"
 
   case "$version" in
-        0.7.*) echo "https://simple-build-tool.googlecode.com" ;;
+        0.7.*) echo "https://storage.googleapis.com/google-code-archive-downloads/v2/code.google.com/simple-build-tool" ;;
       0.10.* ) echo "$sbt_launch_ivy_release_repo" ;;
     0.11.[12]) echo "$sbt_launch_ivy_release_repo" ;;
     0.*-[0-9][0-9][0-9][0-9][0-9][0-9][0-9][0-9]-[0-9][0-9][0-9][0-9][0-9][0-9]) # ie "*-yyyymmdd-hhMMss"
@@ -129,7 +129,7 @@ make_url () {
   local base="${sbt_launch_repo:-$(url_base "$version")}"
 
   case "$version" in
-        0.7.*) echo "$base/files/sbt-launch-0.7.7.jar" ;;
+        0.7.*) echo "$base/sbt-launch-0.7.7.jar" ;;
       0.10.* ) echo "$base/org.scala-tools.sbt/sbt-launch/$version/sbt-launch.jar" ;;
     0.11.[12]) echo "$base/org.scala-tools.sbt/sbt-launch/$version/sbt-launch.jar" ;;
           0.*) echo "$base/org.scala-sbt/sbt-launch/$version/sbt-launch.jar" ;;
