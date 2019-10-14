@@ -166,9 +166,9 @@ getJavaVersion() {
 
   # java -version on java8 says 1.8.x
   # but on 9 and 10 it's 9.x.y and 10.x.y.
-  if [[ "$str" =~ ^1\.([0-9]+)\..*$ ]]; then
+  if [[ "$str" =~ ^1\.([0-9]+)(\..*)?$ ]]; then
     echo "${BASH_REMATCH[1]}"
-  elif [[ "$str" =~ ^([0-9]+)\..*$ ]]; then
+  elif [[ "$str" =~ ^([0-9]+)(\..*)?$ ]]; then
     echo "${BASH_REMATCH[1]}"
   elif [[ -n "$str" ]]; then
     echoerr "Can't parse java version from: $str"
