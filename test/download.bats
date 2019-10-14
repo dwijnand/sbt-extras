@@ -27,7 +27,7 @@ stub_md5sum() { stub md5sum 'true'; }
 
 launcher_url () {
   case "$1" in
-    0.7.*) echo "https://simple-build-tool.googlecode.com/files/sbt-launch-$1.jar" ;;
+    0.7.*) echo "https://storage.googleapis.com/google-code-archive-downloads/v2/code.google.com/simple-build-tool/sbt-launch-$1.jar" ;;
    0.10.*) echo "https://repo.typesafe.com/typesafe/ivy-releases/org.scala-tools.sbt/sbt-launch/$1/sbt-launch.jar" ;;
       1.*) echo "https://repo.scala-sbt.org/scalasbt/maven-releases/org/scala-sbt/sbt-launch/$1/sbt-launch-$1.jar" ;;
         *) echo "https://repo.typesafe.com/typesafe/ivy-releases/org.scala-sbt/sbt-launch/$1/sbt-launch.jar" ;;
