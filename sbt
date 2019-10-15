@@ -41,14 +41,14 @@ declare -a java_args scalac_args sbt_commands residual_args
 # args to jvm/sbt via files or environment variables
 declare -a extra_jvm_opts extra_sbt_opts
 
-echoerr()  { echo >&2 "$@"; }
-vlog()     { [[ -n "$verbose" ]] && echoerr "$@"; }
-die()      {
-  echo            "Aborting: $*"
-  exit                                  1
+echoerr() { echo >&2 "$@"; }
+vlog()    { [[ -n "$verbose" ]] && echoerr "$@"; }
+die()     {
+  echo "Aborting: $*"
+  exit 1
 }
 
-setTrapExit()  {
+setTrapExit() {
   # save stty and trap exit, to ensure echo is re-enabled if we are interrupted.
   SBT_STTY="$(stty -g 2>/dev/null)"
   export SBT_STTY
@@ -67,10 +67,10 @@ setTrapExit()  {
 
 # this seems to cover the bases on OSX, and someone will
 # have to tell me about the others.
-get_script_path()  {
+get_script_path() {
   local path="$1"
   [[ -L "$path" ]] || {
-    echo                     "$path"
+    echo "$path"
     return
   }
 
@@ -87,7 +87,7 @@ declare -r script_path
 script_name="${script_path##*/}"
 declare -r script_name
 
-init_default_option_file()  {
+init_default_option_file() {
   local overriding_var="${!1}"
   local default_file="$2"
   if [[ ! -r "$default_file" && "$overriding_var" =~ ^@(.*)$ ]]; then
@@ -102,18 +102,18 @@ init_default_option_file()  {
 sbt_opts_file="$(init_default_option_file SBT_OPTS .sbtopts)"
 jvm_opts_file="$(init_default_option_file JVM_OPTS .jvmopts)"
 
-build_props_sbt()  {
+build_props_sbt() {
   [[ -r "$buildProps" ]] &&
     grep '^sbt\.version' "$buildProps" | tr '=\r' ' ' | awk '{ print $2; }'
 }
 
-set_sbt_version()  {
+set_sbt_version() {
   sbt_version="${sbt_explicit_version:-$(build_props_sbt)}"
   [[ -n "$sbt_version" ]] || sbt_version=$sbt_release_version
   export sbt_version
 }
 
-url_base()  {
+url_base() {
   local version="$1"
 
   case "$version" in
@@ -129,7 +129,7 @@ url_base()  {
   esac
 }
 
-make_url()  {
+make_url() {
   local version="$1"
 
   local base="${sbt_launch_repo:-$(url_base "$version")}"
@@ -144,36 +144,36 @@ make_url()  {
 }
 
 addJava()      {
-  vlog                "[addJava] arg = '$1'"
+  vlog "[addJava] arg = '$1'"
   java_args+=("$1")
 }
 addSbt()       {
-  vlog                "[addSbt] arg = '$1'"
+  vlog "[addSbt] arg = '$1'"
   sbt_commands+=("$1")
 }
 addScalac()    {
-  vlog                "[addScalac] arg = '$1'"
+  vlog "[addScalac] arg = '$1'"
   scalac_args+=("$1")
 }
 addResidual()  {
-  vlog                "[residual] arg = '$1'"
+  vlog "[residual] arg = '$1'"
   residual_args+=("$1")
 }
 
-addResolver()  { addSbt "set resolvers += $1"; }
+addResolver() { addSbt "set resolvers += $1"; }
 
-addDebugger()  { addJava "-Xdebug" && addJava "-Xrunjdwp:transport=dt_socket,server=y,suspend=n,address=$1"; }
+addDebugger() { addJava "-Xdebug" && addJava "-Xrunjdwp:transport=dt_socket,server=y,suspend=n,address=$1"; }
 
-setThisBuild()  {
+setThisBuild() {
   vlog "[addBuild] args = '$*'"
   local key="$1" && shift
   addSbt "set $key in ThisBuild := $*"
 }
-setScalaVersion()  {
+setScalaVersion() {
   [[ "$1" == *"-SNAPSHOT" ]] && addResolver 'Resolver.sonatypeRepo("snapshots")'
   addSbt "++ $1"
 }
-setJavaHome()  {
+setJavaHome() {
   java_cmd="$1/bin/java"
   setThisBuild javaHome "_root_.scala.Some(file(\"$1\"))"
   export JAVA_HOME="$1"
@@ -198,8 +198,8 @@ getJavaVersion() {
 checkJava() {
   # Warn if there is a Java version mismatch between PATH and JAVA_HOME/JDK_HOME
 
-  [[ -n "$JAVA_HOME" && -e "$JAVA_HOME/bin/java"     ]] && java="$JAVA_HOME/bin/java"
-  [[ -n "$JDK_HOME" && -e "$JDK_HOME/lib/tools.jar"  ]] && java="$JDK_HOME/bin/java"
+  [[ -n "$JAVA_HOME" && -e "$JAVA_HOME/bin/java"    ]] && java="$JAVA_HOME/bin/java"
+  [[ -n "$JDK_HOME" && -e "$JDK_HOME/lib/tools.jar" ]] && java="$JDK_HOME/bin/java"
 
   if [[ -n "$java" ]]; then
     pathJavaVersion=$(getJavaVersion java)
@@ -213,14 +213,14 @@ checkJava() {
   fi
 }
 
-java_version()  {
+java_version() {
   local -r version=$(getJavaVersion "$java_cmd")
   vlog "Detected Java version: $version"
   echo "$version"
 }
 
 # MaxPermSize critical on pre-8 JVMs but incurs noisy warning on 8+
-default_jvm_opts()  {
+default_jvm_opts() {
   local -r v="$(java_version)"
   if [[ $v -ge 8 ]]; then
     echo "$default_jvm_opts_common"
@@ -229,7 +229,7 @@ default_jvm_opts()  {
   fi
 }
 
-build_props_scala()  {
+build_props_scala() {
   if [[ -r "$buildProps" ]]; then
     versionLine="$(grep '^build.scala.versions' "$buildProps")"
     versionString="${versionLine##build.scala.versions=}"
@@ -237,7 +237,7 @@ build_props_scala()  {
   fi
 }
 
-execRunner()  {
+execRunner() {
   # print the arguments one to a line, quoting any containing spaces
   vlog "# Executing command line:" && {
     for arg; do
@@ -261,30 +261,30 @@ execRunner()  {
   fi
 }
 
-jar_url()  { make_url "$1"; }
+jar_url() { make_url "$1"; }
 
-is_cygwin()  { [[ "$(uname -a)" == "CYGWIN"* ]]; }
+is_cygwin() { [[ "$(uname -a)" == "CYGWIN"* ]]; }
 
-jar_file()  {
+jar_file() {
   is_cygwin &&
-    cygpath  -w "$sbt_launch_dir/$1/sbt-launch.jar" ||
-    echo  "$sbt_launch_dir/$1/sbt-launch.jar"
+    cygpath -w "$sbt_launch_dir/$1/sbt-launch.jar" ||
+    echo "$sbt_launch_dir/$1/sbt-launch.jar"
 }
 
-download_url()  {
+download_url() {
   local url="$1"
   local jar="$2"
 
   mkdir -p "${jar%/*}" && {
-    if command -v curl >/dev/null  2>&1; then
+    if command -v curl >/dev/null 2>&1; then
       curl --fail --silent --location "$url" --output "$jar"
-    elif command -v wget >/dev/null  2>&1; then
+    elif command -v wget >/dev/null 2>&1; then
       wget -q -O "$jar" "$url"
     fi
   } && [[ -r "$jar" ]]
 }
 
-acquire_sbt_jar()  {
+acquire_sbt_jar() {
   {
     sbt_jar="$(jar_file "$sbt_version")"
     [[ -r "$sbt_jar" ]]
@@ -303,8 +303,8 @@ acquire_sbt_jar()  {
 
     case "${sbt_version}" in
       0.*)
-        vlog    "SBT versions < 1.0 do not have published MD5 checksums, skipping check"
-        echo                                                                                   ""
+        vlog "SBT versions < 1.0 do not have published MD5 checksums, skipping check"
+        echo ""
         ;;
       *)   verify_sbt_jar "${sbt_jar}" ;;
     esac
@@ -315,9 +315,9 @@ verify_sbt_jar() {
   local jar="${1}"
   local md5="${jar}.md5"
 
-  download_url "$(make_url "${sbt_version}").md5" "${md5}" >/dev/null  2>&1
+  download_url "$(make_url "${sbt_version}").md5" "${md5}" >/dev/null 2>&1
 
-  if command -v md5sum >/dev/null  2>&1; then
+  if command -v md5sum >/dev/null 2>&1; then
     if echo "$(cat "${md5}")  ${jar}" | md5sum -c -; then
       rm -rf "${md5}"
       return 0
@@ -325,7 +325,7 @@ verify_sbt_jar() {
       echoerr "Checksum does not match"
       return 1
     fi
-  elif command -v md5 >/dev/null  2>&1; then
+  elif command -v md5 >/dev/null 2>&1; then
     if [ "$(md5 -q "${jar}")" == "$(cat "${md5}")" ]; then
       rm -rf "${md5}"
       return 0
@@ -333,7 +333,7 @@ verify_sbt_jar() {
       echoerr "Checksum does not match"
       return 1
     fi
-  elif command -v openssl >/dev/null  2>&1; then
+  elif command -v openssl >/dev/null 2>&1; then
     if [ "$(openssl md5 -r "${jar}" | awk '{print $1}')" == "$(cat "${md5}")" ]; then
       rm -rf "${md5}"
       return 0
@@ -347,7 +347,7 @@ verify_sbt_jar() {
   fi
 }
 
-usage()  {
+usage() {
   set_sbt_version
   cat <<EOM
 Usage: $script_name [options]
@@ -423,8 +423,8 @@ EOM
   exit 0
 }
 
-process_args()  {
-  require_arg()  {
+process_args() {
+  require_arg() {
     local type="$1"
     local opt="$2"
     local arg="$3"
@@ -526,8 +526,8 @@ checkJava
 # only exists in 0.12+
 setTraceLevel() {
   case "$sbt_version" in
-    "0.7."* | "0.10."* | "0.11."*)  echoerr "Cannot set trace level in sbt version $sbt_version" ;;
-    *)                              setThisBuild traceLevel "$trace_level" ;;
+    "0.7."* | "0.10."* | "0.11."*) echoerr "Cannot set trace level in sbt version $sbt_version" ;;
+    *)                             setThisBuild traceLevel "$trace_level" ;;
   esac
 }
 
@@ -541,7 +541,7 @@ if [[ -n "$sbt_script" ]]; then
   residual_args=("$sbt_script" "${residual_args[@]}")
 else
   # no args - alert them there's stuff in here
-  ((argumentCount > 0))   || {
+  ((argumentCount > 0)) || {
     vlog "Starting $script_name: invoke with -help for other options"
     residual_args=(shell)
   }
@@ -606,7 +606,7 @@ fi
 # traceLevel is 0.12+
 [[ -n "$trace_level" ]] && setTraceLevel
 
-main()  {
+main() {
   execRunner "$java_cmd" \
     "${extra_jvm_opts[@]}" \
     "${java_args[@]}" \
@@ -621,10 +621,10 @@ main()  {
 # Unfortunately that makes it that much harder to work with when
 # we're not going to print those lines anyway. We strip that bit of
 # line noise, but leave the other codes to preserve color.
-mainFiltered()  {
+mainFiltered() {
   local -r excludeRegex=$(grep -E -v '^#|^$' ~/.sbtignore | paste -sd'|' -)
 
-  echoLine()  {
+  echoLine() {
     local -r line="$1"
     local -r line1="${line//\r\x1BM\x1B\[2K//g}"       # This strips the OverwriteLine code.
     local -r line2="${line1//\x1B\[[0-9;]*[JKmsu]//g}" # This strips all codes - we test regexes against this.
@@ -644,7 +644,7 @@ mainFiltered()  {
 # Obviously this is super ad hoc but I don't know how to improve on it. Testing whether
 # stdin is a terminal is useless because most of my use cases for this filtering are
 # exactly when I'm at a terminal, running sbt non-interactively.
-shouldFilter()  { [[ -f ~/.sbtignore ]] && ! grep -E -q '\b(shell|console|consoleProject)\b' <<<"${residual_args[@]}"; }
+shouldFilter() { [[ -f ~/.sbtignore ]] && ! grep -E -q '\b(shell|console|consoleProject)\b' <<<"${residual_args[@]}"; }
 
 # run sbt
 if shouldFilter; then mainFiltered; else main; fi
