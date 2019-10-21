@@ -143,7 +143,9 @@ addScalac ()   { vlog "[addScalac] arg = '$1'" ;   scalac_args+=("$1"); }
 addResidual () { vlog "[residual] arg = '$1'"  ; residual_args+=("$1"); }
 
 addResolver () { addSbt "set resolvers += $1"; }
-addDebugger () { addJava "-Xdebug" ; addJava "-Xrunjdwp:transport=dt_socket,server=y,suspend=n,address=$1"; }
+
+addDebugger () { addJava "-Xdebug" && addJava "-Xrunjdwp:transport=dt_socket,server=y,suspend=n,address=$1"; }
+
 setThisBuild () {
   vlog "[addBuild] args = '$*'"
   local key="$1" && shift
@@ -241,7 +243,7 @@ execRunner () {
   fi
 }
 
-jar_url ()  { make_url "$1"; }
+jar_url () { make_url "$1"; }
 
 is_cygwin () { [[ "$(uname -a)" == "CYGWIN"* ]]; }
 
@@ -359,44 +361,45 @@ runner with the -x option.
   -script <file>     Run the specified file as a scala script
 
   # sbt version (default: sbt.version from $buildProps if present, otherwise $sbt_release_version)
-  -sbt-force-latest         force the use of the latest release of sbt: $sbt_release_version
-  -sbt-version  <version>   use the specified version of sbt (default: $sbt_release_version)
-  -sbt-dev                  use the latest pre-release version of sbt: $sbt_unreleased_version
-  -sbt-jar      <path>      use the specified jar as the sbt launcher
-  -sbt-launch-dir <path>    directory to hold sbt launchers (default: $sbt_launch_dir)
-  -sbt-launch-repo <url>    repo url for downloading sbt launcher jar (default: $(url_base "$sbt_version"))
+  -sbt-version <version>  use the specified version of sbt (default: $sbt_release_version)
+  -sbt-force-latest       force the use of the latest release of sbt: $sbt_release_version
+  -sbt-dev                use the latest pre-release version of sbt: $sbt_unreleased_version
+  -sbt-jar      <path>    use the specified jar as the sbt launcher
+  -sbt-launch-dir <path>  directory to hold sbt launchers (default: $sbt_launch_dir)
+  -sbt-launch-repo <url>  repo url for downloading sbt launcher jar (default: $(url_base "$sbt_version"))
 
   # scala version (default: as chosen by sbt)
-  -28                       use $latest_28
-  -29                       use $latest_29
-  -210                      use $latest_210
-  -211                      use $latest_211
-  -212                      use $latest_212
-  -213                      use $latest_213
-  -scala-home <path>        use the scala build at the specified directory
-  -scala-version <version>  use the specified version of scala
-  -binary-version <version> use the specified scala version when searching for dependencies
+  -28                        use $latest_28
+  -29                        use $latest_29
+  -210                       use $latest_210
+  -211                       use $latest_211
+  -212                       use $latest_212
+  -213                       use $latest_213
+  -scala-home <path>         use the scala build at the specified directory
+  -scala-version <version>   use the specified version of scala
+  -binary-version <version>  use the specified scala version when searching for dependencies
 
   # java version (default: java from PATH, currently $(java -version 2>&1 | grep version))
-  -java-home <path>         alternate JAVA_HOME
+  -java-home <path>          alternate JAVA_HOME
 
   # passing options to the jvm - note it does NOT use JAVA_OPTS due to pollution
   # The default set is used if JVM_OPTS is unset and no -jvm-opts file is found
-  <default>        $(default_jvm_opts)
-  JVM_OPTS         environment variable holding either the jvm args directly, or
-                   the reference to a file containing jvm args if given path is prepended by '@' (e.g. '@/etc/jvmopts')
-                   Note: "@"-file is overridden by local '.jvmopts' or '-jvm-opts' argument.
-  -jvm-opts <path> file containing jvm args (if not given, .jvmopts in project root is used if present)
-  -Dkey=val        pass -Dkey=val directly to the jvm
-  -J-X             pass option -X directly to the jvm (-J is stripped)
+  <default>         $(default_jvm_opts)
+  JVM_OPTS          environment variable holding either the jvm args directly, or
+                    the reference to a file containing jvm args if given path is prepended by '@' (e.g. '@/etc/jvmopts')
+                    Note: "@"-file is overridden by local '.jvmopts' or '-jvm-opts' argument.
+  -jvm-opts <path>  file containing jvm args (if not given, .jvmopts in project root is used if present)
+  -Dkey=val         pass -Dkey=val directly to the jvm
+  -J-X              pass option -X directly to the jvm (-J is stripped)
 
   # passing options to sbt, OR to this runner
-  SBT_OPTS         environment variable holding either the sbt args directly, or
-                   the reference to a file containing sbt args if given path is prepended by '@' (e.g. '@/etc/sbtopts')
-                   Note: "@"-file is overridden by local '.sbtopts' or '-sbt-opts' argument.
-  -sbt-opts <path> file containing sbt args (if not given, .sbtopts in project root is used if present)
-  -S-X             add -X to sbt's scalacOptions (-S is stripped)
+  SBT_OPTS          environment variable holding either the sbt args directly, or
+                    the reference to a file containing sbt args if given path is prepended by '@' (e.g. '@/etc/sbtopts')
+                    Note: "@"-file is overridden by local '.sbtopts' or '-sbt-opts' argument.
+  -sbt-opts <path>  file containing sbt args (if not given, .sbtopts in project root is used if present)
+  -S-X              add -X to sbt's scalacOptions (-S is stripped)
 EOM
+  exit 0
 }
 
 process_args () {
@@ -411,32 +414,41 @@ process_args () {
   }
   while [[ $# -gt 0 ]]; do
     case "$1" in
-          -h|-help) usage; exit 0 ;;
+          -h|-help) usage ;;
                 -v) verbose=true && shift ;;
                 -d) addSbt "--debug" && shift ;;
                 -w) addSbt "--warn"  && shift ;;
                 -q) addSbt "--error" && shift ;;
                 -x) debugUs=true && shift ;;
             -trace) require_arg integer "$1" "$2" && trace_level="$2" && shift 2 ;;
-              -ivy) require_arg path "$1" "$2" && addJava "-Dsbt.ivy.home=$2" && shift 2 ;;
-        -no-colors) addJava "-Dsbt.log.noformat=true" && shift ;;
-         -no-share) noshare=true && shift ;;
-         -sbt-boot) require_arg path "$1" "$2" && addJava "-Dsbt.boot.directory=$2" && shift 2 ;;
-          -sbt-dir) require_arg path "$1" "$2" && sbt_dir="$2" && shift 2 ;;
         -debug-inc) addJava "-Dxsbt.inc.debug=true" && shift ;;
+
+        -no-colors) addJava "-Dsbt.log.noformat=true" && shift ;;
+       -sbt-create) sbt_create=true && shift ;;
+          -sbt-dir) require_arg path "$1" "$2" && sbt_dir="$2" && shift 2 ;;
+         -sbt-boot) require_arg path "$1" "$2" && addJava "-Dsbt.boot.directory=$2" && shift 2 ;;
+              -ivy) require_arg path "$1" "$2" && addJava "-Dsbt.ivy.home=$2" && shift 2 ;;
+         -no-share) noshare=true && shift ;;
           -offline) addSbt "set offline in Global := true" && shift ;;
         -jvm-debug) require_arg port "$1" "$2" && addDebugger "$2" && shift 2 ;;
             -batch) batch=true && shift ;;
            -prompt) require_arg "expr" "$1" "$2" && setThisBuild shellPrompt "(s => { val e = Project.extract(s) ; $2 })" && shift 2 ;;
            -script) require_arg file "$1" "$2" && sbt_script="$2" && addJava "-Dsbt.main.class=sbt.ScriptMain" && shift 2 ;;
 
-       -sbt-create) sbt_create=true && shift ;;
-          -sbt-jar) require_arg path "$1" "$2" && sbt_jar="$2" && shift 2 ;;
       -sbt-version) require_arg version "$1" "$2" && sbt_explicit_version="$2" && shift 2 ;;
  -sbt-force-latest) sbt_explicit_version="$sbt_release_version" && shift ;;
           -sbt-dev) sbt_explicit_version="$sbt_unreleased_version" && shift ;;
+          -sbt-jar) require_arg path "$1" "$2" && sbt_jar="$2" && shift 2 ;;
    -sbt-launch-dir) require_arg path "$1" "$2" && sbt_launch_dir="$2" && shift 2 ;;
   -sbt-launch-repo) require_arg path "$1" "$2" && sbt_launch_repo="$2" && shift 2 ;;
+
+               -28) setScalaVersion "$latest_28"  && shift ;;
+               -29) setScalaVersion "$latest_29"  && shift ;;
+              -210) setScalaVersion "$latest_210" && shift ;;
+              -211) setScalaVersion "$latest_211" && shift ;;
+              -212) setScalaVersion "$latest_212" && shift ;;
+              -213) setScalaVersion "$latest_213" && shift ;;
+
     -scala-version) require_arg version "$1" "$2" && setScalaVersion "$2" && shift 2 ;;
    -binary-version) require_arg version "$1" "$2" && setThisBuild scalaBinaryVersion "\"$2\"" && shift 2 ;;
        -scala-home) require_arg path "$1" "$2" && setThisBuild scalaHome "_root_.scala.Some(file(\"$2\"))" && shift 2 ;;
@@ -447,13 +459,9 @@ process_args () {
                -D*) addJava "$1" && shift ;;
                -J*) addJava "${1:2}" && shift ;;
                -S*) addScalac "${1:2}" && shift ;;
-               -28) setScalaVersion "$latest_28" && shift ;;
-               -29) setScalaVersion "$latest_29" && shift ;;
-              -210) setScalaVersion "$latest_210" && shift ;;
-              -211) setScalaVersion "$latest_211" && shift ;;
-              -212) setScalaVersion "$latest_212" && shift ;;
-              -213) setScalaVersion "$latest_213" && shift ;;
+
                new) sbt_new=true && : ${sbt_explicit_version:=$sbt_release_version} && addResidual "$1" && shift ;;
+
                  *) addResidual "$1" && shift ;;
     esac
   done

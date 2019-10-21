@@ -99,41 +99,41 @@ runner with the -x option.
   -script <file>     Run the specified file as a scala script
 
   # sbt version (default: sbt.version from project/build.properties if present, otherwise 1.3.3)
-  -sbt-force-latest         force the use of the latest release of sbt: 1.3.3
-  -sbt-version  <version>   use the specified version of sbt (default: 1.3.3)
-  -sbt-dev                  use the latest pre-release version of sbt: 1.3.3
-  -sbt-jar      <path>      use the specified jar as the sbt launcher
-  -sbt-launch-dir <path>    directory to hold sbt launchers (default: ~/.sbt/launchers)
-  -sbt-launch-repo <url>    repo url for downloading sbt launcher jar (default: http://repo.scala-sbt.org/scalasbt/maven-releases)
+  -sbt-version <version>  use the specified version of sbt (default: 1.3.3)
+  -sbt-force-latest       force the use of the latest release of sbt: 1.3.3
+  -sbt-dev                use the latest pre-release version of sbt: 1.3.3
+  -sbt-jar      <path>    use the specified jar as the sbt launcher
+  -sbt-launch-dir <path>  directory to hold sbt launchers (default: ~/.sbt/launchers)
+  -sbt-launch-repo <url>  repo url for downloading sbt launcher jar (default: http://repo.scala-sbt.org/scalasbt/maven-releases)
 
   # scala version (default: as chosen by sbt)
-  -28                       use 2.8.2
-  -29                       use 2.9.3
-  -210                      use 2.10.7
-  -211                      use 2.11.12
-  -212                      use 2.12.10
-  -213                      use 2.13.1
-  -scala-home <path>        use the scala build at the specified directory
-  -scala-version <version>  use the specified version of scala
-  -binary-version <version> use the specified scala version when searching for dependencies
+  -28                        use 2.8.2
+  -29                        use 2.9.3
+  -210                       use 2.10.7
+  -211                       use 2.11.12
+  -212                       use 2.12.10
+  -213                       use 2.13.1
+  -scala-home <path>         use the scala build at the specified directory
+  -scala-version <version>   use the specified version of scala
+  -binary-version <version>  use the specified scala version when searching for dependencies
 
   # java version (default: java from PATH, currently java version "1.8.0_202-ea")
-  -java-home <path>         alternate JAVA_HOME
+  -java-home <path>          alternate JAVA_HOME
 
   # passing options to the jvm - note it does NOT use JAVA_OPTS due to pollution
   # The default set is used if JVM_OPTS is unset and no -jvm-opts file is found
-  <default>        -Xms512m -Xss2m
-  JVM_OPTS         environment variable holding either the jvm args directly, or
-                   the reference to a file containing jvm args if given path is prepended by '@' (e.g. '@/etc/jvmopts')
-                   Note: "@"-file is overridden by local '.jvmopts' or '-jvm-opts' argument.
-  -jvm-opts <path> file containing jvm args (if not given, .jvmopts in project root is used if present)
-  -Dkey=val        pass -Dkey=val directly to the jvm
-  -J-X             pass option -X directly to the jvm (-J is stripped)
+  <default>         -Xms512m -Xss2m
+  JVM_OPTS          environment variable holding either the jvm args directly, or
+                    the reference to a file containing jvm args if given path is prepended by '@' (e.g. '@/etc/jvmopts')
+                    Note: "@"-file is overridden by local '.jvmopts' or '-jvm-opts' argument.
+  -jvm-opts <path>  file containing jvm args (if not given, .jvmopts in project root is used if present)
+  -Dkey=val         pass -Dkey=val directly to the jvm
+  -J-X              pass option -X directly to the jvm (-J is stripped)
 
   # passing options to sbt, OR to this runner
-  SBT_OPTS         environment variable holding either the sbt args directly, or
-                   the reference to a file containing sbt args if given path is prepended by '@' (e.g. '@/etc/sbtopts')
-                   Note: "@"-file is overridden by local '.sbtopts' or '-sbt-opts' argument.
-  -sbt-opts <path> file containing sbt args (if not given, .sbtopts in project root is used if present)
-  -S-X             add -X to sbt's scalacOptions (-S is stripped)
+  SBT_OPTS          environment variable holding either the sbt args directly, or
+                    the reference to a file containing sbt args if given path is prepended by '@' (e.g. '@/etc/sbtopts')
+                    Note: "@"-file is overridden by local '.sbtopts' or '-sbt-opts' argument.
+  -sbt-opts <path>  file containing sbt args (if not given, .sbtopts in project root is used if present)
+  -S-X              add -X to sbt's scalacOptions (-S is stripped)
 ```
