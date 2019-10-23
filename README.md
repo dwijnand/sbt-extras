@@ -74,12 +74,6 @@ options to this runner use a single dash. Any sbt command can be scheduled
 to run first by prefixing the command with --, so --warn, --error and so on
 are not special.
 
-Output filtering: if there is a file in the home directory called .sbtignore
-and this is not an interactive sbt session, the file is treated as a list of
-bash regular expressions. Output lines which match any regex are not echoed.
-One can see exactly which lines would have been suppressed by starting this
-runner with the -x option.
-
   -h | -help         print this message
   -v                 verbose operation (this runner is chattier)
   -d, -w, -q         aliases for --debug, --warn, --error (q means quiet)

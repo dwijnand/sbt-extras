@@ -29,7 +29,6 @@ declare -r noshare_opts="-Dsbt.global.base=project/.sbtboot -Dsbt.boot.directory
 declare sbt_jar sbt_dir sbt_create sbt_version sbt_script sbt_new
 declare sbt_explicit_version
 declare verbose noshare batch trace_level
-declare debugUs
 
 declare java_cmd="java"
 declare sbt_launch_dir="$HOME/.sbt/launchers"
@@ -357,12 +356,6 @@ options to this runner use a single dash. Any sbt command can be scheduled
 to run first by prefixing the command with --, so --warn, --error and so on
 are not special.
 
-Output filtering: if there is a file in the home directory called .sbtignore
-and this is not an interactive sbt session, the file is treated as a list of
-bash regular expressions. Output lines which match any regex are not echoed.
-One can see exactly which lines would have been suppressed by starting this
-runner with the -x option.
-
   -h | -help         print this message
   -v                 verbose operation (this runner is chattier)
   -d, -w, -q         aliases for --debug, --warn, --error (q means quiet)
@@ -440,7 +433,7 @@ process_args() {
       -d)           addSbt "--debug" && shift ;;
       -w)           addSbt "--warn"  && shift ;;
       -q)           addSbt "--error" && shift ;;
-      -x)           debugUs=true && shift ;;
+      -x)           shift ;; # currently unused
       -trace)       require_arg integer "$1" "$2" && trace_level="$2" && shift 2 ;;
       -debug-inc)   addJava "-Dxsbt.inc.debug=true" && shift ;;
 
@@ -606,45 +599,9 @@ fi
 # traceLevel is 0.12+
 [[ -n "$trace_level" ]] && setTraceLevel
 
-main() {
-  execRunner "$java_cmd" \
-    "${extra_jvm_opts[@]}" \
-    "${java_args[@]}" \
-    -jar "$sbt_jar" \
-    "${sbt_commands[@]}" \
-    "${residual_args[@]}"
-}
-
-# sbt inserts this string on certain lines when formatting is enabled:
-#   val OverwriteLine = "\r\u001BM\u001B[2K"
-# ...in order not to spam the console with a million "Resolving" lines.
-# Unfortunately that makes it that much harder to work with when
-# we're not going to print those lines anyway. We strip that bit of
-# line noise, but leave the other codes to preserve color.
-mainFiltered() {
-  local -r excludeRegex=$(grep -E -v '^#|^$' ~/.sbtignore | paste -sd'|' -)
-
-  echoLine() {
-    local -r line="$1"
-    local -r line1="${line//\r\x1BM\x1B\[2K//g}"       # This strips the OverwriteLine code.
-    local -r line2="${line1//\x1B\[[0-9;]*[JKmsu]//g}" # This strips all codes - we test regexes against this.
-
-    if [[ $line2 =~ $excludeRegex ]]; then
-      [[ -n $debugUs ]] && echo "[X] $line1"
-    else
-      [[ -n $debugUs ]] && echo "    $line1" || echo "$line1"
-    fi
-  }
-
-  echoLine "Starting sbt with output filtering enabled."
-  main | while read -r line; do echoLine "$line"; done
-}
-
-# Only filter if there's a filter file and we don't see a known interactive command.
-# Obviously this is super ad hoc but I don't know how to improve on it. Testing whether
-# stdin is a terminal is useless because most of my use cases for this filtering are
-# exactly when I'm at a terminal, running sbt non-interactively.
-shouldFilter() { [[ -f ~/.sbtignore ]] && ! grep -E -q '\b(shell|console|consoleProject)\b' <<<"${residual_args[@]}"; }
-
-# run sbt
-if shouldFilter; then mainFiltered; else main; fi
+execRunner "$java_cmd" \
+  "${extra_jvm_opts[@]}" \
+  "${java_args[@]}" \
+  -jar "$sbt_jar" \
+  "${sbt_commands[@]}" \
+  "${residual_args[@]}"
