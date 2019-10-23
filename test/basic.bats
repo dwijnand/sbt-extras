@@ -10,6 +10,7 @@ load test_helper
 java
 -Xms512m
 -Xss2m
+-XX:MaxInlineLevel=18
 -jar
 \$ROOT/.sbt/launchers/$sbt_release/sbt-launch.jar
 shell
