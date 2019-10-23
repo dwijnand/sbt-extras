@@ -29,7 +29,6 @@ declare -r noshare_opts="-Dsbt.global.base=project/.sbtboot -Dsbt.boot.directory
 declare sbt_jar sbt_dir sbt_create sbt_version sbt_script sbt_new
 declare sbt_explicit_version
 declare verbose noshare batch trace_level
-declare debugUs
 
 declare java_cmd="java"
 declare sbt_launch_dir="$HOME/.sbt/launchers"
@@ -434,7 +433,7 @@ process_args() {
       -d)           addSbt "--debug" && shift ;;
       -w)           addSbt "--warn"  && shift ;;
       -q)           addSbt "--error" && shift ;;
-      -x)           debugUs=true && shift ;;
+      -x)           shift ;; # currently unused
       -trace)       require_arg integer "$1" "$2" && trace_level="$2" && shift 2 ;;
       -debug-inc)   addJava "-Dxsbt.inc.debug=true" && shift ;;
 
