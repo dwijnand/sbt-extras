@@ -47,14 +47,39 @@ no_properties_and_fetch ()               { assert_no_properties && fetch_launche
 
 fetch_launcher () {
   local version="$1" && shift
-  stub_curl "${version}"
-  run sbt "$@"
-  assert_success
-  assert_output <<EOS
+
+  jar_output=$(cat <<EOS
 Downloading sbt launcher for $version:
   From  $(launcher_url $version)
     To  $TEST_ROOT/.sbt/launchers/$version/sbt-launch.jar
 EOS
+)
+  md5_output=$(cat <<EOS
+Downloading sbt launcher $version md5 hash:
+  From  $(launcher_url $version).md5
+    To  $TEST_ROOT/.sbt/launchers/$version/sbt-launch.jar.md5
+EOS
+)
+
+  local output_text
+  # the md5 hash gets added only for sbt 1.x
+  case "${version}" in
+    0.*)
+      output_text="${jar_output}"
+      ;;
+    *)
+      output_text=$(cat <<EOS
+${jar_output}
+${md5_output}
+EOS
+)
+    ;;
+  esac
+
+  stub_curl "${version}"
+  run sbt "$@"
+  assert_success
+  assert_output "${output_text}"
   unstub curl
 }
 
@@ -92,6 +117,9 @@ EOS
 Downloading sbt launcher for $sbt_release:
   From  $(launcher_url $sbt_release)
     To  $TEST_ROOT/.sbt/launchers/$sbt_release/sbt-launch.jar
+Downloading sbt launcher $sbt_release md5 hash:
+  From  $(launcher_url $sbt_release).md5
+    To  $TEST_ROOT/.sbt/launchers/$sbt_release/sbt-launch.jar.md5
 EOS
   unstub curl
 }
@@ -105,6 +133,9 @@ EOS
 Downloading sbt launcher for $sbt_dev:
   From  $(launcher_url $sbt_dev)
     To  $TEST_ROOT/.sbt/launchers/$sbt_dev/sbt-launch.jar
+Downloading sbt launcher $sbt_dev md5 hash:
+  From  $(launcher_url $sbt_dev).md5
+    To  $TEST_ROOT/.sbt/launchers/$sbt_dev/sbt-launch.jar.md5
 EOS
   unstub curl
 }
@@ -142,6 +173,9 @@ EOS
 Downloading sbt launcher for $sbt_1:
   From  $(launcher_url $sbt_1)
     To  ${sbt_project}/xsbt/$sbt_1/sbt-launch.jar
+Downloading sbt launcher $sbt_1 md5 hash:
+  From  $(launcher_url $sbt_1).md5
+    To  ${sbt_project}/xsbt/$sbt_1/sbt-launch.jar.md5
 EOS
   unstub curl
 }
@@ -155,6 +189,9 @@ EOS
 Downloading sbt launcher for $sbt_1:
   From  https://127.0.0.1:8080/ivy-releases/org/scala-sbt/sbt-launch/$sbt_1/sbt-launch-$sbt_1.jar
     To  $TEST_ROOT/.sbt/launchers/$sbt_1/sbt-launch.jar
+Downloading sbt launcher $sbt_1 md5 hash:
+  From  https://127.0.0.1:8080/ivy-releases/org/scala-sbt/sbt-launch/$sbt_1/sbt-launch-$sbt_1.jar.md5
+    To  $TEST_ROOT/.sbt/launchers/$sbt_1/sbt-launch.jar.md5
 EOS
   unstub curl
 }

@@ -315,8 +315,13 @@ acquire_sbt_jar() {
 verify_sbt_jar() {
   local jar="${1}"
   local md5="${jar}.md5"
+  md5url="$(make_url "${sbt_version}").md5"
 
-  download_url "$(make_url "${sbt_version}").md5" "${md5}" >/dev/null 2>&1
+  echoerr "Downloading sbt launcher ${sbt_version} md5 hash:"
+  echoerr "  From  ${md5url}"
+  echoerr "    To  ${md5}"
+
+  download_url "${md5url}" "${md5}" >/dev/null 2>&1
 
   if command -v md5sum >/dev/null 2>&1; then
     if echo "$(cat "${md5}")  ${jar}" | md5sum -c -; then
