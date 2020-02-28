@@ -20,4 +20,5 @@ load test_helper
   sbt_expecting "-Dsbt.global.base=project/.sbtboot" -no-share
   sbt_expecting "-Dsbt.boot.directory=project/.boot" -no-share
   sbt_expecting "-Dsbt.ivy.home=project/.ivy" -no-share
+  sbt_expecting "-Dsbt.coursier.home=project/.coursier" -no-share
 }
