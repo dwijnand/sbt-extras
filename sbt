@@ -230,14 +230,6 @@ default_jvm_opts() {
   fi
 }
 
-build_props_scala() {
-  if [[ -r "$buildProps" ]]; then
-    versionLine="$(grep '^build.scala.versions' "$buildProps")"
-    versionString="${versionLine##build.scala.versions=}"
-    echo "${versionString%% .*}"
-  fi
-}
-
 execRunner() {
   # print the arguments one to a line, quoting any containing spaces
   vlog "# Executing command line:" && {
