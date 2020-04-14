@@ -99,7 +99,7 @@ init_default_option_file() {
 }
 
 sbt_opts_file="$(init_default_option_file SBT_OPTS .sbtopts)"
-sbt_extras_opts_file="$(init_default_option_file SBT_EXTRAS_OPTS .sbtxopts)"
+sbt_x_opts_file="$(init_default_option_file SBT_X_OPTS .sbtxopts)"
 jvm_opts_file="$(init_default_option_file JVM_OPTS .jvmopts)"
 
 build_props_sbt() {
@@ -414,10 +414,10 @@ are not special.
   -S-X              add -X to sbt's scalacOptions (-S is stripped)
 
   # passing options exclusively to this runner
-  SBT_EXTRAS_OPTS           environment variable holding either the sbt-extras args directly, or
-                            the reference to a file containing sbt-extras args if given path is prepended by '@' (e.g. '@/etc/sbtextrasopts')
-                            Note: "@"-file is overridden by local '.sbtxopts' or '-sbt-extras-opts' argument.
-  -sbt-extras-opts <path>   file containing sbt-extras args (if not given, .sbtxopts in project root is used if present)
+  SBT_X_OPTS         environment variable holding either the sbt-extras args directly, or
+                     the reference to a file containing sbt-extras args if given path is prepended by '@' (e.g. '@/etc/sbtxopts')
+                     Note: "@"-file is overridden by local '.sbtxopts' or '-sbt-x-opts' argument.
+  -sbt-x-opts <path> file containing sbt-extras args (if not given, .sbtxopts in project root is used if present)
 EOM
   exit 0
 }
@@ -474,7 +474,7 @@ process_args() {
       -scala-home)  require_arg path "$1" "$2" && setThisBuild scalaHome "_root_.scala.Some(file(\"$2\"))" && shift 2 ;;
       -java-home)   require_arg path "$1" "$2" && setJavaHome "$2" && shift 2 ;;
       -sbt-opts)    require_arg path "$1" "$2" && sbt_opts_file="$2" && shift 2 ;;
-      -sbt-extras-opts) require_arg path "$1" "$2" && sbt_extras_opts_file="$2" && shift 2 ;;
+      -sbt-x-opts) require_arg path "$1" "$2" && sbt_x_opts_file="$2" && shift 2 ;;
       -jvm-opts)    require_arg path "$1" "$2" && jvm_opts_file="$2" && shift 2 ;;
 
       -D*)          addJava "$1" && shift ;;
@@ -512,14 +512,14 @@ else
   vlog "No extra sbt options have been defined"
 fi
 
-# if there are file/environment sbt_extras_opts, process again so we
+# if there are file/environment sbt_x_opts, process again so we
 # can supply args to this runner
-if [[ -r "$sbt_extras_opts_file" ]]; then
-  vlog "Using sbt options defined in file $sbt_extras_opts_file"
-  while read -r opt; do extra_sbt_opts+=("$opt"); done < <(readConfigFile "$sbt_extras_opts_file")
-elif [[ -n "$SBT_EXTRAS_OPTS" && ! ("$SBT_EXTRAS_OPTS" =~ ^@.*) ]]; then
-  vlog "Using sbt options defined in variable \$SBT_EXTRAS_OPTS"
-  IFS=" " read -r -a extra_sbt_opts <<<"$SBT_EXTRAS_OPTS"
+if [[ -r "$sbt_x_opts_file" ]]; then
+  vlog "Using sbt options defined in file $sbt_x_opts_file"
+  while read -r opt; do extra_sbt_opts+=("$opt"); done < <(readConfigFile "$sbt_x_opts_file")
+elif [[ -n "$SBT_X_OPTS" && ! ("$SBT_X_OPTS" =~ ^@.*) ]]; then
+  vlog "Using sbt options defined in variable \$SBT_X_OPTS"
+  IFS=" " read -r -a extra_sbt_opts <<<"$SBT_X_OPTS"
 else
   vlog "No extra sbt options have been defined"
 fi
