@@ -99,7 +99,7 @@ init_default_option_file() {
 }
 
 sbt_opts_file="$(init_default_option_file SBT_OPTS .sbtopts)"
-sbt_extras_opts_file="$(init_default_option_file SBT_EXTRAS_OPTS .sbtextrasopts)"
+sbt_extras_opts_file="$(init_default_option_file SBT_EXTRAS_OPTS .sbtxopts)"
 jvm_opts_file="$(init_default_option_file JVM_OPTS .jvmopts)"
 
 build_props_sbt() {
@@ -416,8 +416,8 @@ are not special.
   # passing options exclusively to this runner
   SBT_EXTRAS_OPTS           environment variable holding either the sbt-extras args directly, or
                             the reference to a file containing sbt-extras args if given path is prepended by '@' (e.g. '@/etc/sbtextrasopts')
-                            Note: "@"-file is overridden by local '.sbtextrasopts' or '-sbt-extras-opts' argument.
-  -sbt-extras-opts <path>   file containing sbt-extras args (if not given, .sbtextrasopts in project root is used if present)
+                            Note: "@"-file is overridden by local '.sbtxopts' or '-sbt-extras-opts' argument.
+  -sbt-extras-opts <path>   file containing sbt-extras args (if not given, .sbtxopts in project root is used if present)
 EOM
   exit 0
 }
