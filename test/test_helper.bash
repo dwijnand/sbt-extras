@@ -12,7 +12,7 @@ export sbt_10="0.10.1"
 export sbt_11="0.11.3"
 export sbt_12="0.12.4"
 export sbt_13="0.13.18"
-export sbt_1="1.3.12"
+export sbt_1="1.3.13"
 export sbt_release="$sbt_1"
 export sbt_dev="1.4.0-M1"
 
