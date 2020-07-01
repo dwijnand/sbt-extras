@@ -127,6 +127,7 @@ init_default_option_file() {
 }
 
 sbt_opts_file="$(init_default_option_file SBT_OPTS .sbtopts)"
+sbtx_opts_file="$(init_default_option_file SBTX_OPTS .sbtxopts)"
 jvm_opts_file="$(init_default_option_file JVM_OPTS .jvmopts)"
 
 build_props_sbt() {
@@ -439,6 +440,12 @@ are not special.
                     Note: "@"-file is overridden by local '.sbtopts' or '-sbt-opts' argument.
   -sbt-opts <path>  file containing sbt args (if not given, .sbtopts in project root is used if present)
   -S-X              add -X to sbt's scalacOptions (-S is stripped)
+
+  # passing options exclusively to this runner
+  SBTX_OPTS         environment variable holding either the sbt-extras args directly, or
+                    the reference to a file containing sbt-extras args if given path is prepended by '@' (e.g. '@/etc/sbtxopts')
+                    Note: "@"-file is overridden by local '.sbtxopts' or '-sbtx-opts' argument.
+  -sbtx-opts <path> file containing sbt-extras args (if not given, .sbtxopts in project root is used if present)
 EOM
   exit 0
 }
@@ -495,6 +502,7 @@ process_args() {
       -scala-home)  require_arg path "$1" "$2" && setThisBuild scalaHome "_root_.scala.Some(file(\"$2\"))" && shift 2 ;;
       -java-home)   require_arg path "$1" "$2" && setJavaHome "$2" && shift 2 ;;
       -sbt-opts)    require_arg path "$1" "$2" && sbt_opts_file="$2" && shift 2 ;;
+      -sbtx-opts) require_arg path "$1" "$2" && sbtx_opts_file="$2" && shift 2 ;;
       -jvm-opts)    require_arg path "$1" "$2" && jvm_opts_file="$2" && shift 2 ;;
 
       -D*)          addJava "$1" && shift ;;
@@ -528,6 +536,18 @@ if [[ -r "$sbt_opts_file" ]]; then
 elif [[ -n "$SBT_OPTS" && ! ("$SBT_OPTS" =~ ^@.*) ]]; then
   vlog "Using sbt options defined in variable \$SBT_OPTS"
   IFS=" " read -r -a extra_sbt_opts <<<"$SBT_OPTS"
+else
+  vlog "No extra sbt options have been defined"
+fi
+
+# if there are file/environment sbtx_opts, process again so we
+# can supply args to this runner
+if [[ -r "$sbtx_opts_file" ]]; then
+  vlog "Using sbt options defined in file $sbtx_opts_file"
+  while read -r opt; do extra_sbt_opts+=("$opt"); done < <(readConfigFile "$sbtx_opts_file")
+elif [[ -n "$SBTX_OPTS" && ! ("$SBTX_OPTS" =~ ^@.*) ]]; then
+  vlog "Using sbt options defined in variable \$SBTX_OPTS"
+  IFS=" " read -r -a extra_sbt_opts <<<"$SBTX_OPTS"
 else
   vlog "No extra sbt options have been defined"
 fi
