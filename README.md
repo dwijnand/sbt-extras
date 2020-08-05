@@ -98,7 +98,7 @@ are not special.
   -sbt-dev                use the latest pre-release version of sbt: 1.3.13
   -sbt-jar      <path>    use the specified jar as the sbt launcher
   -sbt-launch-dir <path>  directory to hold sbt launchers (default: ~/.sbt/launchers)
-  -sbt-launch-repo <url>  repo url for downloading sbt launcher jar (default: http://repo.scala-sbt.org/scalasbt/maven-releases)
+  -sbt-launch-repo <url>  repo url for downloading sbt launcher jar (default: https://repo.scala-sbt.org/scalasbt/maven-releases)
 
   # scala version (default: as chosen by sbt)
   -28                        use 2.8.2
