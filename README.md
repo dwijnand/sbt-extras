@@ -14,7 +14,7 @@ required versions of sbt and scala, downloading them if necessary.
 Put the (self-contained) [sbt script](https://raw.githubusercontent.com/paulp/sbt-extras/master/sbt "sbt") somewhere on your path, for instance:
 
 ```bash
-curl -Ls https://git.io/sbt > ~/bin/sbt && chmod 0755 ~/bin/sbt
+curl -Ls https://git.io/sbt > /usr/bin/sbt && chmod 0755 /usr/bin/sbt
 ```
 
 Alternatively you can install with [Homebrew](https://brew.sh/):
