@@ -106,7 +106,7 @@ are not special.
   -210                       use 2.10.7
   -211                       use 2.11.12
   -212                       use 2.12.12
-  -213                       use 2.13.3
+  -213                       use 2.13.4
   -scala-home <path>         use the scala build at the specified directory
   -scala-version <version>   use the specified version of scala
   -binary-version <version>  use the specified scala version when searching for dependencies
