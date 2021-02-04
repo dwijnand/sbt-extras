@@ -29,7 +29,7 @@ launcher_url () {
   case "$1" in
     0.7.*) echo "https://storage.googleapis.com/google-code-archive-downloads/v2/code.google.com/simple-build-tool/sbt-launch-$1.jar" ;;
    0.10.*) echo "https://repo.typesafe.com/typesafe/ivy-releases/org.scala-tools.sbt/sbt-launch/$1/sbt-launch.jar" ;;
-      1.*) echo "https://repo.scala-sbt.org/scalasbt/maven-releases/org/scala-sbt/sbt-launch/$1/sbt-launch-$1.jar" ;;
+      1.*) echo "https://repo1.maven.org/maven2/org/scala-sbt/sbt-launch/$1/sbt-launch.jar" ;;
         *) echo "https://repo.typesafe.com/typesafe/ivy-releases/org.scala-sbt/sbt-launch/$1/sbt-launch.jar" ;;
   esac
 }
@@ -187,10 +187,10 @@ EOS
   assert_success
   assert_output <<EOS
 Downloading sbt launcher for $sbt_1:
-  From  https://127.0.0.1:8080/ivy-releases/org/scala-sbt/sbt-launch/$sbt_1/sbt-launch-$sbt_1.jar
+  From  https://127.0.0.1:8080/ivy-releases/org/scala-sbt/sbt-launch/$sbt_1/sbt-launch.jar
     To  $TEST_ROOT/.sbt/launchers/$sbt_1/sbt-launch.jar
 Downloading sbt launcher $sbt_1 md5 hash:
-  From  https://127.0.0.1:8080/ivy-releases/org/scala-sbt/sbt-launch/$sbt_1/sbt-launch-$sbt_1.jar.md5
+  From  https://127.0.0.1:8080/ivy-releases/org/scala-sbt/sbt-launch/$sbt_1/sbt-launch.jar.md5
     To  $TEST_ROOT/.sbt/launchers/$sbt_1/sbt-launch.jar.md5
 EOS
   unstub curl

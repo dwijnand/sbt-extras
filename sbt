@@ -48,7 +48,7 @@ declare -r buildProps="project/build.properties"
 
 declare -r sbt_launch_ivy_release_repo="https://repo.typesafe.com/typesafe/ivy-releases"
 declare -r sbt_launch_ivy_snapshot_repo="https://repo.scala-sbt.org/scalasbt/ivy-snapshots"
-declare -r sbt_launch_mvn_release_repo="https://repo.scala-sbt.org/scalasbt/maven-releases"
+declare -r sbt_launch_mvn_release_repo="https://repo1.maven.org/maven2"
 declare -r sbt_launch_mvn_snapshot_repo="https://repo.scala-sbt.org/scalasbt/maven-snapshots"
 
 declare -r default_jvm_opts_common="-Xms512m -Xss2m -XX:MaxInlineLevel=18"
@@ -167,7 +167,7 @@ make_url() {
     0.10.*)    echo "$base/org.scala-tools.sbt/sbt-launch/$version/sbt-launch.jar" ;;
     0.11.[12]) echo "$base/org.scala-tools.sbt/sbt-launch/$version/sbt-launch.jar" ;;
     0.*)       echo "$base/org.scala-sbt/sbt-launch/$version/sbt-launch.jar" ;;
-    *)         echo "$base/org/scala-sbt/sbt-launch/$version/sbt-launch-${version}.jar" ;;
+    *)         echo "$base/org/scala-sbt/sbt-launch/$version/sbt-launch.jar" ;;
   esac
 }
 
