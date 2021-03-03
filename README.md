@@ -1,7 +1,7 @@
 sbt: the rebel cut
 ==================
 
-[![Unix Build Status](https://travis-ci.org/paulp/sbt-extras.png)](https://travis-ci.org/paulp/sbt-extras)
+[![Test status](https://github.com/paulp/sbt-extras/workflows/Test/badge.svg?branch=master)](https://github.com/paulp/sbt-extras/actions?query=branch%3Amaster+workflow%3ATest)
 [![Join the chat on gitter](https://badges.gitter.im/paulp/sbt-extras.svg)](https://gitter.im/paulp/sbt-extras)
 
 An alternative script for running [sbt](https://github.com/sbt/sbt "sbt home").
