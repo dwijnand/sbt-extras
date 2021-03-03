@@ -1,9 +1,0 @@
-language: minimal
-
-script:
-  - curl -sL https://github.com/mvdan/sh/releases/download/v2.6.4/shfmt_v2.6.4_linux_amd64 -o /tmp/shfmt && chmod +x /tmp/shfmt && /tmp/shfmt -d -i 2 -kp -ci ./sbt
-  - shellcheck --version && shellcheck sbt || travis_terminate 1
-  - ./bin/run-tests --tap ./test
-
-notifications:
-  email: dale.wijnand@gmail.com
