@@ -34,7 +34,7 @@ sbt -v[erbosely] creating a new project built with the latest scala 2.12.x.
 [addSbt] arg = '++ 2.12.15'
 [residual] arg = 'about'
 No extra sbt options have been defined
-Detected sbt version 1.5.7
+Detected sbt version 1.5.8
 Using default jvm options
 Detected Java version: 8
 # Executing command line:
@@ -42,7 +42,7 @@ java
 -Xms512m
 -Xss2m
 -jar
-$HOME/.sbt/launchers/1.5.7/sbt-launch.jar
+$HOME/.sbt/launchers/1.5.8/sbt-launch.jar
 "++ 2.12.15"
 about
 
@@ -55,7 +55,7 @@ saving stty: [..]
 [info] Setting Scala version to 2.12.15 on 1 projects.
 [info] Reapplying settings...
 [info] Set current project to [..] (in build file:[..])
-[info] This is sbt 1.5.7
+[info] This is sbt 1.5.8
 [info] The current project is ProjectRef(uri("file:[..]"), "[..]") [..]
 [info] The current project is built against Scala 2.12.15
 [info] Available Plugins
@@ -92,9 +92,9 @@ are not special.
   -prompt <expr>     Set the sbt prompt; in expr, 's' is the State and 'e' is Extracted
   -script <file>     Run the specified file as a scala script
 
-  # sbt version (default: sbt.version from project/build.properties if present, otherwise 1.5.7)
-  -sbt-version <version>  use the specified version of sbt (default: 1.5.7)
-  -sbt-force-latest       force the use of the latest release of sbt: 1.5.7
+  # sbt version (default: sbt.version from project/build.properties if present, otherwise 1.5.8)
+  -sbt-version <version>  use the specified version of sbt (default: 1.5.8)
+  -sbt-force-latest       force the use of the latest release of sbt: 1.5.8
   -sbt-dev                use the latest pre-release version of sbt: 1.6.0-M1
   -sbt-jar      <path>    use the specified jar as the sbt launcher
   -sbt-launch-dir <path>  directory to hold sbt launchers (default: ~/.sbt/launchers)
@@ -116,7 +116,7 @@ are not special.
 
   # passing options to the jvm - note it does NOT use JAVA_OPTS due to pollution
   # The default set is used if JVM_OPTS is unset and no -jvm-opts file is found
-  <default>         -Xms512m -Xss2m
+  <default>         -Xms512m -Xss2m -XX:MaxInlineLevel=18
   JVM_OPTS          environment variable holding either the jvm args directly, or
                     the reference to a file containing jvm args if given path is prepended by '@' (e.g. '@/etc/jvmopts')
                     Note: "@"-file is overridden by local '.jvmopts' or '-jvm-opts' argument.
@@ -130,4 +130,10 @@ are not special.
                     Note: "@"-file is overridden by local '.sbtopts' or '-sbt-opts' argument.
   -sbt-opts <path>  file containing sbt args (if not given, .sbtopts in project root is used if present)
   -S-X              add -X to sbt's scalacOptions (-S is stripped)
+
+  # passing options exclusively to this runner
+  SBTX_OPTS         environment variable holding either the sbt-extras args directly, or
+                    the reference to a file containing sbt-extras args if given path is prepended by '@' (e.g. '@/etc/sbtxopts')
+                    Note: "@"-file is overridden by local '.sbtxopts' or '-sbtx-opts' argument.
+  -sbtx-opts <path> file containing sbt-extras args (if not given, .sbtxopts in project root is used if present)
 ```
