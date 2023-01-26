@@ -644,7 +644,7 @@ fi
 
 if [[ -r "$jvm_opts_file" ]]; then
   vlog "Using jvm options defined in file $jvm_opts_file"
-  while read -r opt; do extra_jvm_opts+=("$opt"); done < <(readConfigFile "$jvm_opts_file")
+  extra_jvm_opts+=($(readConfigFile "$jvm_opts_file"))
 elif [[ -n "$JVM_OPTS" && ! ("$JVM_OPTS" =~ ^@.*) ]]; then
   vlog "Using jvm options defined in \$JVM_OPTS variable"
   IFS=" " read -r -a extra_jvm_opts <<<"$JVM_OPTS"
