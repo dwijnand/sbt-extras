@@ -554,7 +554,7 @@ fi
 # can supply args to this runner
 if [[ -r "$sbtx_opts_file" ]]; then
   vlog "Using sbt options defined in file $sbtx_opts_file"
-  while read -r opt; do extra_sbt_opts+=("$opt"); done < <(readConfigFile "$sbtx_opts_file")
+  extra_sbt_opts+=($(readConfigFile "$sbtx_opts_file"))
 elif [[ -n "$SBTX_OPTS" && ! ("$SBTX_OPTS" =~ ^@.*) ]]; then
   vlog "Using sbt options defined in variable \$SBTX_OPTS"
   IFS=" " read -r -a extra_sbt_opts <<<"$SBTX_OPTS"
