@@ -95,7 +95,7 @@ are not special.
   # sbt version (default: sbt.version from project/build.properties if present, otherwise 1.8.3)
   -sbt-version <version>  use the specified version of sbt (default: 1.8.3)
   -sbt-force-latest       force the use of the latest release of sbt: 1.8.3
-  -sbt-dev                use the latest pre-release version of sbt: 1.8.3
+  -sbt-dev                use the latest pre-release version of sbt: 1.9.0-RC3
   -sbt-jar      <path>    use the specified jar as the sbt launcher
   -sbt-launch-dir <path>  directory to hold sbt launchers (default: ~/.sbt/launchers)
   -sbt-launch-repo <url>  repo url for downloading sbt launcher jar (default: https://repo.scala-sbt.org/scalasbt/maven-releases)
