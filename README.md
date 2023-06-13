@@ -20,7 +20,7 @@ curl -Ls https://raw.githubusercontent.com/dwijnand/sbt-extras/master/sbt > ~/bi
 Alternatively you can install with [Homebrew](https://brew.sh/):
 
 ```bash
-brew install --HEAD paulp/extras/sbtx
+brew install --HEAD dwijnand/extras/sbtx
 ```
 
 **NOTE**: This will install sbt-extras as `sbtx` (to avoid clashing with the official sbt formula). If you prefer you can `alias sbt=sbtx`.
