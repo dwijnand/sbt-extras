@@ -217,7 +217,8 @@ getJavaVersion() {
   if [[ "$str" =~ ^1\.([0-9]+)(\..*)?$ ]]; then
     echo "${BASH_REMATCH[1]}"
   # Fixes https://github.com/dwijnand/sbt-extras/issues/326
-  elif [[ "$str" =~ ^([0-9]+)(\..*)?(-ea)?$ ]]; then
+  # Fixes https://github.com/dwijnand/sbt-extras/issues/378
+  elif [[ "$str" =~ ^([0-9]+)(\..*)?-(ea|internal)?$ ]]; then
     echo "${BASH_REMATCH[1]}"
   elif [[ -n "$str" ]]; then
     echoerr "Can't parse java version from: $str"
