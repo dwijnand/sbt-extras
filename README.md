@@ -31,7 +31,7 @@ sbt -v[erbosely] creating a new project built with the latest scala 2.12.x.
 
 ```
 % sbt -v -212 -sbt-create about
-[addSbt] arg = '++ 2.12.18'
+[addSbt] arg = '++ 2.12.19'
 [residual] arg = 'about'
 No extra sbt options have been defined
 Detected sbt version 1.9.9
@@ -43,21 +43,21 @@ java
 -Xss2m
 -jar
 $HOME/.sbt/launchers/1.9.9/sbt-launch.jar
-"++ 2.12.18"
+"++ 2.12.19"
 about
 
 saving stty: [..]
 [warn] No sbt.version set in project/build.properties, base directory: [..]
-[info] Setting version to 2.12.18
+[info] Setting version to 2.12.19
 [info] Loading settings for project global-plugins from [..] ...
 [info] Loading global plugins from $HOME/.dotfiles/.sbt/1.0/plugins
 [info] Set current project to [..] (in build file:[..])
-[info] Setting Scala version to 2.12.18 on 1 projects.
+[info] Setting Scala version to 2.12.19 on 1 projects.
 [info] Reapplying settings...
 [info] Set current project to [..] (in build file:[..])
 [info] This is sbt 1.9.9
 [info] The current project is ProjectRef(uri("file:[..]"), "[..]") [..]
-[info] The current project is built against Scala 2.12.18
+[info] The current project is built against Scala 2.12.19
 [info] Available Plugins
 [..]
 [info] sbt, sbt plugins, and build definitions are using Scala 2.12.7
@@ -105,7 +105,7 @@ are not special.
   -29                        use 2.9.3
   -210                       use 2.10.7
   -211                       use 2.11.12
-  -212                       use 2.12.18
+  -212                       use 2.12.19
   -213                       use 2.13.12
   -scala-home <path>         use the scala build at the specified directory
   -scala-version <version>   use the specified version of scala
