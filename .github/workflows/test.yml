@@ -1,4 +1,4 @@
-name: Test 
+name: Test
 
 on:
   [push, pull_request]
@@ -7,7 +7,7 @@ jobs:
   test:
     runs-on: ubuntu-latest
     steps:
-    - uses: actions/checkout@v2
+    - uses: actions/checkout@v4
     - name: Run ShellCheck
       run: |
         curl -sL https://github.com/mvdan/sh/releases/download/v2.6.4/shfmt_v2.6.4_linux_amd64 -o /tmp/shfmt && chmod +x /tmp/shfmt && /tmp/shfmt -d -i 2 -kp -ci ./sbt
