@@ -519,7 +519,7 @@ process_args() {
       -J*)          addJava "${1:2}" && shift ;;
       -S*)          addScalac "${1:2}" && shift ;;
 
-      new)          sbt_new=true && : ${sbt_explicit_version:=$sbt_release_version} && addResidual "$1" && shift ;;
+      new)          sbt_new=true && : "${sbt_explicit_version:=$sbt_release_version}" && addResidual "$1" && shift ;;
 
       *)            addResidual "$1" && shift ;;
     esac
