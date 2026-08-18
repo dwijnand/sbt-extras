@@ -25,6 +25,14 @@ stub_curl() {
 stub_wget() { stub wget "$wget_opts"; }
 stub_md5sum() { stub md5sum 'true'; }
 
+# curl invoked with HTTP basic-auth credentials injected (jar + md5 for sbt 1.x)
+curl_auth_opts='--fail --silent --user user:secret --location https://* --output * : mkdir -p "$(dirname "$8")" && touch "$8"'
+stub_curl_auth() {
+  stub curl "$curl_auth_opts"
+  stub curl "$curl_auth_opts"
+  stub md5sum 'true'
+}
+
 launcher_url () {
   case "$1" in
     0.7.*) echo "https://storage.googleapis.com/google-code-archive-downloads/v2/code.google.com/simple-build-tool/sbt-launch-$1.jar" ;;
@@ -194,4 +202,38 @@ Downloading sbt launcher $sbt_1 md5 hash:
     To  $TEST_ROOT/.sbt/launchers/$sbt_1/sbt-launch.jar.md5
 EOS
   unstub curl
+}
+
+@test "passes launcher repo credentials to curl when -sbt-launch-repo-credentials was given" {
+  write_to_properties "stub.version=$sbt_1"
+  stub_curl_auth
+  run sbt -sbt-launch-repo-credentials user:secret
+  assert_success
+  assert_output <<EOS
+Downloading sbt launcher for $sbt_1:
+  From  $(launcher_url $sbt_1)
+    To  $TEST_ROOT/.sbt/launchers/$sbt_1/sbt-launch.jar
+Downloading sbt launcher $sbt_1 md5 hash:
+  From  $(launcher_url $sbt_1).md5
+    To  $TEST_ROOT/.sbt/launchers/$sbt_1/sbt-launch.jar.md5
+EOS
+  unstub curl
+  unstub md5sum
+}
+
+@test "passes launcher repo credentials to curl from \$SBT_LAUNCH_REPO_CREDENTIALS" {
+  write_to_properties "stub.version=$sbt_1"
+  stub_curl_auth
+  SBT_LAUNCH_REPO_CREDENTIALS=user:secret run sbt
+  assert_success
+  assert_output <<EOS
+Downloading sbt launcher for $sbt_1:
+  From  $(launcher_url $sbt_1)
+    To  $TEST_ROOT/.sbt/launchers/$sbt_1/sbt-launch.jar
+Downloading sbt launcher $sbt_1 md5 hash:
+  From  $(launcher_url $sbt_1).md5
+    To  $TEST_ROOT/.sbt/launchers/$sbt_1/sbt-launch.jar.md5
+EOS
+  unstub curl
+  unstub md5sum
 }

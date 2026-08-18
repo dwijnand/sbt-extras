@@ -99,6 +99,9 @@ are not special.
   -sbt-jar      <path>    use the specified jar as the sbt launcher
   -sbt-launch-dir <path>  directory to hold sbt launchers (default: ~/.sbt/launchers)
   -sbt-launch-repo <url>  repo url for downloading sbt launcher jar (default: https://repo.scala-sbt.org/scalasbt/maven-releases)
+  -sbt-launch-repo-credentials <user:password>
+                          HTTP basic-auth credentials for the launcher repo, for
+                          private/authenticated repos (default: $SBT_LAUNCH_REPO_CREDENTIALS)
 
   # scala version (default: as chosen by sbt)
   -28                        use 2.8.2

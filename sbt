@@ -61,6 +61,7 @@ declare verbose noshare batch trace_level
 declare java_cmd="java"
 declare sbt_launch_dir="$HOME/.sbt/launchers"
 declare sbt_launch_repo
+declare sbt_launch_repo_credentials="${SBT_LAUNCH_REPO_CREDENTIALS-}"
 
 # pull -J and -D options to give to java.
 declare -a java_args scalac_args sbt_commands residual_args
@@ -307,11 +308,21 @@ download_url() {
   local url="$1"
   local jar="$2"
 
+  # optional HTTP basic-auth credentials ("user:password") for the launcher
+  # repo, e.g. a private Artifactory/Nexus. Sourced from the environment
+  # variable $SBT_LAUNCH_REPO_CREDENTIALS or the -sbt-launch-repo-credentials
+  # option; left empty for anonymous access to the default public repos.
+  local -a curl_auth_args wget_auth_args
+  if [[ -n "$sbt_launch_repo_credentials" ]]; then
+    curl_auth_args=(--user "$sbt_launch_repo_credentials")
+    wget_auth_args=(--user "${sbt_launch_repo_credentials%%:*}" --password "${sbt_launch_repo_credentials#*:}")
+  fi
+
   mkdir -p "${jar%/*}" && {
     if command -v curl >/dev/null 2>&1; then
-      curl --fail --silent --location "$url" --output "$jar"
+      curl --fail --silent "${curl_auth_args[@]}" --location "$url" --output "$jar"
     elif command -v wget >/dev/null 2>&1; then
-      wget -q -O "$jar" "$url"
+      wget "${wget_auth_args[@]}" -q -O "$jar" "$url"
     fi
   } && [[ -r "$jar" ]]
 }
@@ -419,6 +430,9 @@ are not special.
   -sbt-jar      <path>    use the specified jar as the sbt launcher
   -sbt-launch-dir <path>  directory to hold sbt launchers (default: $sbt_launch_dir)
   -sbt-launch-repo <url>  repo url for downloading sbt launcher jar (default: $(url_base "$sbt_version"))
+  -sbt-launch-repo-credentials <user:password>
+                          HTTP basic-auth credentials for the launcher repo, for
+                          private/authenticated repos (default: \$SBT_LAUNCH_REPO_CREDENTIALS)
 
   # scala version (default: as chosen by sbt)
   -28                        use $latest_28
@@ -499,6 +513,7 @@ process_args() {
       -sbt-jar)     require_arg path "$1" "$2" && sbt_jar="$2" && shift 2 ;;
       -sbt-launch-dir) require_arg path "$1" "$2" && sbt_launch_dir="$2" && shift 2 ;;
       -sbt-launch-repo) require_arg path "$1" "$2" && sbt_launch_repo="$2" && shift 2 ;;
+      -sbt-launch-repo-credentials) require_arg "user:password" "$1" "$2" && sbt_launch_repo_credentials="$2" && shift 2 ;;
 
       -28)          setScalaVersion "$latest_28"  && shift ;;
       -29)          setScalaVersion "$latest_29"  && shift ;;
