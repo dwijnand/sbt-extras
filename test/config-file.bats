@@ -20,6 +20,7 @@ java
 -Dsome.prop="pass a # in a string"
 -Xss4m
 -Xms1g
+-Dsbt.script=\$SBT
 -jar
 $TEST_ROOT/.sbt/launchers/$sbt_release/sbt-launch.jar
 about

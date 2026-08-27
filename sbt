@@ -192,6 +192,18 @@ addResolver() { addSbt "set resolvers += $1"; }
 
 addDebugger() { addJava "-Xdebug" && addJava "-Xrunjdwp:transport=dt_socket,server=y,suspend=n,address=$1"; }
 
+# Advertise this script's path via -Dsbt.script, exactly as the official sbt
+# launcher does. Without it, `sbt --client` cannot re-invoke this launcher to
+# spawn its server: sbt.internal.client.NetworkClient falls back to a bare `sbt`
+# on $PATH, which may be an unrelated/incompatible system sbt that fetches its
+# own launcher jar (bypassing -sbt-launch-repo and the pinned sbt version).
+addSbtScriptProperty() {
+  case " ${java_args[*]} " in
+    *" -Dsbt.script="*) : ;; # respect an explicitly provided one
+    *) addJava "-Dsbt.script=${0// /%20}" ;; # %20-escape spaces, like the official script
+  esac
+}
+
 setThisBuild() {
   vlog "[addBuild] args = '$*'"
   local key="$1" && shift
@@ -655,6 +667,9 @@ fi
 
 # traceLevel is 0.12+
 [[ -n "$trace_level" ]] && setTraceLevel
+
+# so `sbt --client` re-invokes this launcher (not a $PATH `sbt`) for its server
+addSbtScriptProperty
 
 execRunner "$java_cmd" \
   "${extra_jvm_opts[@]}" \

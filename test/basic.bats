@@ -11,6 +11,7 @@ java
 -Xms512m
 -Xss2m
 -XX:MaxInlineLevel=18
+-Dsbt.script=\$SBT
 -jar
 \$ROOT/.sbt/launchers/$sbt_release/sbt-launch.jar
 shell
